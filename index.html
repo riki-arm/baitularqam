@@ -11,7 +11,7 @@
   <style>
     :root {
       --bg: #F6F7F9;
-      --surface: rgba(255, 255, 255, 0.86);
+      --surface: rgba(255, 255, 255, 0.88);
       --surface-solid: #FFFFFF;
       --surface-subtle: #EEF1F5;
       --border: #E2E6EC;
@@ -36,7 +36,7 @@
 
     [data-theme="dark"] {
       --bg: #0B0E14;
-      --surface: rgba(21, 26, 35, 0.84);
+      --surface: rgba(21, 26, 35, 0.86);
       --surface-solid: #151A23;
       --surface-subtle: #1D2432;
       --border: #283142;
@@ -70,336 +70,148 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
       letter-spacing: -0.02em;
     }
-
     .mono { font-family: 'JetBrains Mono', monospace; }
 
-    /* Top Bar */
     .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      position: sticky; top: 0; z-index: 40;
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
     }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
+    .brand { display: flex; align-items: center; gap: 12px; }
     .brand-mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: var(--primary);
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 15px;
-      letter-spacing: -0.03em;
+      width: 38px; height: 38px; border-radius: 10px; background: var(--primary); color: #fff;
+      display: grid; place-items: center; font-weight: 800; font-size: 15px;
     }
-
     [data-theme="dark"] .brand-mark { color: #052E16; }
-
     .brand-meta span {
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      font-weight: 600;
+      display: block; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600;
     }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    /* Buttons & Inputs */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 9px 15px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--surface-solid);
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      text-decoration: none;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+      background: var(--surface-solid); color: var(--text); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.16s ease; text-decoration: none;
     }
-
     .btn:hover { border-color: var(--border-strong); background: var(--surface-subtle); }
-    .btn-primary {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #FFFFFF;
-    }
+    .btn-primary { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
     [data-theme="dark"] .btn-primary { color: #052E16; }
     .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
-    .btn-danger {
-      background: var(--danger-soft);
-      border-color: transparent;
-      color: var(--danger);
-    }
-    .btn-sm { padding: 6px 11px; font-size: 12px; }
+    .btn-danger { background: var(--danger-soft); border-color: transparent; color: var(--danger); }
+    .btn-warn { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
 
     input, select, textarea {
-      width: 100%;
-      padding: 9px 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--surface-solid);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 13.5px;
-      outline: none;
-      transition: border-color 0.18s ease;
+      width: 100%; padding: 9px 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--surface-solid); color: var(--text);
+      font-family: inherit; font-size: 13.5px; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    label.field-label {
+      display: block; font-size: 11.5px; font-weight: 700; color: var(--text-muted);
+      margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em;
     }
 
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--primary);
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 5px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    /* Layout & Cards */
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px; }
     .card {
-      background: var(--surface);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 22px;
-      box-shadow: var(--shadow-md);
-      margin-bottom: 20px;
+      background: var(--surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px;
+      box-shadow: var(--shadow-md); margin-bottom: 20px;
     }
-
     .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
     }
 
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
 
-    /* Avatars */
     .avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: var(--primary-soft);
-      color: var(--primary);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 13px;
-      flex-shrink: 0;
-      border: 1.5px solid var(--border);
+      width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+      background: var(--primary-soft); color: var(--primary); display: inline-flex;
+      align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+      flex-shrink: 0; border: 1.5px solid var(--border);
     }
     .avatar-lg { width: 64px; height: 64px; font-size: 20px; }
 
-    /* Pills & Badges */
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 600;
+      display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
+      border-radius: 999px; font-size: 11.5px; font-weight: 600;
     }
     .badge-success { background: var(--primary-soft); color: var(--primary); }
     .badge-warn { background: var(--accent-soft); color: var(--accent); }
     .badge-danger { background: var(--danger-soft); color: var(--danger); }
     .badge-info { background: var(--info-soft); color: var(--info); }
 
-    /* Portal Switcher Tabs */
     .portal-tabs {
-      display: flex;
-      gap: 8px;
-      background: var(--surface-subtle);
-      padding: 6px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      margin-bottom: 22px;
-      flex-wrap: wrap;
+      display: flex; gap: 8px; background: var(--surface-subtle); padding: 6px;
+      border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 22px; flex-wrap: wrap;
     }
-
     .portal-tab {
-      flex: 1;
-      min-width: 150px;
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.18s ease;
+      flex: 1; min-width: 150px; padding: 10px 14px; border-radius: var(--radius-sm);
+      border: none; background: transparent; color: var(--text-muted); font-weight: 600;
+      font-size: 13px; cursor: pointer; transition: all 0.16s ease;
     }
+    .portal-tab.active { background: var(--surface-solid); color: var(--text); box-shadow: var(--shadow-sm); }
 
-    .portal-tab.active {
-      background: var(--surface-solid);
-      color: var(--text);
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* Tables */
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    th, td {
-      padding: 11px 13px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      vertical-align: middle;
-    }
-
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
     th {
-      background: var(--surface-subtle);
-      font-weight: 700;
-      font-size: 11.5px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-      white-space: nowrap;
+      background: var(--surface-subtle); font-weight: 700; font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); white-space: nowrap;
     }
-
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(125, 125, 125, 0.03); }
 
-    /* Score Radio Pills */
-    .score-group {
-      display: inline-flex;
-      gap: 4px;
-    }
-
+    .score-group { display: inline-flex; gap: 4px; flex-wrap: wrap; }
     .score-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 7px;
-      border: 1px solid var(--border);
-      background: var(--surface-solid);
-      color: var(--text);
-      font-weight: 700;
-      font-size: 12px;
-      cursor: pointer;
+      width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--border);
+      background: var(--surface-solid); color: var(--text); font-weight: 700; font-size: 12.5px; cursor: pointer;
     }
-
-    .score-btn.selected {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #fff;
-    }
+    .score-btn.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
     [data-theme="dark"] .score-btn.selected { color: #052E16; }
 
-    /* Sync Indicator */
-    .sync-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #22C55E;
-      display: inline-block;
+    /* Stacked vertical cards for mobile-friendly Index & Skrining */
+    .vertical-stack { display: flex; flex-direction: column; gap: 14px; }
+    .item-card-vertical {
+      background: var(--surface-solid); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px;
     }
+    .aspect-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--border); flex-wrap: wrap;
+    }
+    .aspect-row:last-child { border-bottom: none; }
+
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #22C55E; display: inline-block; }
     .sync-dot.syncing { background: #F59E0B; animation: pulse 1s infinite; }
     .sync-dot.error { background: #EF4444; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    /* Modal */
     .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.55);
-      backdrop-filter: blur(6px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 100;
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100;
     }
     .modal-backdrop.open { display: flex; }
     .modal-box {
-      background: var(--surface-solid);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      max-width: 520px;
-      width: 100%;
-      padding: 24px;
-      max-height: 90vh;
-      overflow-y: auto;
+      background: var(--surface-solid); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      max-width: 560px; width: 100%; padding: 24px; max-height: 90vh; overflow-y: auto;
     }
 
-    /* Print ID Cards */
     @media print {
       .no-print { display: none !important; }
       body { background: #fff; color: #000; }
-      .print-grid {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-      }
-      .id-card-item {
-        border: 1px solid #333;
-        padding: 10px;
-        border-radius: 8px;
-        page-break-inside: avoid;
-        text-align: center;
-      }
+      .print-grid { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .id-card-item { border: 1px solid #333; padding: 10px; border-radius: 8px; page-break-inside: avoid; text-align: center; }
     }
-
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <!-- TOP HEADER -->
   <header class="topbar no-print">
     <div class="brand">
       <div class="brand-mark">BA</div>
@@ -410,18 +222,12 @@
     </div>
 
     <div class="topbar-actions">
-      <div id="syncBadge" class="badge badge-info" title="Status Koneksi Google Sheets">
+      <div id="syncBadge" class="badge badge-info">
         <span id="syncDot" class="sync-dot"></span>
         <span id="syncText">Terhubung ke Sheets</span>
       </div>
-
-      <button class="btn btn-sm" onclick="pullFromCloud(true)" title="Muat ulang data terbaru dari Google Sheets">
-        ↻ Segarkan Data
-      </button>
-
-      <button class="btn btn-sm" onclick="toggleTheme()" id="themeBtn">
-        🌙 Mode Gelap
-      </button>
+      <button class="btn btn-sm" onclick="pullFromCloud(true)">↻ Segarkan</button>
+      <button class="btn btn-sm" onclick="toggleTheme()" id="themeBtn">🌙 Mode Gelap</button>
 
       <div id="loggedUserBar" class="hidden" style="display:flex; align-items:center; gap:8px;">
         <img id="topUserAvatar" class="avatar" src="" alt="" />
@@ -433,12 +239,11 @@
   </header>
 
   <main class="container">
-
-    <!-- GATEWAY / PORTAL SELECTOR (WHEN NOT LOGGED IN AS STAFF) -->
+    <!-- GATEWAY -->
     <section id="gatewaySection">
       <div class="portal-tabs no-print">
-        <button class="portal-tab active" onclick="switchGatewayTab('peserta', this)">1. Portal Peserta (Pre & Post Test)</button>
-        <button class="portal-tab" onclick="switchGatewayTab('scan', this)">2. Panitia Scan Barcode Presensi</button>
+        <button class="portal-tab active" onclick="switchGatewayTab('peserta', this)">1. Portal Peserta (Biodata & Tes)</button>
+        <button class="portal-tab" onclick="switchGatewayTab('scan', this)">2. Panitia Scan Barcode</button>
         <button class="portal-tab" onclick="switchGatewayTab('staff', this)">3. Login Admin / Instruktur / Penilai Akad</button>
       </div>
 
@@ -446,20 +251,20 @@
       <div id="gw-peserta" class="card">
         <div class="card-header">
           <div>
-            <h2>Portal Ujian Peserta Baitul Arqam</h2>
-            <p style="color:var(--text-muted); font-size:13.5px;">Pilih kelompok dan nama Anda. Soal Pre-Test & Post-Test muncul otomatis saat dibuka oleh Admin.</p>
+            <h2>Portal Peserta Baitul Arqam</h2>
+            <p style="color:var(--text-muted); font-size:13.5px;">Pilih kelompok dan nama Anda untuk mengisi Biodata Peserta, Pre-Test, atau Post-Test (saat dibuka Admin).</p>
           </div>
         </div>
 
-        <div id="pesertaSelectorBox" class="grid-2">
+        <div class="grid-2">
           <div>
-            <label>Pilih Kelompok</label>
+            <label class="field-label">Pilih Kelompok</label>
             <select id="pesertaGroupSelect" onchange="populatePesertaByGroup()">
               <option value="">-- Pilih Kelompok Anda --</option>
             </select>
           </div>
           <div>
-            <label>Pilih Nama Peserta</label>
+            <label class="field-label">Pilih Nama Peserta</label>
             <select id="pesertaNameSelect" onchange="selectPesertaPortal()">
               <option value="">-- Pilih Nama Anda --</option>
             </select>
@@ -467,16 +272,25 @@
         </div>
 
         <div id="pesertaWorkspace" class="hidden" style="margin-top:22px; padding-top:20px; border-top:1px solid var(--border);">
-          <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-wrap:wrap;">
-            <img id="pPortalAvatar" class="avatar avatar-lg" src="" alt="" />
-            <div>
-              <h3 id="pPortalName"></h3>
-              <p id="pPortalMeta" style="color:var(--text-muted); font-size:13px;"></p>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <img id="pPortalAvatar" class="avatar avatar-lg" src="" alt="" />
+              <div>
+                <h3 id="pPortalName"></h3>
+                <p id="pPortalMeta" style="color:var(--text-muted); font-size:13px;"></p>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-sm" onclick="togglePesertaSubView('biodata')">📋 Biodata Peserta</button>
+              <button class="btn btn-sm btn-primary" onclick="togglePesertaSubView('tes')">📝 Pre-Test & Post-Test</button>
             </div>
           </div>
 
-          <div id="testButtonsArea" class="grid-2"></div>
-          <div id="quizRunnerArea" class="hidden" style="margin-top:20px;"></div>
+          <div id="pesertaBiodataArea" class="hidden"></div>
+          <div id="pesertaTestArea">
+            <div id="testButtonsArea" class="grid-2"></div>
+            <div id="quizRunnerArea" class="hidden" style="margin-top:20px;"></div>
+          </div>
         </div>
       </div>
 
@@ -485,14 +299,14 @@
         <div class="card-header">
           <div>
             <h2>Scan Barcode Presensi Materi & Ibadah</h2>
-            <p style="color:var(--text-muted); font-size:13.5px;">Khusus panitia presensi. Masukkan password panitia untuk membuka kamera pemindai ID Card.</p>
+            <p style="color:var(--text-muted); font-size:13.5px;">Khusus panitia presensi. Masukkan password panitia untuk membuka pemindai.</p>
           </div>
         </div>
 
         <div id="scanLockBox" style="max-width:420px;">
-          <label>Password Panitia Scan</label>
+          <label class="field-label">Password Panitia Scan</label>
           <div style="display:flex; gap:8px;">
-            <input type="password" id="scanPasswordInput" placeholder="Masukkan password panitia..." />
+            <input type="password" id="scanPasswordInput" placeholder="Masukkan password panitia..." onkeyup="if(event.key==='Enter') unlockScanPortal()" />
             <button class="btn btn-primary" onclick="unlockScanPortal()">Buka Scanner</button>
           </div>
         </div>
@@ -500,7 +314,7 @@
         <div id="scanUnlockedArea" class="hidden">
           <div class="grid-3" style="margin-bottom:16px;">
             <div>
-              <label>Pilih Hari Kegiatan</label>
+              <label class="field-label">Pilih Hari Kegiatan</label>
               <select id="scanDaySelect" onchange="updateScanSessionOptions()">
                 <option value="1">Hari Ke-1</option>
                 <option value="2">Hari Ke-2</option>
@@ -508,11 +322,11 @@
               </select>
             </div>
             <div>
-              <label>Pilih Sesi Materi / Ibadah</label>
+              <label class="field-label">Pilih Sesi Materi / Ibadah</label>
               <select id="scanSessionSelect"></select>
             </div>
             <div>
-              <label>Status Kehadiran Saat Scan</label>
+              <label class="field-label">Status Kehadiran Saat Scan</label>
               <select id="scanStatusSelect">
                 <option value="5">Hadir Tepat Waktu (+5 Poin)</option>
                 <option value="2">Terlambat (+2 Poin - Khusus Materi)</option>
@@ -526,12 +340,12 @@
               <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
                 <button class="btn btn-primary btn-sm" onclick="startCameraScanner()">📷 Aktifkan Kamera HP</button>
                 <button class="btn btn-sm" onclick="stopCameraScanner()">⏹ Matikan Kamera</button>
-                <button class="btn btn-sm" onclick="openPrintIdCards()">🪪 Cetak ID Card Barcode (66 Peserta)</button>
+                <button class="btn btn-sm" onclick="openPrintIdCards()">🪪 Cetak ID Card (66 Peserta)</button>
               </div>
             </div>
 
             <div>
-              <label>Input Manual / Barcode Reader USB (Ketik ID: BA-01 s.d. BA-66)</label>
+              <label class="field-label">Input Manual / Barcode Reader (BA-01 s.d. BA-66)</label>
               <div style="display:flex; gap:8px; margin-bottom:14px;">
                 <input type="text" id="manualBarcodeInput" placeholder="Contoh: BA-01" onkeyup="if(event.key==='Enter') processBarcodeScan(this.value)" />
                 <button class="btn btn-primary" onclick="processBarcodeScan(document.getElementById('manualBarcodeInput').value)">Catat</button>
@@ -544,22 +358,22 @@
         </div>
       </div>
 
-      <!-- TAB 3: LOGIN STAF (ADMIN / INSTRUKTUR / PENILAI AKAD) -->
+      <!-- TAB 3: LOGIN STAF -->
       <div id="gw-staff" class="card hidden">
         <div class="card-header">
           <div>
             <h2>Login Panel Penilaian & Manajemen</h2>
-            <p style="color:var(--text-muted); font-size:13.5px;">Pilih nama akun Anda (Admin, 6 Instruktur Kelompok, atau Penilai Khusus Akad Amanah) lalu masukkan password.</p>
+            <p style="color:var(--text-muted); font-size:13.5px;">Pilih nama akun Anda lalu masukkan password.</p>
           </div>
         </div>
 
         <div style="max-width:460px;">
           <div style="margin-bottom:14px;">
-            <label>Pilih Nama Akun</label>
+            <label class="field-label">Pilih Nama Akun</label>
             <select id="staffAccountSelect"></select>
           </div>
           <div style="margin-bottom:16px;">
-            <label>Password</label>
+            <label class="field-label">Password</label>
             <input type="password" id="staffPasswordInput" placeholder="Masukkan password akun..." onkeyup="if(event.key==='Enter') loginStaff()" />
           </div>
           <button class="btn btn-primary" style="width:100%;" onclick="loginStaff()">Masuk ke Ruang Kerja</button>
@@ -567,13 +381,13 @@
       </div>
     </section>
 
-    <!-- STAFF WORKSPACE (VISIBLE AFTER STAFF LOGIN) -->
+    <!-- STAFF WORKSPACE -->
     <section id="staffWorkspace" class="hidden">
       <div id="staffNavTabs" class="portal-tabs no-print"></div>
       <div id="staffContentArea"></div>
     </section>
 
-    <!-- PRINT AREA FOR ID CARDS -->
+    <!-- PRINT AREA -->
     <section id="printIdCardSection" class="hidden">
       <div class="no-print" style="margin-bottom:16px; display:flex; gap:10px;">
         <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak Sekarang</button>
@@ -581,10 +395,9 @@
       </div>
       <div id="printGridContainer" class="print-grid"></div>
     </section>
-
   </main>
 
-  <!-- MODAL EDIT PROFIL / AKUN -->
+  <!-- MODAL EDIT PROFIL -->
   <div id="profileModal" class="modal-backdrop">
     <div class="modal-box">
       <div class="card-header">
@@ -597,20 +410,18 @@
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
         <img id="editPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
         <div style="flex:1;">
-          <label>Unggah Foto Baru (Otomatis Kompres)</label>
+          <label class="field-label">Unggah Foto Baru (Otomatis Kompres)</label>
           <input type="file" accept="image/*" onchange="handleAvatarUpload(event, 'editPreviewAvatar')" />
         </div>
       </div>
 
       <div style="margin-bottom:12px;">
-        <label>Nama Lengkap</label>
+        <label class="field-label">Nama Lengkap</label>
         <input type="text" id="editNameInput" />
       </div>
-
       <div id="editExtraFieldWrap" style="margin-bottom:12px;"></div>
-
       <div id="editPasswordWrap" style="margin-bottom:16px;">
-        <label>Password Baru (Kosongkan jika tidak diubah)</label>
+        <label class="field-label">Password Baru (Kosongkan jika tidak diubah)</label>
         <input type="text" id="editPasswordInput" placeholder="Password baru..." />
       </div>
 
@@ -622,81 +433,36 @@
   </div>
 
   <script>
-    // =========================================================================
-    // KONFIGURASI GOOGLE APPS SCRIPT (TERTANAM OTOMATIS)
-    // =========================================================================
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-PhKppMosc19DPB7h_d8YL5IKCPegqQaLZKGIKeg9dR5h9b_jboMIakEeo2fd-gGY/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_v2026';
+    const STORAGE_KEY = 'baitul_arqam_ppda_v2026_2';
 
-    // =========================================================================
-    // DATA MASTER PESERTA (66 ORANG) & INSTRUKTUR (6 ORANG)
-    // =========================================================================
     const RAW_PARTICIPANTS = [
-      ["Abid Daffa Khairullah, S.Pd.", "Musyrif 1A Putra"],
-      ["Aceng Tasmanuddin, S.Pd", "TS kls 7 PA"],
-      ["Agi Muslih", "Panahan"],
-      ["Agniya Tazkiya, S.Pd", "Guru"],
-      ["Agus Setiawan", "Marching Band"],
-      ["Ai Mindarwati", "Read Guard"],
-      ["Angga Tiana Nugraha, M.Pd", "Musyrif 2A Putra"],
-      ["Ari Jaenal Bahri, S.Hum.", "Musyrif 4A Putra"],
-      ["Ase Purwanto, K.ka", "TS kls 7 PI"],
-      ["Asti Septiani", "Panahan"],
-      ["Bagus Hambali", "PMR"],
-      ["Bayu Baihaqi Pemana, S.Pd", "Musyrif 3A Putra"],
-      ["Dandi Purwandi, S.Sos", "Guru"],
-      ["Dani Ramdani, S.Pd", "Guru"],
-      ["Dede Ilyas, S. Pd", "Murofiq"],
-      ["Dewi Nurjanah Septiany, S.E", "Staf Keuangan"],
-      ["Dinda Nurul Fazriah, S.E", "Staf Kesekretariatan"],
-      ["Erias Hayi Sukma, S.Ag", "Guru"],
-      ["Fadil Mahbubilah, S.Sos.", "Musyrif 1B Putra"],
-      ["Fajar Abdussalam, S.Pd.", "Musyrif 1A Putra"],
-      ["Fatwa Andika Zayyin Al Zulfa I, S.H.", "Musyrif 1C Putra"],
-      ["Febriani Siti Barokah", "Murofiqoh"],
-      ["Giri Alghani Kartiwa, S.Pd", "Guru"],
-      ["Hibban Muttaqin, S.Pd", "Futsal"],
-      ["Ian Sudarisman", "Garda"],
-      ["Ikeu Munawaroh, S.Pd", "Paskibra"],
-      ["Iman Saefurrahman", "Marching Band"],
-      ["Luki Alawi, S. Pd", "Murofiq"],
-      ["M Fauzi Miftah, S. Pd", "Murofiq"],
-      ["M Wildan Aji Firmansyah S.Pd", "Murofiq"],
-      ["M. Farhan Ma'mun, S.T", "Padus"],
-      ["M. Syariful Ihsan, S.M, C.AHR", "Panahan"],
-      ["Maulida Tasa Tsania Tsuraya", "Murofiqoh"],
-      ["Mega Purnama", "TS kls 8-11 PI"],
-      ["Muhamad Ali, S.Ag", "Guru"],
-      ["Muhamad Bardan Salaman, S.H", "Musyrif 6A Putra"],
-      ["Muhammad Rifqi Rezatama, S.Pd", "Musyrif 2B Putra"],
-      ["Mulki Nurfathurrahman Hidayat, S.Sos", "Murofiq"],
-      ["Nabila Putri Irsalina, S.E", "Staf Kesekretariatan"],
-      ["Najma Zahra Firstaliya", "Murofiqoh"],
-      ["Neneng Mulkiyah Rahmawati, S.Pd", "Guru"],
-      ["Nurhayati", "Murofiqoh"],
-      ["Nurul Aisyah Jamilah", "Murofiqoh"],
-      ["Rabih Ramadhan, S.Pd", "Guru"],
-      ["Rahmi Rahmawati", "Murofiqoh"],
-      ["Rani Mulyani, S. Sos", "Murofiqoh"],
-      ["Rian Waroihan, S.Pd", "Guru"],
-      ["Rifqi Zaenal", "Garda"],
-      ["Risyan Ahmad Fauzi, Lc", "Guru"],
-      ["Rizki Kurniawan, M.Pd.", "Musyrif 4C Putra"],
-      ["Rofifah Qonitatin, S.Hum", "Staf Baitul Marhhamah"],
-      ["Sabrina Azzahra", "Murofiqoh"],
-      ["Salman Alfarizi", "Murofiq"],
-      ["Salsa Nurfitriyani, Lc", "Guru"],
-      ["Salsabila Rabiultsani, S.Ak", "Staf Keuangan"],
-      ["Shaddiq Amin Muttahid S.Ag", "Murofiq"],
-      ["Silmi Hanif Firyaal", "Panahan"],
-      ["Siti Rachma Azzahra", "Murofiqoh"],
-      ["Sitta Nurul Luthfiyah, S.Pd", "Guru"],
-      ["Sumi arianti", "Read Guard"],
-      ["Tohid Nurhidayat, S,Ag", "Musyrif 4B Putra"],
-      ["Ulfi Siti Hanifah, S.Pd", "Guru"],
-      ["Utruza Imba Bidara, M.Pd", "Guru"],
-      ["Wandi Abdul Rojak, S.Ag", "Guru"],
-      ["Yeti", "Read Guard"],
+      ["Abid Daffa Khairullah, S.Pd.", "Musyrif 1A Putra"], ["Aceng Tasmanuddin, S.Pd", "TS kls 7 PA"],
+      ["Agi Muslih", "Panahan"], ["Agniya Tazkiya, S.Pd", "Guru"], ["Agus Setiawan", "Marching Band"],
+      ["Ai Mindarwati", "Read Guard"], ["Angga Tiana Nugraha, M.Pd", "Musyrif 2A Putra"],
+      ["Ari Jaenal Bahri, S.Hum.", "Musyrif 4A Putra"], ["Ase Purwanto, K.ka", "TS kls 7 PI"],
+      ["Asti Septiani", "Panahan"], ["Bagus Hambali", "PMR"], ["Bayu Baihaqi Pemana, S.Pd", "Musyrif 3A Putra"],
+      ["Dandi Purwandi, S.Sos", "Guru"], ["Dani Ramdani, S.Pd", "Guru"], ["Dede Ilyas, S. Pd", "Murofiq"],
+      ["Dewi Nurjanah Septiany, S.E", "Staf Keuangan"], ["Dinda Nurul Fazriah, S.E", "Staf Kesekretariatan"],
+      ["Erias Hayi Sukma, S.Ag", "Guru"], ["Fadil Mahbubilah, S.Sos.", "Musyrif 1B Putra"],
+      ["Fajar Abdussalam, S.Pd.", "Musyrif 1A Putra"], ["Fatwa Andika Zayyin Al Zulfa I, S.H.", "Musyrif 1C Putra"],
+      ["Febriani Siti Barokah", "Murofiqoh"], ["Giri Alghani Kartiwa, S.Pd", "Guru"],
+      ["Hibban Muttaqin, S.Pd", "Futsal"], ["Ian Sudarisman", "Garda"], ["Ikeu Munawaroh, S.Pd", "Paskibra"],
+      ["Iman Saefurrahman", "Marching Band"], ["Luki Alawi, S. Pd", "Murofiq"], ["M Fauzi Miftah, S. Pd", "Murofiq"],
+      ["M Wildan Aji Firmansyah S.Pd", "Murofiq"], ["M. Farhan Ma'mun, S.T", "Padus"],
+      ["M. Syariful Ihsan, S.M, C.AHR", "Panahan"], ["Maulida Tasa Tsania Tsuraya", "Murofiqoh"],
+      ["Mega Purnama", "TS kls 8-11 PI"], ["Muhamad Ali, S.Ag", "Guru"], ["Muhamad Bardan Salaman, S.H", "Musyrif 6A Putra"],
+      ["Muhammad Rifqi Rezatama, S.Pd", "Musyrif 2B Putra"], ["Mulki Nurfathurrahman Hidayat, S.Sos", "Murofiq"],
+      ["Nabila Putri Irsalina, S.E", "Staf Kesekretariatan"], ["Najma Zahra Firstaliya", "Murofiqoh"],
+      ["Neneng Mulkiyah Rahmawati, S.Pd", "Guru"], ["Nurhayati", "Murofiqoh"], ["Nurul Aisyah Jamilah", "Murofiqoh"],
+      ["Rabih Ramadhan, S.Pd", "Guru"], ["Rahmi Rahmawati", "Murofiqoh"], ["Rani Mulyani, S. Sos", "Murofiqoh"],
+      ["Rian Waroihan, S.Pd", "Guru"], ["Rifqi Zaenal", "Garda"], ["Risyan Ahmad Fauzi, Lc", "Guru"],
+      ["Rizki Kurniawan, M.Pd.", "Musyrif 4C Putra"], ["Rofifah Qonitatin, S.Hum", "Staf Baitul Marhhamah"],
+      ["Sabrina Azzahra", "Murofiqoh"], ["Salman Alfarizi", "Murofiq"], ["Salsa Nurfitriyani, Lc", "Guru"],
+      ["Salsabila Rabiultsani, S.Ak", "Staf Keuangan"], ["Shaddiq Amin Muttahid S.Ag", "Murofiq"],
+      ["Silmi Hanif Firyaal", "Panahan"], ["Siti Rachma Azzahra", "Murofiqoh"], ["Sitta Nurul Luthfiyah, S.Pd", "Guru"],
+      ["Sumi arianti", "Read Guard"], ["Tohid Nurhidayat, S,Ag", "Musyrif 4B Putra"], ["Ulfi Siti Hanifah, S.Pd", "Guru"],
+      ["Utruza Imba Bidara, M.Pd", "Guru"], ["Wandi Abdul Rojak, S.Ag", "Guru"], ["Yeti", "Read Guard"],
       ["Yunita Sulistiani, S.Pd", "Musyrifah 3A Putri"]
     ];
 
@@ -710,7 +476,6 @@
     ];
 
     const PRESENSI_SESSIONS = [
-      // Hari 1
       { id: 'h1_m1', day: 1, type: 'materi', title: 'Registrasi Peserta & Pembukaan' },
       { id: 'h1_m2', day: 1, type: 'materi', title: 'Orientasi dan Kontrak Belajar' },
       { id: 'h1_m3', day: 1, type: 'materi', title: 'Materi ke-1' },
@@ -721,7 +486,6 @@
       { id: 'h1_i3', day: 1, type: 'ibadah', title: 'Shalat Maghrib' },
       { id: 'h1_i4', day: 1, type: 'ibadah', title: "Shalat Isya'" },
       { id: 'h1_m6', day: 1, type: 'materi', title: "Leveling Baca Al-Qur'an dan Praktik Sholat" },
-      // Hari 2
       { id: 'h2_i1', day: 2, type: 'ibadah', title: 'Qiyamullail, Kultum, Shalat Shubuh, Fathul Qulub' },
       { id: 'h2_m1', day: 2, type: 'materi', title: 'Materi ke-3 Outbound' },
       { id: 'h2_m2', day: 2, type: 'materi', title: 'Materi ke-4' },
@@ -733,87 +497,48 @@
       { id: 'h2_i4', day: 2, type: 'ibadah', title: 'Shalat Maghrib' },
       { id: 'h2_i5', day: 2, type: 'ibadah', title: "Shalat Isya'" },
       { id: 'h2_m6', day: 2, type: 'materi', title: 'Pendalaman Materi ke-6' },
-      // Hari 3
       { id: 'h3_i1', day: 3, type: 'ibadah', title: 'Qiyamullail, Kultum, Shalat Shubuh, Fathul Qulub' },
       { id: 'h3_m1', day: 3, type: 'materi', title: 'Materi ke-7 Outbound' },
       { id: 'h3_m2', day: 3, type: 'materi', title: 'Materi ke-8' },
       { id: 'h3_m3', day: 3, type: 'materi', title: 'Pendalaman Materi ke-8' }
     ];
 
-    const INDEX_SESSIONS = [
-      { id: 'idx_1', day: 1, title: '1. Orientasi dan Kontrak Belajar' },
-      { id: 'idx_2', day: 1, title: '2. Materi ke-1' },
-      { id: 'idx_3', day: 1, title: '3. Materi ke-2' },
-      { id: 'idx_4', day: 1, title: '4. Pendalaman Materi ke-1 dan 2' },
-      { id: 'idx_5', day: 2, title: '5. Outbound (Materi ke-3)' },
-      { id: 'idx_6', day: 2, title: '6. Materi ke-4' },
-      { id: 'idx_7', day: 2, title: '7. Materi ke-5' },
-      { id: 'idx_8', day: 2, title: '8. Pendalaman Materi ke-4 dan 5' },
-      { id: 'idx_9', day: 2, title: '9. Materi ke-6' },
-      { id: 'idx_10', day: 2, title: '10. Pendalaman Materi ke-6' },
-      { id: 'idx_11', day: 3, title: '11. Outbound (Materi ke-7)' },
-      { id: 'idx_12', day: 3, title: '12. Materi ke-8' },
-      { id: 'idx_13', day: 3, title: '13. Pendalaman Materi ke-8' }
+    const DEFAULT_BIODATA_FIELDS = [
+      { id: 'f_nama', label: 'Nama Lengkap', type: 'text', options: [] },
+      { id: 'f_jk', label: 'Jenis Kelamin', type: 'select', options: ['Laki-Laki', 'Perempuan'] },
+      { id: 'f_status', label: 'Status Pernikahan', type: 'select', options: ['Belum Menikah', 'Menikah', 'Duda', 'Janda'] },
+      { id: 'f_jabatan', label: 'Jabatan di AUM / Jabatan Pekerjaan', type: 'select', options: ['Musyrif/ah', 'Guru', 'Pustakawan', 'Laboran', 'Staf Sarana Prasarana', 'Staf Rumah Tangga', 'Staf Keuangan', 'Staf IT/Medkom', 'Murafiq/ah', 'Lainnya'] },
+      { id: 'f_ttl', label: 'Tempat, Tanggal Lahir', type: 'text', options: [] },
+      { id: 'f_alamat', label: 'Alamat Rumah', type: 'textarea', options: [] },
+      { id: 'f_hp', label: 'No. HP / WA', type: 'text', options: [] },
+      { id: 'f_kesiapan', label: 'Kesiapan Mengikuti Baitul Arqam', type: 'select', options: ['Sangat Siap', 'Siap', 'Cukup Siap', 'Tidak Siap'] },
+      { id: 'f_baca_quran', label: "Kemampuan Tentang Membaca Al-Qur'an", type: 'select', options: ['Sangat Lancar', 'Lancar', 'Cukup', 'Masih Terbata-bata', 'Belum Bisa'] },
+      { id: 'f_paham_quran', label: "Kemampuan Memahami Bacaan Al-Qur'an", type: 'select', options: ['Sangat Baik', 'Baik', 'Cukup', 'Kurang', 'Tidak Memahami/Perlu Bimbingan'] },
+      { id: 'f_aktif_quran', label: "Aktivitas Membaca Al-Qur'an dalam Sehari", type: 'custom_select', options: ['Tidak Pernah', '< 1 Halaman', '1 - 2 Halaman', '3 - 5 Halaman'] },
+      { id: 'f_buku_agama', label: 'Jumlah Koleksi Buku Agama', type: 'custom_select', options: ['Tidak Ada', '1 - 5 Buku', '6 - 10 Buku', '11 - 15 Buku'] },
+      { id: 'f_waktu_baca', label: 'Waktu yang Diluangkan untuk Membaca Buku per Hari', type: 'custom_select', options: ['Tidak Membaca', '< 15 Menit', '15 - 30 Menit', '30 - 60 Menit'] },
+      { id: 'f_bg_keluarga', label: 'Tentang Muhammadiyah — Background Keluarga', type: 'custom_select', options: ['Muhammadiyah', 'Persis', 'Nahdlatul Ulama'] },
+      { id: 'f_nktam', label: 'Memiliki NKTAM / Nomor Kartu Tanda Anggota Muhammadiyah', type: 'select', options: ['Ya', 'Tidak'] },
+      { id: 'f_sumber_info', label: 'Sumber Mengetahui Informasi tentang Muhammadiyah (Bisa pilih banyak)', type: 'checkbox', options: ['Keluarga', 'Guru/Dosen', 'Teman', 'Media Sosial', 'Pengajian/Tabligh', 'Kegiatan AUM', 'Lainnya'] },
+      { id: 'f_majalah', label: "Apakah Berlangganan Majalah Suara Muhammadiyah / 'Aisyiyah", type: 'select', options: ["Ya, Suara Muhammadiyah", "Ya, Suara 'Aisyiyah", 'Ya, Keduanya', 'Tidak'] },
+      { id: 'f_tokoh', label: 'Siapakah Tokoh Muhammadiyah yang Paling Berpengaruh bagi Anda?', type: 'text', options: [] },
+      { id: 'f_lama_aktif', label: 'Telah Aktif di Muhammadiyah', type: 'custom_select', options: ['Tidak Pernah', '< 1 tahun', '1 - 2 tahun', '3 - 5 tahun'] },
+      { id: 'f_ortom', label: 'Pernah / Aktif di Ortom Muhammadiyah (Bisa pilih banyak)', type: 'checkbox', options: ['Hizbul Wathan', 'IPM', 'IMM', "Nasyiatul 'Aisyiyah", 'Tapak Suci', 'Tidak Pernah', 'Lainnya'] },
+      { id: 'f_aum', label: 'Aktif di Amal Usaha Muhammadiyah (Bisa pilih banyak)', type: 'checkbox', options: ['Sekolah / Madrasah', 'Perguruan Tinggi', 'Rumah Sakit / Klinik', 'Panti Asuhan', 'Masjid', 'Koperasi', 'Tidak Aktif', 'Lainnya'] },
+      { id: 'f_pelatihan', label: 'Pelatihan / Training yang Pernah Diikuti di Muhammadiyah', type: 'checkbox', options: ['Latihan Instruktur', 'Pelatihan Kepemimpinan', 'Tabligh Training', 'Belum Pernah Mengikuti', 'Lainnya'] },
+      { id: 'f_harapan', label: 'Apa Harapan Anda terhadap Muhammadiyah?', type: 'textarea', options: [] },
+      { id: 'f_kontribusi', label: 'Kontribusi Apa yang Dapat Anda Berikan di Persyarikatan Muhammadiyah?', type: 'textarea', options: [] }
     ];
 
-    const SKRINING_SECTIONS = [
-      {
-        id: 'wudlu',
-        title: 'Skrining Praktik Wudlu',
-        items: [
-          'Membaca bismillah sambil mencuci tangan',
-          'Melakukan kumur sambil menghirup air ke dalam hidung dan mengeluarkan kembali (istinsyaq wa al madmadha)',
-          'Sempurna mencuci wajah',
-          'Sempurna mencuci tangan sampai siku',
-          'Sempurna membasuh kepala dan diteruskan membasuh telinga',
-          'Sempurna mencuci kaki sampai mata kaki',
-          'Berdoa setelah berwudhu'
-        ]
-      },
-      {
-        id: 'shalat',
-        title: 'Skrining Praktik Shalat',
-        items: [
-          'Takbir dengan mengangkat tangan sejajar dengan bahu atau telinga',
-          'Meletakkan tangan di atas dada',
-          'Membaca doa iftitah',
-          'Sempurna membaca Al-Fatihah dan surat pendek',
-          'Ruku dengan sempurna (punggung dan kepala sejajar, tangan mengepal lutut) dan membaca doa ruku',
-          "I'tidal sambil mengangkat tangan sejajar bahu/telinga dan membaca doa sampai tegak berdiri",
-          'Sujud dengan sempurna (paha tegak, tangan sejajar bahu/telinga membentuk 45°) dan membaca doa sujud',
-          'Sempurna duduk di antara dua sujud (badan tegak, kaki kanan tegak, duduk pada kaki kiri)',
-          'Berdiri dengan takbir tanpa mengangkat tangan (rakaat ke-2), dan mengangkat tangan (rakaat ke-3)',
-          'Sempurna duduk Tahiyyat awal (tumpuan kaki kiri, kaki kanan tegak, telunjuk menunjuk sejak awal)',
-          'Sempurna duduk Tahiyyat akhir (duduk pada lantai, kaki kanan tegak, telunjuk menunjuk sejak awal)',
-          'Membaca doa sebelum salam'
-        ]
-      },
-      {
-        id: 'quran',
-        title: "Skrining Bacaan Al-Qur'an",
-        items: [
-          "Ta'awudh sebelum tadarus",
-          'Makhraj',
-          'Bacaan (Tajwid)',
-          'Tartil'
-        ]
-      }
-    ];
-
-    // =========================================================================
-    // STATE APLIKASI
-    // =========================================================================
     function createInitialState() {
       const participants = RAW_PARTICIPANTS.map((item, idx) => {
         const num = idx + 1;
-        const code = 'BA-' + String(num).padStart(2, '0');
-        const group = (idx % 6) + 1;
         return {
-          id: code,
+          id: 'BA-' + String(num).padStart(2, '0'),
           no: num,
           name: item[0],
           jabatan: item[1],
-          group: group,
+          group: (idx % 6) + 1,
           avatar: ''
         };
       });
@@ -822,71 +547,111 @@
         webAppUrl: DEFAULT_WEB_APP_URL,
         theme: 'light',
         scanPassword: 'panitia2026',
-        admin: {
-          id: 'admin-1',
-          name: 'Riki Ahmad Roqin Muntaha, S.Pd.',
-          password: 'admin123',
-          avatar: ''
-        },
-        instructors: DEFAULT_INSTRUCTORS,
-        akadAssessors: [
-          { id: 'akad-1', name: 'Pimpinan Pondok / Penguji 1', password: 'akad123', avatar: '', assignedIds: [] }
-        ],
+        admin: { id: 'admin-1', name: 'Riki Ahmad Roqin Muntaha, S.Pd.', password: 'admin123', avatar: '' },
+        instructors: JSON.parse(JSON.stringify(DEFAULT_INSTRUCTORS)),
+        akadAssessors: [{ id: 'akad-1', name: 'Pimpinan Pondok / Penguji 1', password: 'akad123', avatar: '', assignedIds: [] }],
         akadQuestions: [
           'Sejauh mana kesiapan Anda menjaga komitmen bermuhammadiyah dan mengabdi di Pondok Pesantren Darul Arqam?',
           'Bagaimana sikap Anda apabila amanah pesantren berbenturan dengan kepentingan pribadi?',
           'Komitmen nyata apa yang siap Anda jalankan pasca kegiatan Baitul Arqam ini?'
         ],
+        indexSessions: [
+          { id: 'idx_1', title: '1. Orientasi dan Kontrak Belajar' },
+          { id: 'idx_2', title: '2. Materi ke-1' },
+          { id: 'idx_3', title: '3. Materi ke-2' },
+          { id: 'idx_4', title: '4. Pendalaman Materi ke-1 dan 2' },
+          { id: 'idx_5', title: '5. Outbound (Materi ke-3)' },
+          { id: 'idx_6', title: '6. Materi ke-4' },
+          { id: 'idx_7', title: '7. Materi ke-5' },
+          { id: 'idx_8', title: '8. Pendalaman Materi ke-4 dan 5' },
+          { id: 'idx_9', title: '9. Materi ke-6' },
+          { id: 'idx_10', title: '10. Pendalaman Materi ke-6' },
+          { id: 'idx_11', title: '11. Outbound (Materi ke-7)' },
+          { id: 'idx_12', title: '12. Materi ke-8' },
+          { id: 'idx_13', title: '13. Pendalaman Materi ke-8' }
+        ],
+        skriningSections: [
+          {
+            id: 'wudlu', title: 'Skrining Praktik Wudlu',
+            items: [
+              'Membaca bismillah sambil mencuci tangan',
+              'Melakukan kumur sambil menghirup air ke dalam hidung dan mengeluarkan kembali (istinsyaq wa al madmadha)',
+              'Sempurna mencuci wajah',
+              'Sempurna mencuci tangan sampai siku',
+              'Sempurna membasuh kepala dan diteruskan membasuh telinga',
+              'Sempurna mencuci kaki sampai mata kaki',
+              'Berdoa setelah berwudhu'
+            ]
+          },
+          {
+            id: 'shalat', title: 'Skrining Praktik Shalat',
+            items: [
+              'Takbir dengan mengangkat tangan sejajar dengan bahu atau telinga',
+              'Meletakkan tangan di atas dada',
+              'Membaca doa iftitah',
+              'Sempurna membaca Al-Fatihah dan surat pendek',
+              'Ruku dengan sempurna (punggung dan kepala sejajar, tangan mengepal lutut) dan membaca doa ruku',
+              "I'tidal sambil mengangkat tangan sejajar bahu/telinga dan membaca doa sampai tegak berdiri",
+              'Sujud dengan sempurna (paha tegak, tangan sejajar bahu/telinga membentuk 45°) dan membaca doa sujud',
+              'Sempurna duduk di antara dua sujud (badan tegak, kaki kanan tegak, duduk pada kaki kiri)',
+              'Berdiri dengan takbir tanpa mengangkat tangan (rakaat ke-2), dan mengangkat tangan (rakaat ke-3)',
+              'Sempurna duduk Tahiyyat awal (tumpuan kaki kiri, kaki kanan tegak, telunjuk menunjuk sejak awal)',
+              'Sempurna duduk Tahiyyat akhir (duduk pada lantai, kaki kanan tegak, telunjuk menunjuk sejak awal)',
+              'Membaca doa sebelum salam'
+            ]
+          },
+          {
+            id: 'quran', title: "Skrining Bacaan Al-Qur'an",
+            items: ["Ta'awudh sebelum tadarus", 'Makhraj', 'Bacaan (Tajwid)', 'Tartil']
+          }
+        ],
+        dashboardRules: {
+          minTarget: 40,
+          maxTarget: 100,
+          predikatIstimewa: 90,
+          predikatSangatBaik: 75,
+          predikatBaik: 60,
+          predikatCukup: 45
+        },
         testConfig: {
           preTestOpen: false,
           postTestOpen: false,
-          questions: [
-            {
-              id: 'q1',
-              text: 'Apa tujuan utama diselenggarakan Baitul Arqam bagi civitas Pondok Pesantren Darul Arqam?',
-              options: [
-                'Peneguhan ideologi, integritas, dan komitmen berkhidmat dalam persyarikatan',
-                'Sekadar kegiatan rekreasi tahunan',
-                'Pelatihan administrasi keuangan semata',
-                'Lomba ketangkasan fisik antar bagian'
-              ],
-              answer: 0
-            },
-            {
-              id: 'q2',
-              text: 'Sikap utama seorang kader dan pendidik di lingkungan pesantren dalam bekerja adalah...',
-              options: [
-                'Menunggu perintah baru bergerak',
-                'Amanah, keteladanan (uswah), dan keikhlasan beramal',
-                'Bekerja secara individual tanpa koordinasi',
-                'Mengutamakan formalitas daripada kualitas'
-              ],
-              answer: 1
-            }
+          sameQuestions: false,
+          preAttendanceSessionId: 'h1_m3',
+          preQuestions: [
+            { id: 'pre1', type: 'mc', text: 'Apa tujuan utama Baitul Arqam PPDA?', options: ['Peneguhan ideologi & komitmen', 'Rekreasi', 'Administrasi', 'Olahraga'], answer: 0 },
+            { id: 'pre2', type: 'short', text: 'Sebutkan satu nilai utama kader Muhammadiyah dalam bekerja!' }
+          ],
+          postQuestions: [
+            { id: 'post1', type: 'mc', text: 'Komitmen pasca Baitul Arqam diwujudkan melalui...', options: ['Keteladanan & amanah di AUM', 'Pasif menunggu', 'Mengabaikan aturan', 'Kepentingan pribadi'], answer: 0 },
+            { id: 'post2', type: 'short', text: 'Tuliskan rencana kontribusi nyata Anda di PPDA!' }
           ]
         },
+        biodataFields: JSON.parse(JSON.stringify(DEFAULT_BIODATA_FIELDS)),
+        biodataAnswers: {},
         participants,
-        presensi: {},     // { 'BA-01': { 'h1_m1': 5, ... } }
-        indexScores: {},  // { 'BA-01': { 'idx_1': { keaktifan:4, etika:4, kedisiplinan:4, empati:4 } } }
-        skrining: {},     // { 'BA-01': { wudlu: { items:[], note:'' }, shalat:{...}, quran:{...} } }
-        testResults: {},  // { 'BA-01': { pre: 5, post: 5 } }
-        akadScores: {}    // { 'BA-01': { score: 5, assessor: '...', note: '' } }
+        presensi: {},
+        indexScores: {},
+        skrining: {},
+        testResults: {},
+        akadScores: {}
       };
     }
 
     let appState = loadLocalState();
-    let currentUser = null; // { role: 'admin'|'instructor'|'akad', user: obj }
+    let currentUser = null;
     let activeStaffTab = 'dashboard';
     let html5QrCode = null;
     let selectedPesertaPortalId = null;
+    let _tempUploadedAvatar = '';
 
     function loadLocalState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
+          const base = createInitialState();
           const parsed = JSON.parse(raw);
-          if (!parsed.webAppUrl) parsed.webAppUrl = DEFAULT_WEB_APP_URL;
-          return parsed;
+          return { ...base, ...parsed, webAppUrl: parsed.webAppUrl || DEFAULT_WEB_APP_URL };
         }
       } catch (e) {}
       return createInitialState();
@@ -898,13 +663,11 @@
     }
 
     // =========================================================================
-    // SINKRONISASI GOOGLE SHEETS (APPS SCRIPT)
+    // CLOUD SYNC
     // =========================================================================
     function setSyncStatus(mode, text) {
-      const dot = document.getElementById('syncDot');
-      const lbl = document.getElementById('syncText');
-      dot.className = 'sync-dot ' + (mode === 'syncing' ? 'syncing' : mode === 'error' ? 'error' : '');
-      lbl.textContent = text;
+      document.getElementById('syncDot').className = 'sync-dot ' + (mode === 'syncing' ? 'syncing' : mode === 'error' ? 'error' : '');
+      document.getElementById('syncText').textContent = text;
     }
 
     async function pullFromCloud(notify = false) {
@@ -920,13 +683,13 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
           refreshAllUI();
           setSyncStatus('ok', 'Tersinkronisasi');
-          if (notify) alert('Data terbaru berhasil dimuat dari Google Sheets!');
+          if (notify) alert('Data terbaru dimuat dari Google Sheets!');
         } else {
-          setSyncStatus('ok', 'Siap (Sheets Kosong)');
-          if (notify) alert('Terhubung ke Google Sheets. Belum ada data tersimpan di server, menggunakan data lokal saat ini.');
+          setSyncStatus('ok', 'Siap');
+          if (notify) alert('Terhubung ke Google Sheets.');
         }
       } catch (err) {
-        setSyncStatus('error', 'Mode Offline Lokal');
+        setSyncStatus('error', 'Mode Lokal');
         if (notify) alert('Gagal menghubungi Google Sheets: ' + err.message);
       }
     }
@@ -934,15 +697,15 @@
     async function pushToCloud(actor, summary) {
       const url = appState.webAppUrl || DEFAULT_WEB_APP_URL;
       if (!url) return;
-      setSyncStatus('syncing', 'Menyimpan ke Sheets...');
+      setSyncStatus('syncing', 'Menyimpan...');
       try {
         const summaryRows = appState.participants.map((p, i) => {
-          const calc = computeParticipantMetrics(p.id);
+          const m = computeParticipantMetrics(p.id);
           const ins = appState.instructors.find(x => x.group === p.group);
           return [
             i + 1, p.name, p.jabatan, 'Kelompok ' + p.group, ins ? ins.name : '-',
-            calc.presensiMateri, calc.presensiIbadah, calc.keaktifan, calc.etika,
-            calc.kedisiplinan, calc.empati, calc.testScore, calc.skriningScore, calc.akadScore
+            m.presensiMateri, m.presensiIbadah, m.keaktifan, m.etika,
+            m.kedisiplinan, m.empati, m.testScore, m.skriningScore, m.akadScore
           ];
         });
 
@@ -950,41 +713,35 @@
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'save_state',
-            actor,
-            summary,
-            data: appState,
-            summaryRows
-          })
+          body: JSON.stringify({ action: 'save_state', actor, summary, data: appState, summaryRows })
         });
-        setSyncStatus('ok', 'Tersimpan ke Sheets');
+        setSyncStatus('ok', 'Tersimpan');
       } catch (err) {
         setSyncStatus('error', 'Gagal Sinkron');
       }
     }
 
     // =========================================================================
-    // KALKULASI POIN 9 ASPEK & LEVEL
+    // KALKULASI
     // =========================================================================
     function computeParticipantMetrics(pid) {
       const pPres = appState.presensi[pid] || {};
       let presensiMateri = 0, presensiIbadah = 0;
       PRESENSI_SESSIONS.forEach(s => {
-        const val = Number(pPres[s.id] || 0);
-        if (s.type === 'materi') presensiMateri += val;
-        else presensiIbadah += val;
+        const v = Number(pPres[s.id] || 0);
+        if (s.type === 'materi') presensiMateri += v;
+        else presensiIbadah += v;
       });
 
       const pIdx = appState.indexScores[pid] || {};
       let keaktifan = 0, etika = 0, kedisiplinan = 0, empati = 0;
-      INDEX_SESSIONS.forEach(s => {
-        const row = pIdx[s.id];
-        if (row) {
-          keaktifan += Number(row.keaktifan || 0);
-          etika += Number(row.etika || 0);
-          kedisiplinan += Number(row.kedisiplinan || 0);
-          empati += Number(row.empati || 0);
+      appState.indexSessions.forEach(s => {
+        const r = pIdx[s.id];
+        if (r) {
+          keaktifan += Number(r.keaktifan || 0);
+          etika += Number(r.etika || 0);
+          kedisiplinan += Number(r.kedisiplinan || 0);
+          empati += Number(r.empati || 0);
         }
       });
 
@@ -992,25 +749,19 @@
       const testScore = Number(tRes.pre || 0) + Number(tRes.post || 0);
 
       const skr = appState.skrining[pid] || {};
-      let skriningRaw = 0;
-      ['wudlu', 'shalat', 'quran'].forEach(sec => {
-        if (skr[sec] && Array.isArray(skr[sec].items)) {
-          skriningRaw += skr[sec].items.reduce((a, b) => a + Number(b || 0), 0);
-        }
+      let skriningScore = 0;
+      appState.skriningSections.forEach(sec => {
+        const arr = skr[sec.id]?.items || [];
+        skriningScore += arr.reduce((a, b) => a + Number(b || 0), 0);
       });
-      // Konversi rata-rata skrining ke skala setara atau total poin
-      const skriningScore = skriningRaw;
 
-      const akad = appState.akadScores[pid] || {};
-      const akadScore = Number(akad.score || 0);
-
+      const akadScore = Number(appState.akadScores[pid]?.score || 0);
       const totalPoint = presensiMateri + presensiIbadah + keaktifan + etika + kedisiplinan + empati + testScore + skriningScore + akadScore;
 
       return {
         presensiMateri, presensiIbadah, keaktifan, etika,
         kedisiplinan, empati, testScore, skriningScore, akadScore,
-        totalPoint,
-        level: getLevelLabel(totalPoint)
+        totalPoint, level: getLevelLabel(totalPoint)
       };
     }
 
@@ -1026,10 +777,11 @@
     }
 
     function getPredikat(pct) {
-      if (pct >= 90) return 'Istimewa';
-      if (pct >= 75) return 'Sangat Baik';
-      if (pct >= 60) return 'Baik';
-      if (pct >= 45) return 'Cukup Baik';
+      const r = appState.dashboardRules;
+      if (pct >= r.predikatIstimewa) return 'Istimewa';
+      if (pct >= r.predikatSangatBaik) return 'Sangat Baik';
+      if (pct >= r.predikatBaik) return 'Baik';
+      if (pct >= r.predikatCukup) return 'Cukup Baik';
       return 'Kurang';
     }
 
@@ -1041,13 +793,12 @@
     }
 
     // =========================================================================
-    // THEME & GATEWAY NAVIGATION
+    // THEME & PORTAL NAVIGATION
     // =========================================================================
     function toggleTheme() {
       const html = document.documentElement;
       const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
       html.setAttribute('data-theme', next);
-      appState.theme = next;
       document.getElementById('themeBtn').textContent = next === 'light' ? '🌙 Mode Gelap' : '☀️ Mode Terang';
     }
 
@@ -1060,13 +811,13 @@
     }
 
     // =========================================================================
-    // PORTAL PESERTA (PRE-TEST & POST-TEST)
+    // PORTAL PESERTA (BIODATA DINAMIS + PRE/POST TEST + PRESENSI MATERI OTOMATIS)
     // =========================================================================
     function initPesertaDropdowns() {
       const grpSel = document.getElementById('pesertaGroupSelect');
       grpSel.innerHTML = '<option value="">-- Pilih Kelompok Anda --</option>';
       appState.instructors.forEach(ins => {
-        grpSel.innerHTML += `<option value="${ins.group}">Kelompok ${ins.group} — Instruktur: ${ins.name}</option>`;
+        grpSel.innerHTML += `<option value="${ins.group}">Kelompok ${ins.group} — ${ins.name}</option>`;
       });
     }
 
@@ -1076,7 +827,6 @@
       nameSel.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
       document.getElementById('pesertaWorkspace').classList.add('hidden');
       if (!grp) return;
-
       appState.participants.filter(p => p.group === grp).forEach(p => {
         nameSel.innerHTML += `<option value="${p.id}">${p.no}. ${p.name} (${p.jabatan})</option>`;
       });
@@ -1096,6 +846,123 @@
       document.getElementById('pPortalName').textContent = `${p.name} (${p.id})`;
       document.getElementById('pPortalMeta').textContent = `${p.jabatan} • Kelompok ${p.group} (${ins ? ins.name : '-'})`;
 
+      renderPesertaBiodataForm(p);
+      renderPesertaTests(pid);
+      document.getElementById('pesertaWorkspace').classList.remove('hidden');
+    }
+
+    function togglePesertaSubView(mode) {
+      document.getElementById('pesertaBiodataArea').classList.toggle('hidden', mode !== 'biodata');
+      document.getElementById('pesertaTestArea').classList.toggle('hidden', mode !== 'tes');
+    }
+
+    function renderPesertaBiodataForm(p) {
+      const saved = appState.biodataAnswers[p.id] || {};
+      const area = document.getElementById('pesertaBiodataArea');
+
+      area.innerHTML = `
+        <div class="card" style="background:var(--surface-subtle); box-shadow:none;">
+          <h3 style="margin-bottom:14px;">Biodata Peserta Baitul Arqam Pegawai</h3>
+          <div style="margin-bottom:14px;">
+            <label class="field-label">Upload Foto Peserta Baitul Arqam Pegawai</label>
+            <input type="file" accept="image/*" onchange="handleBiodataPhotoUpload(event, '${p.id}')" />
+          </div>
+          ${appState.biodataFields.map(f => {
+            const val = saved[f.id];
+            if (f.type === 'text') {
+              const initVal = val !== undefined ? val : (f.id === 'f_nama' ? p.name : '');
+              return `<div style="margin-bottom:12px;"><label class="field-label">${f.label}</label><input type="text" id="bio_${f.id}" value="${initVal}" /></div>`;
+            }
+            if (f.type === 'textarea') {
+              return `<div style="margin-bottom:12px;"><label class="field-label">${f.label}</label><textarea rows="2" id="bio_${f.id}">${val || ''}</textarea></div>`;
+            }
+            if (f.type === 'select') {
+              return `
+                <div style="margin-bottom:12px;">
+                  <label class="field-label">${f.label}</label>
+                  <select id="bio_${f.id}">
+                    <option value="">-- Pilih --</option>
+                    ${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}
+                  </select>
+                </div>`;
+            }
+            if (f.type === 'custom_select') {
+              const isCustom = val && !f.options.includes(val);
+              return `
+                <div style="margin-bottom:12px;">
+                  <label class="field-label">${f.label}</label>
+                  <select id="bio_${f.id}" onchange="document.getElementById('bio_custom_${f.id}').classList.toggle('hidden', this.value !== '__custom__')">
+                    <option value="">-- Pilih --</option>
+                    ${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}
+                    <option value="__custom__" ${isCustom ? 'selected' : ''}>Tulis Sendiri...</option>
+                  </select>
+                  <input type="text" id="bio_custom_${f.id}" class="${isCustom ? '' : 'hidden'}" style="margin-top:6px;" placeholder="Tuliskan jawaban Anda..." value="${isCustom ? val : ''}" />
+                </div>`;
+            }
+            if (f.type === 'checkbox') {
+              const arr = Array.isArray(val) ? val : [];
+              return `
+                <div style="margin-bottom:12px;">
+                  <label class="field-label">${f.label}</label>
+                  <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                    ${f.options.map(o => `
+                      <label style="display:inline-flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                        <input type="checkbox" name="bio_chk_${f.id}" value="${o}" ${arr.includes(o) ? 'checked' : ''} style="width:auto;" />
+                        <span>${o}</span>
+                      </label>
+                    `).join('')}
+                  </div>
+                </div>`;
+            }
+            return '';
+          }).join('')}
+          <button class="btn btn-primary" onclick="savePesertaBiodata('${p.id}')">Simpan Biodata Peserta</button>
+        </div>
+      `;
+    }
+
+    function handleBiodataPhotoUpload(e, pid) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 180; canvas.height = 180;
+          const ctx = canvas.getContext('2d');
+          const side = Math.min(img.width, img.height);
+          ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 180, 180);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+          const p = appState.participants.find(x => x.id === pid);
+          if (p) p.avatar = dataUrl;
+          document.getElementById('pPortalAvatar').src = dataUrl;
+          saveState(p.name, 'Upload foto biodata peserta');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function savePesertaBiodata(pid) {
+      const ans = {};
+      appState.biodataFields.forEach(f => {
+        if (f.type === 'text' || f.type === 'textarea' || f.type === 'select') {
+          ans[f.id] = document.getElementById('bio_' + f.id)?.value || '';
+        } else if (f.type === 'custom_select') {
+          const selVal = document.getElementById('bio_' + f.id)?.value || '';
+          ans[f.id] = selVal === '__custom__' ? (document.getElementById('bio_custom_' + f.id)?.value || '') : selVal;
+        } else if (f.type === 'checkbox') {
+          ans[f.id] = Array.from(document.querySelectorAll(`input[name="bio_chk_${f.id}"]:checked`)).map(c => c.value);
+        }
+      });
+      appState.biodataAnswers[pid] = ans;
+      const p = appState.participants.find(x => x.id === pid);
+      saveState(p.name, 'Menyimpan biodata peserta');
+      alert('Biodata berhasil disimpan!');
+    }
+
+    function renderPesertaTests(pid) {
       const area = document.getElementById('testButtonsArea');
       const res = appState.testResults[pid] || {};
       const preOpen = appState.testConfig.preTestOpen;
@@ -1103,76 +970,90 @@
 
       area.innerHTML = `
         <div class="card" style="box-shadow:none; margin:0;">
-          <h4>Pre-Test Pilihan Ganda</h4>
+          <h4>Pre-Test (Otomatis Presensi Sesi Materi)</h4>
           <p style="font-size:12.5px; color:var(--text-muted); margin:6px 0 12px;">
-            ${preOpen ? 'Sesi tes sedang dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Pre-Test.'}
+            ${preOpen ? 'Sesi Pre-Test dibuka oleh Admin. Mengisi Pre-Test otomatis mencatat presensi materi.' : 'Terkunci — Menunggu Admin membuka sesi Pre-Test.'}
           </p>
-          ${res.pre !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Skor Poin: ${res.pre})</span>` :
-            preOpen ? `<button class="btn btn-primary" onclick="startQuiz('pre')">Mulai Kerjakan Pre-Test</button>` :
+          ${res.pre !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Poin: ${res.pre})</span>` :
+            preOpen ? `<button class="btn btn-primary" onclick="startQuiz('pre')">Kerjakan Pre-Test</button>` :
             `<button class="btn" disabled>🔒 Belum Dibuka</button>`}
         </div>
         <div class="card" style="box-shadow:none; margin:0;">
-          <h4>Post-Test Pilihan Ganda</h4>
+          <h4>Post-Test</h4>
           <p style="font-size:12.5px; color:var(--text-muted); margin:6px 0 12px;">
-            ${postOpen ? 'Sesi tes sedang dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Post-Test.'}
+            ${postOpen ? 'Sesi Post-Test dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Post-Test.'}
           </p>
-          ${res.post !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Skor Poin: ${res.post})</span>` :
-            postOpen ? `<button class="btn btn-primary" onclick="startQuiz('post')">Mulai Kerjakan Post-Test</button>` :
+          ${res.post !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Poin: ${res.post})</span>` :
+            postOpen ? `<button class="btn btn-primary" onclick="startQuiz('post')">Kerjakan Post-Test</button>` :
             `<button class="btn" disabled>🔒 Belum Dibuka</button>`}
         </div>
       `;
       document.getElementById('quizRunnerArea').classList.add('hidden');
-      document.getElementById('pesertaWorkspace').classList.remove('hidden');
+    }
+
+    function getActiveQuestions(type) {
+      if (type === 'post' && appState.testConfig.sameQuestions) return appState.testConfig.preQuestions;
+      return type === 'pre' ? appState.testConfig.preQuestions : appState.testConfig.postQuestions;
     }
 
     function startQuiz(type) {
-      const qs = appState.testConfig.questions || [];
+      const qs = getActiveQuestions(type);
       const runner = document.getElementById('quizRunnerArea');
       runner.classList.remove('hidden');
       runner.innerHTML = `
         <div class="card" style="background:var(--surface-subtle); box-shadow:none;">
-          <h3 style="margin-bottom:14px;">Lembar ${type === 'pre' ? 'Pre-Test' : 'Post-Test'}</h3>
+          <h3 style="margin-bottom:14px;">${type === 'pre' ? 'Pre-Test' : 'Post-Test'}</h3>
           ${qs.map((q, idx) => `
             <div style="margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border);">
               <p style="font-weight:600; margin-bottom:8px;">${idx + 1}. ${q.text}</p>
-              ${q.options.map((opt, oIdx) => `
-                <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400; color:var(--text); cursor:pointer; margin-bottom:6px;">
+              ${q.type === 'mc' ? q.options.map((opt, oIdx) => `
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:6px; font-size:13px;">
                   <input type="radio" name="ans_${q.id}" value="${oIdx}" style="width:auto;" />
                   <span>${String.fromCharCode(65 + oIdx)}. ${opt}</span>
                 </label>
-              `).join('')}
+              `).join('') : `<input type="text" id="short_${q.id}" placeholder="Tuliskan jawaban singkat Anda..." />`}
             </div>
           `).join('')}
-          <button class="btn btn-primary" onclick="submitQuiz('${type}')">Kirim Jawaban ${type === 'pre' ? 'Pre-Test' : 'Post-Test'}</button>
+          <button class="btn btn-primary" onclick="submitQuiz('${type}')">Kirim Jawaban</button>
         </div>
       `;
     }
 
     function submitQuiz(type) {
-      const qs = appState.testConfig.questions || [];
-      let correct = 0;
+      const qs = getActiveQuestions(type);
+      let scoreUnits = 0;
       qs.forEach(q => {
-        const picked = document.querySelector(`input[name="ans_${q.id}"]:checked`);
-        if (picked && Number(picked.value) === Number(q.answer)) correct++;
+        if (q.type === 'mc') {
+          const picked = document.querySelector(`input[name="ans_${q.id}"]:checked`);
+          if (picked && Number(picked.value) === Number(q.answer)) scoreUnits += 1;
+        } else {
+          const txt = document.getElementById('short_' + q.id)?.value.trim();
+          if (txt) scoreUnits += 1;
+        }
       });
-      const pct = qs.length ? (correct / qs.length) * 100 : 0;
+      const pct = qs.length ? (scoreUnits / qs.length) * 100 : 0;
       const point = pct >= 85 ? 5 : pct >= 70 ? 4 : pct >= 55 ? 3 : pct >= 40 ? 2 : 1;
 
       if (!appState.testResults[selectedPesertaPortalId]) appState.testResults[selectedPesertaPortalId] = {};
       appState.testResults[selectedPesertaPortalId][type] = point;
 
+      // Catatan #6: Pre-Test otomatis mencatat presensi kehadiran materi
+      if (type === 'pre' && appState.testConfig.preAttendanceSessionId) {
+        if (!appState.presensi[selectedPesertaPortalId]) appState.presensi[selectedPesertaPortalId] = {};
+        appState.presensi[selectedPesertaPortalId][appState.testConfig.preAttendanceSessionId] = 5;
+      }
+
       const p = appState.participants.find(x => x.id === selectedPesertaPortalId);
-      saveState(p.name, `Menyelesaikan ${type.toUpperCase()}-TEST (Poin: ${point})`);
-      selectPesertaPortal();
-      alert(`Jawaban terkirim! Anda mendapatkan ${point} poin.`);
+      saveState(p.name, `Submit ${type.toUpperCase()}-TEST (+${point} poin)`);
+      renderPesertaTests(selectedPesertaPortalId);
+      alert(`Jawaban tersimpan! Nilai poin: ${point}${type === 'pre' ? ' (Presensi materi otomatis tercatat)' : ''}.`);
     }
 
     // =========================================================================
     // PORTAL PANITIA SCAN BARCODE
     // =========================================================================
     function unlockScanPortal() {
-      const pass = document.getElementById('scanPasswordInput').value;
-      if (pass !== appState.scanPassword) {
+      if (document.getElementById('scanPasswordInput').value !== appState.scanPassword) {
         alert('Password panitia salah!');
         return;
       }
@@ -1184,28 +1065,20 @@
     function updateScanSessionOptions() {
       const day = Number(document.getElementById('scanDaySelect').value);
       const sel = document.getElementById('scanSessionSelect');
-      sel.innerHTML = '';
-      PRESENSI_SESSIONS.filter(s => s.day === day).forEach(s => {
-        sel.innerHTML += `<option value="${s.id}">[${s.type.toUpperCase()}] ${s.title}</option>`;
-      });
+      sel.innerHTML = PRESENSI_SESSIONS.filter(s => s.day === day)
+        .map(s => `<option value="${s.id}">[${s.type.toUpperCase()}] ${s.title}</option>`).join('');
     }
 
     function startCameraScanner() {
       if (html5QrCode) return;
       html5QrCode = new Html5Qrcode('qrReader');
-      html5QrCode.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        (decodedText) => {
-          processBarcodeScan(decodedText);
-        }
-      ).catch(err => alert('Kamera tidak dapat diakses: ' + err));
+      html5QrCode.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 220, height: 220 } },
+        decoded => processBarcodeScan(decoded)
+      ).catch(err => alert('Kamera tidak tersedia: ' + err));
     }
 
     function stopCameraScanner() {
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => { html5QrCode = null; });
-      }
+      if (html5QrCode) html5QrCode.stop().then(() => { html5QrCode = null; });
     }
 
     function processBarcodeScan(rawCode) {
@@ -1233,25 +1106,22 @@
             <h4 style="margin-top:4px;">${p.name} (${p.id})</h4>
             <p style="font-size:12.5px; color:var(--text-muted);">${sess.title}</p>
           </div>
-        </div>
-      `;
-      saveState('Panitia Scan', `Presensi ${p.name} pada ${sess.title} (+${pts})`);
+        </div>`;
+      saveState('Panitia Scan', `Presensi ${p.name} (+${pts})`);
     }
 
     function openPrintIdCards() {
       document.getElementById('gatewaySection').classList.add('hidden');
       document.getElementById('printIdCardSection').classList.remove('hidden');
-      const grid = document.getElementById('printGridContainer');
-      grid.innerHTML = appState.participants.map(p => `
+      document.getElementById('printGridContainer').innerHTML = appState.participants.map(p => `
         <div class="id-card-item">
-          <div style="font-size:10px; font-weight:700; letter-spacing:0.06em;">BAITUL ARQAM PPDA</div>
+          <div style="font-size:10px; font-weight:700;">BAITUL ARQAM PPDA</div>
           <img src="${avatarSrc(p)}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; margin:6px auto;" />
           <div style="font-weight:700; font-size:12px;">${p.name}</div>
           <div style="font-size:10.5px; color:#555;">${p.jabatan} • Kel. ${p.group}</div>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${p.id}" style="width:92px; height:92px; margin:6px auto;" />
-          <div class="mono" style="font-weight:700; font-size:12px;">${p.id}</div>
-        </div>
-      `).join('');
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${p.id}" style="width:90px; height:90px; margin:6px auto;" />
+          <div class="mono" style="font-weight:700;">${p.id}</div>
+        </div>`).join('');
     }
 
     function closePrintIdCards() {
@@ -1260,40 +1130,27 @@
     }
 
     // =========================================================================
-    // LOGIN STAF & ROLE WORKSPACE
+    // LOGIN STAF & TABS
     // =========================================================================
     function initStaffDropdown() {
       const sel = document.getElementById('staffAccountSelect');
-      sel.innerHTML = '';
-      sel.innerHTML += `<optgroup label="Administrator">
-        <option value="admin:${appState.admin.id}">${appState.admin.name} (Admin Utama)</option>
-      </optgroup>`;
-
-      sel.innerHTML += `<optgroup label="Instruktur Kelompok (6 Orang)">
-        ${appState.instructors.map(i => `<option value="instructor:${i.id}">Kelompok ${i.group} — ${i.name}</option>`).join('')}
-      </optgroup>`;
-
-      sel.innerHTML += `<optgroup label="Penilai Khusus Akad Amanah">
-        ${appState.akadAssessors.map(a => `<option value="akad:${a.id}">${a.name}</option>`).join('')}
-      </optgroup>`;
+      sel.innerHTML = `
+        <optgroup label="Administrator"><option value="admin:${appState.admin.id}">${appState.admin.name} (Admin)</option></optgroup>
+        <optgroup label="Instruktur Kelompok">${appState.instructors.map(i => `<option value="instructor:${i.id}">Kelompok ${i.group} — ${i.name}</option>`).join('')}</optgroup>
+        <optgroup label="Penilai Khusus Akad Amanah">${appState.akadAssessors.map(a => `<option value="akad:${a.id}">${a.name}</option>`).join('')}</optgroup>
+      `;
     }
 
     function loginStaff() {
-      const val = document.getElementById('staffAccountSelect').value;
+      const [role, id] = document.getElementById('staffAccountSelect').value.split(':');
       const pass = document.getElementById('staffPasswordInput').value;
-      const [role, id] = val.split(':');
+      let acc = null;
+      if (role === 'admin' && appState.admin.password === pass) acc = appState.admin;
+      if (role === 'instructor') acc = appState.instructors.find(x => x.id === id && x.password === pass);
+      if (role === 'akad') acc = appState.akadAssessors.find(x => x.id === id && x.password === pass);
 
-      let account = null;
-      if (role === 'admin' && appState.admin.password === pass) account = appState.admin;
-      if (role === 'instructor') account = appState.instructors.find(x => x.id === id && x.password === pass);
-      if (role === 'akad') account = appState.akadAssessors.find(x => x.id === id && x.password === pass);
-
-      if (!account) {
-        alert('Password tidak sesuai!');
-        return;
-      }
-
-      currentUser = { role, user: account };
+      if (!acc) return alert('Password salah!');
+      currentUser = { role, user: acc };
       document.getElementById('staffPasswordInput').value = '';
       document.getElementById('gatewaySection').classList.add('hidden');
       document.getElementById('staffWorkspace').classList.remove('hidden');
@@ -1320,40 +1177,29 @@
       const nav = document.getElementById('staffNavTabs');
       const role = currentUser.role;
       let tabs = [];
-
       if (role === 'admin') {
         tabs = [
           { id: 'dashboard', label: 'Dashboard 9 Aspek' },
-          { id: 'index', label: 'Penilaian Index' },
-          { id: 'skrining', label: 'Penilaian Skrining' },
+          { id: 'index', label: 'Index' },
+          { id: 'skrining', label: 'Skrining' },
           { id: 'akad', label: 'Akad Amanah' },
           { id: 'final', label: 'Klasemen Final' },
-          { id: 'admin', label: 'Kontrol & Akun Admin' }
+          { id: 'admin', label: 'Kontrol Admin & CRUD' }
         ];
       } else if (role === 'instructor') {
         tabs = [
-          { id: 'index', label: `Index Kelompok ${currentUser.user.group}` },
-          { id: 'skrining', label: `Skrining Kelompok ${currentUser.user.group}` }
+          { id: 'index', label: `Index Kel. ${currentUser.user.group}` },
+          { id: 'skrining', label: `Skrining Kel. ${currentUser.user.group}` }
         ];
-      } else if (role === 'akad') {
-        tabs = [
-          { id: 'akad', label: 'Wawancara Akad Amanah' }
-        ];
+      } else {
+        tabs = [{ id: 'akad', label: 'Akad Amanah' }];
       }
-
       if (!tabs.some(t => t.id === activeStaffTab)) activeStaffTab = tabs[0].id;
-
-      nav.innerHTML = tabs.map(t => `
-        <button class="portal-tab ${t.id === activeStaffTab ? 'active' : ''}" onclick="switchStaffTab('${t.id}')">${t.label}</button>
-      `).join('');
-
+      nav.innerHTML = tabs.map(t => `<button class="portal-tab ${t.id === activeStaffTab ? 'active' : ''}" onclick="switchStaffTab('${t.id}')">${t.label}</button>`).join('');
       renderStaffContent();
     }
 
-    function switchStaffTab(tabId) {
-      activeStaffTab = tabId;
-      renderStaffNavigation();
-    }
+    function switchStaffTab(id) { activeStaffTab = id; renderStaffNavigation(); }
 
     function renderStaffContent() {
       const area = document.getElementById('staffContentArea');
@@ -1366,278 +1212,297 @@
     }
 
     // =========================================================================
-    // VIEW 1: DASHBOARD 9 ASPEK
+    // VIEW 1: DASHBOARD
     // =========================================================================
     function renderDashboardView(area) {
       const count = appState.participants.length || 1;
-      const totals = {
-        presensiMateri: 0, presensiIbadah: 0, keaktifan: 0, etika: 0,
-        kedisiplinan: 0, empati: 0, testScore: 0, skriningScore: 0, akadScore: 0
-      };
+      const totals = { presensiMateri: 0, presensiIbadah: 0, keaktifan: 0, etika: 0, kedisiplinan: 0, empati: 0, testScore: 0, skriningScore: 0, akadScore: 0 };
       appState.participants.forEach(p => {
         const m = computeParticipantMetrics(p.id);
         Object.keys(totals).forEach(k => totals[k] += m[k]);
       });
 
       const rows = [
-        { no: 1, aspek: 'Presensi Sesi Materi', ket: 'Hadir (5), Terlambat (2), Sakit/Izin (0), Alpha (-5)', avg: totals.presensiMateri / count, min: 30, max: 75 },
-        { no: 2, aspek: 'Presensi Ibadah', ket: 'Hadir (5), Sakit/Izin (0), Alpha (-5)', avg: totals.presensiIbadah / count, min: 25, max: 50 },
-        { no: 3, aspek: 'Keaktifan', ket: 'Sangat Aktif (5) s.d. Tidak Aktif (1)', avg: totals.keaktifan / count, min: 26, max: 65 },
-        { no: 4, aspek: 'Etika', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.etika / count, min: 26, max: 65 },
-        { no: 5, aspek: 'Kedisiplinan', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.kedisiplinan / count, min: 26, max: 65 },
-        { no: 6, aspek: 'Empati', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.empati / count, min: 26, max: 65 },
-        { no: 7, aspek: 'Pre-Test dan Post-Test', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.testScore / count, min: 4, max: 10 },
-        { no: 8, aspek: 'Skrining (Wudlu, Shalat, Al-Qur’an)', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.skriningScore / count, min: 46, max: 115 },
-        { no: 9, aspek: 'Akad Amanah', ket: 'Komitmen Sangat Kuat (5) s.d. Sangat Lemah (1)', avg: totals.akadScore / count, min: 2, max: 5 }
+        { no: 1, aspek: 'Presensi Sesi Materi', avg: totals.presensiMateri / count, max: 75 },
+        { no: 2, aspek: 'Presensi Ibadah', avg: totals.presensiIbadah / count, max: 50 },
+        { no: 3, aspek: 'Keaktifan', avg: totals.keaktifan / count, max: appState.indexSessions.length * 5 || 65 },
+        { no: 4, aspek: 'Etika', avg: totals.etika / count, max: appState.indexSessions.length * 5 || 65 },
+        { no: 5, aspek: 'Kedisiplinan', avg: totals.kedisiplinan / count, max: appState.indexSessions.length * 5 || 65 },
+        { no: 6, aspek: 'Empati', avg: totals.empati / count, max: appState.indexSessions.length * 5 || 65 },
+        { no: 7, aspek: 'Pre-Test dan Post-Test', avg: totals.testScore / count, max: 10 },
+        { no: 8, aspek: 'Skrining', avg: totals.skriningScore / count, max: 115 },
+        { no: 9, aspek: 'Akad Amanah', avg: totals.akadScore / count, max: 5 }
       ];
 
       area.innerHTML = `
         <div class="card">
           <div class="card-header">
             <div>
-              <h2>Dashboard Capaian 9 Aspek Evaluasi</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Rata-rata capaian seluruh ${appState.participants.length} peserta Baitul Arqam PPDA.</p>
+              <h2>Dashboard 9 Aspek</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Target Min: ${appState.dashboardRules.minTarget} • Target Maks: ${appState.dashboardRules.maxTarget}</p>
             </div>
           </div>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>No.</th>
-                  <th>Aspek Penilaian</th>
-                  <th>Skala Keterangan</th>
-                  <th>Rata-rata Poin</th>
-                  <th>Target Min</th>
-                  <th>Target Maks</th>
-                  <th>Tercapai (%)</th>
-                  <th>Tidak Tercapai (%)</th>
-                  <th>Predikat</th>
-                </tr>
-              </thead>
+              <thead><tr><th>No</th><th>Aspek</th><th>Rata-rata Poin</th><th>Tercapai (%)</th><th>Tidak Tercapai (%)</th><th>Predikat</th></tr></thead>
               <tbody>
                 ${rows.map(r => {
                   const pct = Math.min(100, Math.max(0, Math.round((r.avg / r.max) * 100)));
-                  const unpct = 100 - pct;
-                  return `
-                    <tr>
-                      <td class="mono">${r.no}</td>
-                      <td style="font-weight:700;">${r.aspek}</td>
-                      <td style="font-size:12px; color:var(--text-muted);">${r.ket}</td>
-                      <td class="mono" style="font-weight:700;">${r.avg.toFixed(1)}</td>
-                      <td class="mono">${r.min}</td>
-                      <td class="mono">${r.max}</td>
-                      <td><span class="badge badge-success">${pct}%</span></td>
-                      <td><span class="badge badge-warn">${unpct}%</span></td>
-                      <td><span class="badge badge-info">${getPredikat(pct)}</span></td>
-                    </tr>
-                  `;
+                  return `<tr>
+                    <td class="mono">${r.no}</td>
+                    <td style="font-weight:700;">${r.aspek}</td>
+                    <td class="mono">${r.avg.toFixed(1)}</td>
+                    <td><span class="badge badge-success">${pct}%</span></td>
+                    <td><span class="badge badge-warn">${100 - pct}%</span></td>
+                    <td><span class="badge badge-info">${getPredikat(pct)}</span></td>
+                  </tr>`;
                 }).join('')}
               </tbody>
             </table>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
     // =========================================================================
-    // VIEW 2: PENILAIAN INDEX (SEQUENTIAL UNLOCK PER SESI)
+    // VIEW 2: INDEX (VERTIKAL KE BAWAH + BULK APPLY + RESET PER PESERTA/SESI)
     // =========================================================================
     function renderIndexView(area) {
       const isInstructor = currentUser.role === 'instructor';
       const targetGroup = isInstructor ? currentUser.user.group : Number(window._adminIdxGroup || 1);
       const members = appState.participants.filter(p => p.group === targetGroup);
 
-      // Hitung sesi yang sudah terisi lengkap untuk sequential unlock
       let unlockedCount = 1;
-      for (let i = 0; i < INDEX_SESSIONS.length; i++) {
-        const sId = INDEX_SESSIONS[i].id;
-        const allFilled = members.every(m => {
-          const row = appState.indexScores[m.id]?.[sId];
-          return row && row.keaktifan && row.etika && row.kedisiplinan && row.empati;
+      for (let i = 0; i < appState.indexSessions.length; i++) {
+        const sId = appState.indexSessions[i].id;
+        const ok = members.every(m => {
+          const r = appState.indexScores[m.id]?.[sId];
+          return r && r.keaktifan && r.etika && r.kedisiplinan && r.empati;
         });
-        if (allFilled) unlockedCount = i + 2;
+        if (ok) unlockedCount = i + 2;
         else break;
       }
 
-      const selectedSessionId = window._selectedIdxSession || INDEX_SESSIONS[Math.min(unlockedCount - 1, INDEX_SESSIONS.length - 1)].id;
+      const activeSessId = window._selectedIdxSession || appState.indexSessions[Math.min(unlockedCount - 1, appState.indexSessions.length - 1)]?.id;
 
       area.innerHTML = `
         <div class="card">
           <div class="card-header">
             <div>
-              <h2>Penilaian Index — Kelompok ${targetGroup}</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Penilaian terbuka satu per satu secara berurutan. Selesaikan seluruh anggota pada sesi aktif untuk membuka sesi berikutnya.</p>
+              <h2>Index — Kelompok ${targetGroup}</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Tampilan bertumpuk ke bawah. Selesaikan sesi aktif untuk membuka sesi berikutnya.</p>
             </div>
-            ${!isInstructor ? `
-              <div style="width:240px;">
-                <select onchange="window._adminIdxGroup=Number(this.value); renderStaffContent();">
-                  ${appState.instructors.map(i => `<option value="${i.group}" ${i.group === targetGroup ? 'selected' : ''}>Kelompok ${i.group} (${i.name})</option>`).join('')}
-                </select>
-              </div>
-            ` : ''}
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              ${!isInstructor ? `<select style="width:200px;" onchange="window._adminIdxGroup=Number(this.value); renderStaffContent();">
+                ${appState.instructors.map(i => `<option value="${i.group}" ${i.group === targetGroup ? 'selected' : ''}>Kelompok ${i.group}</option>`).join('')}
+              </select>` : ''}
+              <button class="btn btn-sm btn-warn" onclick="resetIndexSession(${targetGroup}, '${activeSessId}')">↺ Reset Sesi Ini</button>
+            </div>
           </div>
 
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;">
-            ${INDEX_SESSIONS.map((s, idx) => {
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+            ${appState.indexSessions.map((s, idx) => {
               const locked = isInstructor && (idx + 1 > unlockedCount);
-              const active = s.id === selectedSessionId;
-              return `
-                <button class="btn btn-sm ${active ? 'btn-primary' : ''}" ${locked ? 'disabled' : ''}
-                  onclick="window._selectedIdxSession='${s.id}'; renderStaffContent();">
-                  ${locked ? '🔒 ' : ''}${s.title}
-                </button>
-              `;
+              return `<button class="btn btn-sm ${s.id === activeSessId ? 'btn-primary' : ''}" ${locked ? 'disabled' : ''}
+                onclick="window._selectedIdxSession='${s.id}'; renderStaffContent();">${locked ? '🔒 ' : ''}${s.title}</button>`;
             }).join('')}
           </div>
 
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Peserta</th>
-                  <th>Keaktifan (1-5)</th>
-                  <th>Etika (1-5)</th>
-                  <th>Kedisiplinan (1-5)</th>
-                  <th>Empati (1-5)</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${members.map(m => {
-                  const row = appState.indexScores[m.id]?.[selectedSessionId] || {};
-                  return `
-                    <tr>
-                      <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                          <img class="avatar" src="${avatarSrc(m)}" />
-                          <div>
-                            <div style="font-weight:700;">${m.name}</div>
-                            <div style="font-size:11.5px; color:var(--text-muted);">${m.jabatan}</div>
-                          </div>
-                        </div>
-                      </td>
-                      ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(field => `
-                        <td>
-                          <div class="score-group">
-                            ${[1,2,3,4,5].map(val => `
-                              <button class="score-btn ${Number(row[field]) === val ? 'selected' : ''}"
-                                onclick="setIndexScore('${m.id}', '${selectedSessionId}', '${field}', ${val})">${val}</button>
-                            `).join('')}
-                          </div>
-                        </td>
-                      `).join('')}
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
+          <!-- BULK SET ALL PARTICIPANTS IN GROUP -->
+          <div class="card" style="background:var(--surface-subtle); box-shadow:none; padding:14px;">
+            <div style="font-size:12.5px; font-weight:700; margin-bottom:8px;">Terapkan Nilai Otomatis ke Semua Peserta di Kelompok ${targetGroup} (Lalu edit yang perlu saja):</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(asp => `
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <span style="font-size:12px; font-weight:600; text-transform:capitalize;">${asp}:</span>
+                  ${[1,2,3,4,5].map(v => `<button class="score-btn" onclick="bulkSetIndex(${targetGroup}, '${activeSessId}', '${asp}', ${v})">${v}</button>`).join('')}
+                </div>
+              `).join('')}
+            </div>
           </div>
-        </div>
-      `;
+
+          <!-- STACKED VERTICAL CARDS -->
+          <div class="vertical-stack">
+            ${members.map(m => {
+              const row = appState.indexScores[m.id]?.[activeSessId] || {};
+              return `
+                <div class="item-card-vertical">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <img class="avatar" src="${avatarSrc(m)}" />
+                      <div>
+                        <div style="font-weight:700;">${m.name}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">${m.jabatan}</div>
+                      </div>
+                    </div>
+                    <button class="btn btn-sm btn-danger" onclick="resetIndexParticipant('${m.id}', '${activeSessId}')">Batal / Reset</button>
+                  </div>
+                  ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(field => `
+                    <div class="aspect-row">
+                      <span style="font-weight:600; font-size:13px; text-transform:capitalize;">${field} (1–5)</span>
+                      <div class="score-group">
+                        ${[1,2,3,4,5].map(val => {
+                          const selected = Number(row[field]) === val;
+                          return `<button class="score-btn ${selected ? 'selected' : ''}"
+                            onclick="toggleIndexScore('${m.id}', '${activeSessId}', '${field}', ${val})">${val}</button>`;
+                        }).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`;
     }
 
-    function setIndexScore(pid, sessId, field, val) {
+    function toggleIndexScore(pid, sessId, field, val) {
       if (!appState.indexScores[pid]) appState.indexScores[pid] = {};
       if (!appState.indexScores[pid][sessId]) appState.indexScores[pid][sessId] = {};
-      appState.indexScores[pid][sessId][field] = val;
-      saveState(currentUser.user.name, `Index ${pid} (${sessId} - ${field}: ${val})`);
+      // Klik nilai yang sama = batalkan/kosongkan
+      if (Number(appState.indexScores[pid][sessId][field]) === val) {
+        delete appState.indexScores[pid][sessId][field];
+      } else {
+        appState.indexScores[pid][sessId][field] = val;
+      }
+      saveState(currentUser.user.name, `Update index ${pid}`);
+      renderStaffContent();
+    }
+
+    function bulkSetIndex(group, sessId, field, val) {
+      appState.participants.filter(p => p.group === group).forEach(p => {
+        if (!appState.indexScores[p.id]) appState.indexScores[p.id] = {};
+        if (!appState.indexScores[p.id][sessId]) appState.indexScores[p.id][sessId] = {};
+        appState.indexScores[p.id][sessId][field] = val;
+      });
+      saveState(currentUser.user.name, `Bulk set ${field}=${val} Kel.${group}`);
+      renderStaffContent();
+    }
+
+    function resetIndexParticipant(pid, sessId) {
+      if (appState.indexScores[pid]?.[sessId]) {
+        delete appState.indexScores[pid][sessId];
+        saveState(currentUser.user.name, `Reset index ${pid}`);
+        renderStaffContent();
+      }
+    }
+
+    function resetIndexSession(group, sessId) {
+      if (!confirm('Reset seluruh nilai pada sesi ini untuk kelompok?')) return;
+      appState.participants.filter(p => p.group === group).forEach(p => {
+        if (appState.indexScores[p.id]?.[sessId]) delete appState.indexScores[p.id][sessId];
+      });
+      saveState(currentUser.user.name, `Reset sesi ${sessId}`);
       renderStaffContent();
     }
 
     // =========================================================================
-    // VIEW 3: PENILAIAN SKRINING (WUDLU, SHALAT, AL-QUR'AN)
+    // VIEW 3: SKRINING (PILIH 1 PESERTA + TAMPILAN KE BAWAH + BULK + RESET)
     // =========================================================================
     function renderSkriningView(area) {
       const isInstructor = currentUser.role === 'instructor';
       const targetGroup = isInstructor ? currentUser.user.group : Number(window._adminSkrGroup || 1);
       const members = appState.participants.filter(p => p.group === targetGroup);
-      const activeSecId = window._selectedSkrSec || 'wudlu';
-      const secObj = SKRINING_SECTIONS.find(s => s.id === activeSecId);
+      const selectedPid = window._selectedSkrPid || members[0]?.id || '';
+      const activeParticipant = members.find(m => m.id === selectedPid) || members[0];
+      const activeSecId = window._selectedSkrSec || appState.skriningSections[0]?.id;
+      const secObj = appState.skriningSections.find(s => s.id === activeSecId) || appState.skriningSections[0];
 
-      // Sequential unlock antar bagian skrining (Wudlu -> Shalat -> Qur'an)
-      const wudluDone = members.every(m => (appState.skrining[m.id]?.wudlu?.items || []).filter(Boolean).length === 7);
-      const shalatDone = members.every(m => (appState.skrining[m.id]?.shalat?.items || []).filter(Boolean).length === 12);
+      const rec = activeParticipant ? (appState.skrining[activeParticipant.id]?.[secObj.id] || { items: [], note: '' }) : { items: [], note: '' };
+      const sum = (rec.items || []).reduce((a, b) => a + Number(b || 0), 0);
 
       area.innerHTML = `
         <div class="card">
           <div class="card-header">
             <div>
-              <h2>Penilaian Skrining Ibadah & Al-Qur'an — Kelompok ${targetGroup}</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Rentang 1–5 per indikator. Bagian berikutnya terbuka otomatis setelah bagian sebelumnya terisi lengkap.</p>
+              <h2>Penilaian Skrining — Kelompok ${targetGroup}</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Pilih peserta yang sedang dites agar fokus ke bawah tanpa melebar ke samping.</p>
             </div>
-            ${!isInstructor ? `
-              <div style="width:240px;">
-                <select onchange="window._adminSkrGroup=Number(this.value); renderStaffContent();">
-                  ${appState.instructors.map(i => `<option value="${i.group}" ${i.group === targetGroup ? 'selected' : ''}>Kelompok ${i.group} (${i.name})</option>`).join('')}
-                </select>
+            ${!isInstructor ? `<select style="width:200px;" onchange="window._adminSkrGroup=Number(this.value); window._selectedSkrPid=''; renderStaffContent();">
+              ${appState.instructors.map(i => `<option value="${i.group}" ${i.group === targetGroup ? 'selected' : ''}>Kelompok ${i.group}</option>`).join('')}
+            </select>` : ''}
+          </div>
+
+          <div class="grid-2" style="margin-bottom:16px;">
+            <div>
+              <label class="field-label">Pilih Peserta yang Sedang Dites</label>
+              <select onchange="window._selectedSkrPid=this.value; renderStaffContent();">
+                ${members.map(m => `<option value="${m.id}" ${activeParticipant && m.id === activeParticipant.id ? 'selected' : ''}>${m.no}. ${m.name} (${m.jabatan})</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Pilih Bagian Skrining</label>
+              <select onchange="window._selectedSkrSec=this.value; renderStaffContent();">
+                ${appState.skriningSections.map(s => `<option value="${s.id}" ${s.id === secObj.id ? 'selected' : ''}>${s.title}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          ${activeParticipant ? `
+            <div class="item-card-vertical" style="margin-bottom:16px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img class="avatar avatar-lg" src="${avatarSrc(activeParticipant)}" />
+                  <div>
+                    <h3>${activeParticipant.name}</h3>
+                    <p style="font-size:12.5px; color:var(--text-muted);">${activeParticipant.jabatan} • Skor ${secObj.title}: <strong class="mono">${sum}</strong></p>
+                  </div>
+                </div>
+                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                  <span style="font-size:12px; font-weight:600;">Semua Item:</span>
+                  ${[1,2,3,4,5].map(v => `<button class="score-btn" onclick="bulkSetSkrining('${activeParticipant.id}', '${secObj.id}', ${secObj.items.length}, ${v})">${v}</button>`).join('')}
+                  <button class="btn btn-sm btn-danger" onclick="resetSkrining('${activeParticipant.id}', '${secObj.id}')">Reset</button>
+                </div>
               </div>
-            ` : ''}
-          </div>
 
-          <div style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;">
-            ${SKRINING_SECTIONS.map(sec => {
-              const locked = isInstructor && ((sec.id === 'shalat' && !wudluDone) || (sec.id === 'quran' && (!wudluDone || !shalatDone)));
-              return `
-                <button class="btn ${sec.id === activeSecId ? 'btn-primary' : ''}" ${locked ? 'disabled' : ''}
-                  onclick="window._selectedSkrSec='${sec.id}'; renderStaffContent();">
-                  ${locked ? '🔒 ' : ''}${sec.title}
-                </button>
-              `;
-            }).join('')}
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th style="min-width:210px;">Peserta</th>
-                  ${secObj.items.map((it, idx) => `<th title="${it}" style="min-width:135px;">${idx + 1}. ${it.slice(0, 26)}...</th>`).join('')}
-                  <th style="min-width:160px;">Catatan Khusus</th>
-                  <th>Skor</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${members.map(m => {
-                  const rec = appState.skrining[m.id]?.[secObj.id] || { items: [], note: '' };
-                  const sum = (rec.items || []).reduce((a, b) => a + Number(b || 0), 0);
-                  return `
-                    <tr>
-                      <td>
-                        <div style="display:flex; align-items:center; gap:9px;">
-                          <img class="avatar" src="${avatarSrc(m)}" />
-                          <span style="font-weight:700; font-size:12.5px;">${m.name}</span>
-                        </div>
-                      </td>
-                      ${secObj.items.map((_, iIdx) => `
-                        <td>
-                          <div class="score-group">
-                            ${[1,2,3,4,5].map(v => `
-                              <button class="score-btn ${Number(rec.items?.[iIdx]) === v ? 'selected' : ''}"
-                                onclick="setSkriningScore('${m.id}', '${secObj.id}', ${iIdx}, ${v})">${v}</button>
-                            `).join('')}
-                          </div>
-                        </td>
+              ${secObj.items.map((itemText, idx) => {
+                const curVal = Number(rec.items?.[idx] || 0);
+                return `
+                  <div class="aspect-row">
+                    <span style="font-size:13px; flex:1; min-width:220px;"><strong>${idx + 1}.</strong> ${itemText}</span>
+                    <div class="score-group">
+                      ${[1,2,3,4,5].map(v => `
+                        <button class="score-btn ${curVal === v ? 'selected' : ''}"
+                          onclick="toggleSkriningScore('${activeParticipant.id}', '${secObj.id}', ${idx}, ${v})">${v}</button>
                       `).join('')}
-                      <td>
-                        <input type="text" value="${rec.note || ''}" placeholder="Opsional..."
-                          onchange="setSkriningNote('${m.id}', '${secObj.id}', this.value)" />
-                      </td>
-                      <td class="mono" style="font-weight:700;">${sum}</td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
+                    </div>
+                  </div>`;
+              }).join('')}
+
+              <div style="margin-top:14px;">
+                <label class="field-label">Catatan Khusus Peserta (Tidak Wajib)</label>
+                <input type="text" value="${rec.note || ''}" placeholder="Catatan pembina / penguji..."
+                  onchange="setSkriningNote('${activeParticipant.id}', '${secObj.id}', this.value)" />
+              </div>
+            </div>
+          ` : ''}
+        </div>`;
     }
 
-    function setSkriningScore(pid, secId, itemIdx, val) {
+    function toggleSkriningScore(pid, secId, idx, val) {
       if (!appState.skrining[pid]) appState.skrining[pid] = {};
       if (!appState.skrining[pid][secId]) appState.skrining[pid][secId] = { items: [], note: '' };
-      appState.skrining[pid][secId].items[itemIdx] = val;
-      saveState(currentUser.user.name, `Skrining ${secId} ${pid}`);
+      if (Number(appState.skrining[pid][secId].items[idx]) === val) {
+        appState.skrining[pid][secId].items[idx] = 0;
+      } else {
+        appState.skrining[pid][secId].items[idx] = val;
+      }
+      saveState(currentUser.user.name, `Skrining ${pid}`);
       renderStaffContent();
+    }
+
+    function bulkSetSkrining(pid, secId, count, val) {
+      if (!appState.skrining[pid]) appState.skrining[pid] = {};
+      if (!appState.skrining[pid][secId]) appState.skrining[pid][secId] = { items: [], note: '' };
+      appState.skrining[pid][secId].items = Array(count).fill(val);
+      saveState(currentUser.user.name, `Bulk skrining ${pid} = ${val}`);
+      renderStaffContent();
+    }
+
+    function resetSkrining(pid, secId) {
+      if (appState.skrining[pid]?.[secId]) {
+        delete appState.skrining[pid][secId];
+        saveState(currentUser.user.name, `Reset skrining ${pid}`);
+        renderStaffContent();
+      }
     }
 
     function setSkriningNote(pid, secId, note) {
@@ -1648,442 +1513,545 @@
     }
 
     // =========================================================================
-    // VIEW 4: WAWANCARA AKAD AMANAH (PENILAI KHUSUS & ADMIN)
+    // VIEW 4: AKAD AMANAH
     // =========================================================================
     function renderAkadView(area) {
-      const assessor = currentUser.user;
-      const assigned = assessor.assignedIds || [];
-      const list = (currentUser.role === 'akad' && assigned.length > 0)
-        ? appState.participants.filter(p => assigned.includes(p.id))
-        : appState.participants;
-
       area.innerHTML = `
         <div class="card">
           <div class="card-header">
             <div>
-              <h2>Penilaian Wawancara Akad Amanah</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Penilai bebas memilih peserta mana saja yang diwawancarai (lintas kelompok). Rentang skor komitmen 1–5.</p>
+              <h2>Wawancara Akad Amanah</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Penilai bebas memilih peserta lintas kelompok dan mengatur pertanyaan wawancara.</p>
             </div>
           </div>
 
           <div class="card" style="background:var(--surface-subtle); box-shadow:none;">
-            <h4 style="margin-bottom:8px;">Panduan Pertanyaan Wawancara Akad Amanah</h4>
-            <ol style="padding-left:20px; font-size:13.5px; margin-bottom:10px;">
-              ${appState.akadQuestions.map(q => `<li style="margin-bottom:4px;">${q}</li>`).join('')}
+            <h4>Pertanyaan Wawancara Akad Amanah</h4>
+            <ol style="padding-left:20px; font-size:13px; margin:8px 0 12px;">
+              ${appState.akadQuestions.map((q, i) => `
+                <li style="margin-bottom:5px;">${q} <button class="btn btn-sm btn-danger" style="padding:2px 7px;" onclick="deleteAkadQuestion(${i})">Hapus</button></li>
+              `).join('')}
             </ol>
             <div style="display:flex; gap:8px; max-width:560px;">
-              <input type="text" id="newAkadQuestionInput" placeholder="Tambah pertanyaan wawancara baru..." />
-              <button class="btn btn-sm btn-primary" onclick="addAkadQuestion()">+ Tambah</button>
+              <input type="text" id="newAkadQ" placeholder="Tambah pertanyaan wawancara..." />
+              <button class="btn btn-sm btn-primary" onclick="addAkadQ()">+ Tambah</button>
             </div>
           </div>
 
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Peserta</th>
-                  <th>Kelompok</th>
-                  <th>Skor Komitmen (1-5)</th>
-                  <th>Catatan Wawancara</th>
-                  <th>Penilai</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${list.map(p => {
-                  const rec = appState.akadScores[p.id] || {};
-                  return `
-                    <tr>
-                      <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                          <img class="avatar" src="${avatarSrc(p)}" />
-                          <div>
-                            <div style="font-weight:700;">${p.name}</div>
-                            <div style="font-size:11.5px; color:var(--text-muted);">${p.jabatan}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>Kelompok ${p.group}</td>
-                      <td>
-                        <div class="score-group">
-                          ${[1,2,3,4,5].map(v => `
-                            <button class="score-btn ${Number(rec.score) === v ? 'selected' : ''}"
-                              onclick="setAkadScore('${p.id}', ${v})">${v}</button>
-                          `).join('')}
-                        </div>
-                      </td>
-                      <td>
-                        <input type="text" value="${rec.note || ''}" placeholder="Catatan komitmen..."
-                          onchange="setAkadNote('${p.id}', this.value)" />
-                      </td>
-                      <td style="font-size:12px; color:var(--text-muted);">${rec.assessor || '-'}</td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
+          <div class="vertical-stack">
+            ${appState.participants.map(p => {
+              const rec = appState.akadScores[p.id] || {};
+              return `
+                <div class="item-card-vertical">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <img class="avatar" src="${avatarSrc(p)}" />
+                      <div>
+                        <div style="font-weight:700;">${p.name}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">${p.jabatan} • Kel. ${p.group}</div>
+                      </div>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                      <div class="score-group">
+                        ${[1,2,3,4,5].map(v => `
+                          <button class="score-btn ${Number(rec.score) === v ? 'selected' : ''}" onclick="toggleAkadScore('${p.id}', ${v})">${v}</button>
+                        `).join('')}
+                      </div>
+                      <button class="btn btn-sm btn-danger" onclick="resetAkad('${p.id}')">Reset</button>
+                    </div>
+                  </div>
+                  <input type="text" value="${rec.note || ''}" placeholder="Catatan wawancara..." onchange="setAkadNote('${p.id}', this.value)" />
+                </div>`;
+            }).join('')}
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    function addAkadQuestion() {
-      const inp = document.getElementById('newAkadQuestionInput');
+    function addAkadQ() {
+      const inp = document.getElementById('newAkadQ');
       if (!inp.value.trim()) return;
       appState.akadQuestions.push(inp.value.trim());
       inp.value = '';
-      saveState(currentUser.user.name, 'Menambah pertanyaan Akad Amanah');
+      saveState(currentUser.user.name, 'Tambah pertanyaan Akad Amanah');
       renderStaffContent();
     }
 
-    function setAkadScore(pid, val) {
+    function deleteAkadQuestion(idx) {
+      appState.akadQuestions.splice(idx, 1);
+      saveState(currentUser.user.name, 'Hapus pertanyaan Akad Amanah');
+      renderStaffContent();
+    }
+
+    function toggleAkadScore(pid, val) {
       if (!appState.akadScores[pid]) appState.akadScores[pid] = {};
-      appState.akadScores[pid].score = val;
-      appState.akadScores[pid].assessor = currentUser.user.name;
-      saveState(currentUser.user.name, `Akad Amanah ${pid}: ${val}`);
+      if (Number(appState.akadScores[pid].score) === val) delete appState.akadScores[pid].score;
+      else {
+        appState.akadScores[pid].score = val;
+        appState.akadScores[pid].assessor = currentUser.user.name;
+      }
+      saveState(currentUser.user.name, `Akad ${pid}`);
+      renderStaffContent();
+    }
+
+    function resetAkad(pid) {
+      delete appState.akadScores[pid];
+      saveState(currentUser.user.name, `Reset Akad ${pid}`);
       renderStaffContent();
     }
 
     function setAkadNote(pid, note) {
       if (!appState.akadScores[pid]) appState.akadScores[pid] = {};
       appState.akadScores[pid].note = note;
-      appState.akadScores[pid].assessor = currentUser.user.name;
-      saveState(currentUser.user.name, `Catatan Akad Amanah ${pid}`);
+      saveState(currentUser.user.name, `Catatan Akad ${pid}`);
     }
 
     // =========================================================================
-    // VIEW 5: KLASEMEN FINAL & 8 LEVEL KADER
+    // VIEW 5: KLASEMEN FINAL
     // =========================================================================
     function renderFinalView(area) {
-      const ranked = appState.participants.map(p => ({
-        ...p,
-        metrics: computeParticipantMetrics(p.id)
-      })).sort((a, b) => b.metrics.totalPoint - a.metrics.totalPoint);
+      const ranked = appState.participants.map(p => ({ ...p, m: computeParticipantMetrics(p.id) }))
+        .sort((a, b) => b.m.totalPoint - a.m.totalPoint);
 
       area.innerHTML = `
         <div class="card">
           <div class="card-header">
-            <div>
-              <h2>Klasemen Final & Pemeringkatan Jenjang Kader</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Rekapitulasi otomatis seluruh 9 komponen penilaian untuk 66 peserta.</p>
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="exportFinalCsv()">⬇ Unduh CSV Rekap</button>
+            <div><h2>Klasemen Final & 8 Jenjang Kader</h2></div>
+            <button class="btn btn-primary btn-sm" onclick="exportFinalCsv()">⬇ Unduh CSV</button>
           </div>
-
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Nama Peserta</th>
-                  <th>Kelompok</th>
-                  <th>Materi</th>
-                  <th>Ibadah</th>
-                  <th>Aktif</th>
-                  <th>Etika</th>
-                  <th>Disiplin</th>
-                  <th>Empati</th>
-                  <th>Tes</th>
-                  <th>Skrining</th>
-                  <th>Akad</th>
-                  <th>Total Poin</th>
-                  <th>Level Jenjang</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Rank</th><th>Peserta</th><th>Kel.</th><th>Materi</th><th>Ibadah</th><th>Index</th><th>Tes</th><th>Skrining</th><th>Akad</th><th>Total</th><th>Level</th></tr></thead>
               <tbody>
-                ${ranked.map((r, i) => `
-                  <tr>
-                    <td class="mono" style="font-weight:700;">#${i + 1}</td>
-                    <td>
-                      <div style="display:flex; align-items:center; gap:9px;">
-                        <img class="avatar" src="${avatarSrc(r)}" />
-                        <div>
-                          <div style="font-weight:700;">${r.name}</div>
-                          <div style="font-size:11px; color:var(--text-muted);">${r.jabatan}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>Kel. ${r.group}</td>
-                    <td class="mono">${r.metrics.presensiMateri}</td>
-                    <td class="mono">${r.metrics.presensiIbadah}</td>
-                    <td class="mono">${r.metrics.keaktifan}</td>
-                    <td class="mono">${r.metrics.etika}</td>
-                    <td class="mono">${r.metrics.kedisiplinan}</td>
-                    <td class="mono">${r.metrics.empati}</td>
-                    <td class="mono">${r.metrics.testScore}</td>
-                    <td class="mono">${r.metrics.skriningScore}</td>
-                    <td class="mono">${r.metrics.akadScore}</td>
-                    <td class="mono" style="font-weight:800; font-size:14px;">${r.metrics.totalPoint}</td>
-                    <td><span class="badge badge-success">${r.metrics.level}</span></td>
-                  </tr>
-                `).join('')}
+                ${ranked.map((r, i) => {
+                  const idxSum = r.m.keaktifan + r.m.etika + r.m.kedisiplinan + r.m.empati;
+                  return `<tr>
+                    <td class="mono">#${i + 1}</td>
+                    <td><div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(r)}" /><strong>${r.name}</strong></div></td>
+                    <td>${r.group}</td>
+                    <td class="mono">${r.m.presensiMateri}</td>
+                    <td class="mono">${r.m.presensiIbadah}</td>
+                    <td class="mono">${idxSum}</td>
+                    <td class="mono">${r.m.testScore}</td>
+                    <td class="mono">${r.m.skriningScore}</td>
+                    <td class="mono">${r.m.akadScore}</td>
+                    <td class="mono" style="font-weight:800;">${r.m.totalPoint}</td>
+                    <td><span class="badge badge-success">${r.m.level}</span></td>
+                  </tr>`;
+                }).join('')}
               </tbody>
             </table>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
     function exportFinalCsv() {
-      const headers = ['No','Nama','Jabatan','Kelompok','Materi','Ibadah','Keaktifan','Etika','Kedisiplinan','Empati','Tes','Skrining','Akad','Total','Level'];
-      const lines = [headers.join(',')];
-      appState.participants.forEach((p, idx) => {
-        const m = computeParticipantMetrics(p.id);
-        lines.push([
-          idx + 1, `"${p.name}"`, `"${p.jabatan}"`, p.group,
-          m.presensiMateri, m.presensiIbadah, m.keaktifan, m.etika,
-          m.kedisiplinan, m.empati, m.testScore, m.skriningScore,
-          m.akadScore, m.totalPoint, `"${m.level}"`
-        ].join(','));
-      });
+      const lines = ['Rank,Nama,Kelompok,Materi,Ibadah,Keaktifan,Etika,Kedisiplinan,Empati,Tes,Skrining,Akad,Total,Level'];
+      appState.participants.map(p => ({ p, m: computeParticipantMetrics(p.id) }))
+        .sort((a, b) => b.m.totalPoint - a.m.totalPoint)
+        .forEach((row, idx) => {
+          lines.push([idx + 1, `"${row.p.name}"`, row.p.group, row.m.presensiMateri, row.m.presensiIbadah, row.m.keaktifan, row.m.etika, row.m.kedisiplinan, row.m.empati, row.m.testScore, row.m.skriningScore, row.m.akadScore, row.m.totalPoint, `"${row.m.level}"`].join(','));
+        });
       const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'Rekap_Final_Baitul_Arqam_PPDA.csv';
+      a.download = 'Klasemen_Final_Baitul_Arqam_PPDA.csv';
       a.click();
     }
 
     // =========================================================================
-    // VIEW 6: KONTROL ADMIN (BUKA TES, AKUN, FOTO PESERTA, PENILAI AKAD)
+    // VIEW 6: KONTROL ADMIN (CRUD SOAL, BIODATA, INDEX/SKRINING, DASHBOARD, AKUN & RESET)
     // =========================================================================
     function renderAdminControlView(area) {
       area.innerHTML = `
+        <!-- 1. BUKA TES & RESET TOTAL -->
         <div class="grid-2">
-          <!-- KONTROL UJIAN PESERTA -->
           <div class="card">
-            <h3>Kontrol Akses Pre-Test & Post-Test</h3>
-            <p style="font-size:13px; color:var(--text-muted); margin:6px 0 14px;">Peserta hanya bisa melihat dan mengerjakan tes jika sakelar di bawah ini diaktifkan.</p>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
-              <button class="btn ${appState.testConfig.preTestOpen ? 'btn-primary' : ''}" onclick="toggleTestAccess('preTestOpen')">
+            <h3>Kontrol Pre-Test, Post-Test & Presensi Materi Otomatis</h3>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin:12px 0;">
+              <button class="btn ${appState.testConfig.preTestOpen ? 'btn-primary' : ''}" onclick="toggleTest('preTestOpen')">
                 ${appState.testConfig.preTestOpen ? '✅ Pre-Test DIBUKA' : '🔒 Pre-Test DITUTUP'}
               </button>
-              <button class="btn ${appState.testConfig.postTestOpen ? 'btn-primary' : ''}" onclick="toggleTestAccess('postTestOpen')">
+              <button class="btn ${appState.testConfig.postTestOpen ? 'btn-primary' : ''}" onclick="toggleTest('postTestOpen')">
                 ${appState.testConfig.postTestOpen ? '✅ Post-Test DIBUKA' : '🔒 Post-Test DITUTUP'}
               </button>
             </div>
-            <button class="btn btn-sm" onclick="addSampleQuizQuestion()">+ Tambah Soal Pilihan Ganda</button>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:10px; cursor:pointer;">
+              <input type="checkbox" style="width:auto;" ${appState.testConfig.sameQuestions ? 'checked' : ''} onchange="appState.testConfig.sameQuestions=this.checked; saveState('Admin','Ubah opsi soal sama');" />
+              <span>Samakan soal Pre-Test dan Post-Test</span>
+            </label>
+            <label class="field-label">Sesi Materi Otomatis Terisi Saat Pre-Test</label>
+            <select onchange="appState.testConfig.preAttendanceSessionId=this.value; saveState('Admin','Atur sesi presensi Pre-Test');">
+              <option value="">-- Nonaktif --</option>
+              ${PRESENSI_SESSIONS.filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${appState.testConfig.preAttendanceSessionId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}
+            </select>
           </div>
 
-          <!-- KONEKSI SHEETS & PASSWORD SCAN -->
           <div class="card">
-            <h3>Koneksi Google Sheets & Panitia Scan</h3>
-            <div style="margin:10px 0;">
-              <label>URL Web App Google Apps Script</label>
-              <input type="text" id="adminWebAppInput" value="${appState.webAppUrl}" />
+            <h3>Ketentuan Dashboard & Reset Data</h3>
+            <div class="grid-2" style="margin:10px 0;">
+              <div><label class="field-label">Target Min</label><input type="number" id="ruleMin" value="${appState.dashboardRules.minTarget}" /></div>
+              <div><label class="field-label">Target Maks</label><input type="number" id="ruleMax" value="${appState.dashboardRules.maxTarget}" /></div>
             </div>
-            <div style="margin-bottom:12px;">
-              <label>Password Portal Scan Barcode Panitia</label>
-              <input type="text" id="adminScanPassInput" value="${appState.scanPassword}" />
-            </div>
-            <div style="display:flex; gap:8px;">
-              <button class="btn btn-primary btn-sm" onclick="saveAdminSystemSettings()">Simpan Pengaturan</button>
-              <button class="btn btn-sm" onclick="pushToCloud('Admin', 'Sinkronisasi manual penuh')">Paksa Kirim ke Sheets</button>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-primary" onclick="saveDashboardRules()">Simpan Ketentuan</button>
+              <button class="btn btn-sm btn-danger" onclick="wipeAllData()">🗑 Hapus Semua Data Dari Awal</button>
             </div>
           </div>
         </div>
 
-        <!-- KELOLA 6 INSTRUKTUR & PENILAI KHUSUS AKAD AMANAH -->
+        <!-- 2. CRUD BANK SOAL (PRE & POST TEST) -->
+        <div class="card">
+          <div class="card-header">
+            <h3>CRUD Bank Soal (Pilihan Ganda, Isian Singkat / Esai, Campuran)</h3>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-primary" onclick="createQuestionBatch('pre')">+ Buat Paket Soal Pre-Test</button>
+              <button class="btn btn-sm btn-primary" onclick="createQuestionBatch('post')">+ Buat Paket Soal Post-Test</button>
+            </div>
+          </div>
+          ${['pre', 'post'].map(t => {
+            const list = getActiveQuestions(t);
+            return `
+              <div style="margin-bottom:14px;">
+                <h4>${t === 'pre' ? 'Daftar Soal Pre-Test' : 'Daftar Soal Post-Test'} (${list.length} soal)</h4>
+                ${list.map((q, idx) => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;">
+                    <span><strong>${idx + 1}.</strong> [${q.type === 'mc' ? `PG (${q.options.length} opsi)` : 'Isian/Esai'}] ${q.text}</span>
+                    <div style="display:flex; gap:6px;">
+                      <button class="btn btn-sm" onclick="editQuestion('${t}', ${idx})">Edit</button>
+                      <button class="btn btn-sm btn-danger" onclick="deleteQuestion('${t}', ${idx})">Hapus</button>
+                    </div>
+                  </div>`).join('')}
+              </div>`;
+          }).join('')}
+        </div>
+
+        <!-- 3. STRUKTUR INDEX & SKRINING -->
         <div class="grid-2">
           <div class="card">
             <div class="card-header">
-              <h3>Daftar 6 Instruktur Kelompok</h3>
+              <h3>Struktur Sesi Index</h3>
+              <button class="btn btn-sm btn-primary" onclick="addIndexSession()">+ Tambah Sesi</button>
             </div>
-            ${appState.instructors.map(ins => `
-              <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <img class="avatar" src="${avatarSrc(ins)}" />
-                  <div>
-                    <div style="font-weight:700; font-size:13px;">${ins.name}</div>
-                    <div style="font-size:11.5px; color:var(--text-muted);">Kelompok ${ins.group} • Pass: <span class="mono">${ins.password}</span></div>
-                  </div>
+            ${appState.indexSessions.map((s, idx) => `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px;">
+                <span>${s.title}</span>
+                <div style="display:flex; gap:4px;">
+                  <button class="btn btn-sm" onclick="renameIndexSession(${idx})">Edit</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteIndexSession(${idx})">Hapus</button>
                 </div>
-                <button class="btn btn-sm" onclick="openEntityEditor('instructor', '${ins.id}')">Edit & Foto</button>
-              </div>
-            `).join('')}
+              </div>`).join('')}
           </div>
 
           <div class="card">
             <div class="card-header">
-              <h3>Penilai Khusus Akad Amanah</h3>
-              <button class="btn btn-primary btn-sm" onclick="addAkadAssessor()">+ Tambah Penilai</button>
+              <h3>Struktur Bagian & Item Skrining</h3>
+              <button class="btn btn-sm btn-primary" onclick="addSkriningItem()">+ Tambah Indikator</button>
             </div>
-            ${appState.akadAssessors.map(ak => `
-              <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <img class="avatar" src="${avatarSrc(ak)}" />
-                  <div>
-                    <div style="font-weight:700; font-size:13px;">${ak.name}</div>
-                    <div style="font-size:11.5px; color:var(--text-muted);">Pass: <span class="mono">${ak.password}</span></div>
-                  </div>
-                </div>
-                <button class="btn btn-sm" onclick="openEntityEditor('akad', '${ak.id}')">Edit & Foto</button>
-              </div>
-            `).join('')}
+            ${appState.skriningSections.map((sec, sIdx) => `
+              <div style="margin-bottom:10px;">
+                <strong>${sec.title}</strong>
+                ${sec.items.map((it, iIdx) => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:12.5px;">
+                    <span>${iIdx + 1}. ${it}</span>
+                    <div style="display:flex; gap:4px;">
+                      <button class="btn btn-sm" onclick="editSkriningItem(${sIdx}, ${iIdx})">Edit</button>
+                      <button class="btn btn-sm btn-danger" onclick="deleteSkriningItem(${sIdx}, ${iIdx})">Hapus</button>
+                    </div>
+                  </div>`).join('')}
+              </div>`).join('')}
           </div>
         </div>
 
-        <!-- MANAJEMEN 66 PESERTA (FOTO & PEMBAGIAN KELOMPOK) -->
+        <!-- 4. EDIT PERTANYAAN BIODATA PESERTA -->
         <div class="card">
           <div class="card-header">
-            <div>
-              <h3>Direktori 66 Peserta (Foto Profil & Pembagian Kelompok)</h3>
-              <p style="font-size:13px; color:var(--text-muted);">Unggah foto agar instruktur mengenali wajah peserta saat menilai.</p>
-            </div>
+            <h3>Pengaturan Pertanyaan Biodata Peserta (${appState.biodataFields.length} Pertanyaan)</h3>
+            <button class="btn btn-sm btn-primary" onclick="addBiodataField()">+ Tambah Pertanyaan Biodata</button>
           </div>
+          ${appState.biodataFields.map((f, idx) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px;">
+              <span><strong>${idx + 1}.</strong> ${f.label} <span class="badge badge-info">${f.type}</span></span>
+              <div style="display:flex; gap:4px;">
+                <button class="btn btn-sm" onclick="editBiodataField(${idx})">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteBiodataField(${idx})">Hapus</button>
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <!-- 5. KELOLA INSTRUKTUR & PENILAI KHUSUS -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3>Instruktur (${appState.instructors.length})</h3><button class="btn btn-sm btn-primary" onclick="addInstructor()">+ Tambah</button></div>
+            ${appState.instructors.map(ins => `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(ins)}" /><div><div style="font-weight:700; font-size:13px;">${ins.name}</div><div style="font-size:11.5px; color:var(--text-muted);">Kel. ${ins.group} • Pass: ${ins.password}</div></div></div>
+                <div style="display:flex; gap:4px;"><button class="btn btn-sm" onclick="openEntityEditor('instructor', '${ins.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteInstructor('${ins.id}')">Hapus</button></div>
+              </div>`).join('')}
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>Penilai Khusus Akad Amanah (${appState.akadAssessors.length})</h3><button class="btn btn-sm btn-primary" onclick="addAkadAssessor()">+ Tambah</button></div>
+            ${appState.akadAssessors.map(ak => `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(ak)}" /><div><div style="font-weight:700; font-size:13px;">${ak.name}</div><div style="font-size:11.5px; color:var(--text-muted);">Pass: ${ak.password}</div></div></div>
+                <div style="display:flex; gap:4px;"><button class="btn btn-sm" onclick="openEntityEditor('akad', '${ak.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteAkadAssessor('${ak.id}')">Hapus</button></div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <!-- 6. DAFTAR PESERTA (HAPUS / EDIT / KELOMPOK) -->
+        <div class="card">
+          <div class="card-header"><h3>Daftar Peserta (${appState.participants.length} Orang)</h3></div>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Foto & Nama Peserta</th>
-                  <th>Jabatan</th>
-                  <th>Kelompok</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
+              <thead><tr><th>ID</th><th>Foto & Nama</th><th>Jabatan</th><th>Kelompok</th><th>Aksi</th></tr></thead>
               <tbody>
                 ${appState.participants.map(p => `
                   <tr>
                     <td class="mono">${p.id}</td>
-                    <td>
-                      <div style="display:flex; align-items:center; gap:10px;">
-                        <img class="avatar" src="${avatarSrc(p)}" />
-                        <span style="font-weight:700;">${p.name}</span>
-                      </div>
-                    </td>
+                    <td><div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(p)}" /><strong>${p.name}</strong></div></td>
                     <td>${p.jabatan}</td>
-                    <td>
-                      <select style="width:130px;" onchange="changeParticipantGroup('${p.id}', Number(this.value))">
-                        ${[1,2,3,4,5,6].map(g => `<option value="${g}" ${p.group === g ? 'selected' : ''}>Kelompok ${g}</option>`).join('')}
-                      </select>
-                    </td>
-                    <td>
-                      <button class="btn btn-sm" onclick="openEntityEditor('participant', '${p.id}')">Edit / Foto</button>
-                    </td>
-                  </tr>
-                `).join('')}
+                    <td><select style="width:125px;" onchange="changeParticipantGroup('${p.id}', Number(this.value))">
+                      ${[1,2,3,4,5,6].map(g => `<option value="${g}" ${p.group === g ? 'selected' : ''}>Kel. ${g}</option>`).join('')}
+                    </select></td>
+                    <td><div style="display:flex; gap:4px;">
+                      <button class="btn btn-sm" onclick="openEntityEditor('participant', '${p.id}')">Edit/Foto</button>
+                      <button class="btn btn-sm btn-danger" onclick="deleteParticipant('${p.id}')">Hapus</button>
+                    </div></td>
+                  </tr>`).join('')}
               </tbody>
             </table>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    function toggleTestAccess(key) {
-      appState.testConfig[key] = !appState.testConfig[key];
-      saveState('Admin', `Ubah status ${key}: ${appState.testConfig[key]}`);
+    function toggleTest(k) { appState.testConfig[k] = !appState.testConfig[k]; saveState('Admin', `Toggle ${k}`); renderStaffContent(); }
+    function saveDashboardRules() {
+      appState.dashboardRules.minTarget = Number(document.getElementById('ruleMin').value || 0);
+      appState.dashboardRules.maxTarget = Number(document.getElementById('ruleMax').value || 100);
+      saveState('Admin', 'Update ketentuan Dashboard');
+      alert('Ketentuan Dashboard tersimpan!');
+    }
+    function wipeAllData() {
+      if (!confirm('Yakin hapus SEMUA nilai, presensi, biodata, dan reset ke kondisi awal?')) return;
+      if (!confirm('Konfirmasi kedua: seluruh data penilaian akan dikosongkan. Lanjutkan?')) return;
+      const fresh = createInitialState();
+      fresh.webAppUrl = appState.webAppUrl;
+      appState = fresh;
+      saveState('Admin', 'Reset total semua data');
       renderStaffContent();
     }
 
-    function addSampleQuizQuestion() {
-      const text = prompt('Masukkan teks pertanyaan pilihan ganda:');
-      if (!text) return;
-      const a = prompt('Pilihan A:') || 'Pilihan A';
-      const b = prompt('Pilihan B:') || 'Pilihan B';
-      const c = prompt('Pilihan C:') || 'Pilihan C';
-      const d = prompt('Pilihan D:') || 'Pilihan D';
-      const ans = Number(prompt('Nomor jawaban benar (0 untuk A, 1 untuk B, 2 untuk C, 3 untuk D):') || 0);
-      appState.testConfig.questions.push({
-        id: 'q_' + Date.now(),
-        text,
-        options: [a, b, c, d],
-        answer: ans
-      });
-      saveState('Admin', 'Menambah soal pilihan ganda');
-      alert('Soal berhasil ditambahkan!');
+    function createQuestionBatch(type) {
+      const mode = prompt('Pilih jenis soal: ketik "mc" (Pilihan Ganda), "short" (Isian Singkat/Esai), atau "mix" (Campuran PG + Isian Singkat):', 'mc');
+      if (!mode) return;
+      const targetArr = type === 'pre' ? appState.testConfig.preQuestions : appState.testConfig.postQuestions;
+
+      if (mode === 'mix') {
+        const mcCount = Number(prompt('Jumlah soal Pilihan Ganda:', 10) || 10);
+        const optCount = Number(prompt('Jumlah opsi jawaban per PG (misal 4 atau 5):', 5) || 5);
+        const shortCount = Number(prompt('Jumlah soal Isian Singkat / Esai:', 10) || 10);
+        for (let i = 1; i <= mcCount; i++) {
+          targetArr.push({ id: `${type}_mc_${Date.now()}_${i}`, type: 'mc', text: `Soal Pilihan Ganda #${i}`, options: Array.from({ length: optCount }, (_, k) => `Opsi ${String.fromCharCode(65 + k)}`), answer: 0 });
+        }
+        for (let j = 1; j <= shortCount; j++) {
+          targetArr.push({ id: `${type}_sh_${Date.now()}_${j}`, type: 'short', text: `Pertanyaan Isian Singkat / Esai #${j}` });
+        }
+      } else if (mode === 'short') {
+        const count = Number(prompt('Berapa jumlah soal isian singkat / esai?', 10) || 10);
+        for (let i = 1; i <= count; i++) {
+          targetArr.push({ id: `${type}_sh_${Date.now()}_${i}`, type: 'short', text: `Pertanyaan Isian Singkat / Esai #${i}` });
+        }
+      } else {
+        const count = Number(prompt('Berapa jumlah soal pilihan ganda?', 10) || 10);
+        const optCount = Number(prompt('Berapa opsi jawaban per soal? (misal 5):', 5) || 5);
+        for (let i = 1; i <= count; i++) {
+          targetArr.push({ id: `${type}_mc_${Date.now()}_${i}`, type: 'mc', text: `Pertanyaan Pilihan Ganda #${i}`, options: Array.from({ length: optCount }, (_, k) => `Pilihan ${String.fromCharCode(65 + k)}`), answer: 0 });
+        }
+      }
+      saveState('Admin', `Generate soal ${type}`);
+      renderStaffContent();
     }
 
-    function saveAdminSystemSettings() {
-      appState.webAppUrl = document.getElementById('adminWebAppInput').value.trim();
-      appState.scanPassword = document.getElementById('adminScanPassInput').value.trim();
-      saveState('Admin', 'Memperbarui URL Sheets & password scan');
-      alert('Pengaturan sistem tersimpan!');
+    function editQuestion(type, idx) {
+      const list = getActiveQuestions(type);
+      const q = list[idx];
+      const newText = prompt('Edit teks pertanyaan:', q.text);
+      if (!newText) return;
+      q.text = newText;
+      if (q.type === 'mc') {
+        q.options = q.options.map((o, i) => prompt(`Edit opsi ${String.fromCharCode(65 + i)}:`, o) ?? o);
+        q.answer = Number(prompt(`Indeks jawaban benar (0 s.d. ${q.options.length - 1}):`, q.answer) ?? q.answer);
+      }
+      saveState('Admin', `Edit soal ${type} #${idx + 1}`);
+      renderStaffContent();
+    }
+
+    function deleteQuestion(type, idx) {
+      getActiveQuestions(type).splice(idx, 1);
+      saveState('Admin', `Hapus soal ${type}`);
+      renderStaffContent();
+    }
+
+    function addIndexSession() {
+      const title = prompt('Nama sesi Index baru:');
+      if (!title) return;
+      appState.indexSessions.push({ id: 'idx_' + Date.now(), title });
+      saveState('Admin', 'Tambah sesi Index');
+      renderStaffContent();
+    }
+    function renameIndexSession(idx) {
+      const title = prompt('Ubah nama sesi:', appState.indexSessions[idx].title);
+      if (!title) return;
+      appState.indexSessions[idx].title = title;
+      saveState('Admin', 'Edit sesi Index');
+      renderStaffContent();
+    }
+    function deleteIndexSession(idx) {
+      appState.indexSessions.splice(idx, 1);
+      saveState('Admin', 'Hapus sesi Index');
+      renderStaffContent();
+    }
+
+    function addSkriningItem() {
+      const secId = prompt('Pilih bagian skrining: ketik "wudlu", "shalat", atau "quran":', 'wudlu');
+      const sec = appState.skriningSections.find(s => s.id === secId) || appState.skriningSections[0];
+      const text = prompt(`Tambah indikator baru pada ${sec.title}:`);
+      if (!text) return;
+      sec.items.push(text);
+      saveState('Admin', 'Tambah item skrining');
+      renderStaffContent();
+    }
+    function editSkriningItem(sIdx, iIdx) {
+      const val = prompt('Edit indikator skrining:', appState.skriningSections[sIdx].items[iIdx]);
+      if (!val) return;
+      appState.skriningSections[sIdx].items[iIdx] = val;
+      saveState('Admin', 'Edit item skrining');
+      renderStaffContent();
+    }
+    function deleteSkriningItem(sIdx, iIdx) {
+      appState.skriningSections[sIdx].items.splice(iIdx, 1);
+      saveState('Admin', 'Hapus item skrining');
+      renderStaffContent();
+    }
+
+    function addBiodataField() {
+      const label = prompt('Teks pertanyaan biodata baru:');
+      if (!label) return;
+      const type = prompt('Tipe input: ketik "text", "textarea", "select", "custom_select", atau "checkbox":', 'text') || 'text';
+      const optsRaw = (type === 'select' || type === 'custom_select' || type === 'checkbox')
+        ? (prompt('Pisahkan pilihan dengan koma (,):', 'Opsi 1, Opsi 2, Opsi 3') || '') : '';
+      const options = optsRaw ? optsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+      appState.biodataFields.push({ id: 'f_' + Date.now(), label, type, options });
+      saveState('Admin', 'Tambah pertanyaan biodata');
+      renderStaffContent();
+    }
+    function editBiodataField(idx) {
+      const f = appState.biodataFields[idx];
+      const label = prompt('Edit label pertanyaan:', f.label);
+      if (!label) return;
+      f.label = label;
+      if (f.options?.length) {
+        const raw = prompt('Edit pilihan (pisahkan dengan koma):', f.options.join(', '));
+        if (raw !== null) f.options = raw.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      saveState('Admin', 'Edit pertanyaan biodata');
+      renderStaffContent();
+    }
+    function deleteBiodataField(idx) {
+      appState.biodataFields.splice(idx, 1);
+      saveState('Admin', 'Hapus pertanyaan biodata');
+      renderStaffContent();
+    }
+
+    function addInstructor() {
+      const name = prompt('Nama Instruktur baru:');
+      if (!name) return;
+      const group = Number(prompt('Nomor Kelompok (1-6):', 1) || 1);
+      const password = prompt('Password:', 'ins123') || 'ins123';
+      appState.instructors.push({ id: 'ins-' + Date.now(), group, name, password, avatar: '' });
+      saveState('Admin', `Tambah instruktur ${name}`);
+      renderStaffContent();
+    }
+    function deleteInstructor(id) {
+      appState.instructors = appState.instructors.filter(x => x.id !== id);
+      saveState('Admin', 'Hapus instruktur');
+      renderStaffContent();
     }
 
     function addAkadAssessor() {
-      const name = prompt('Masukkan nama Penilai Khusus Akad Amanah (Pimpinan / Tamu Undangan):');
+      const name = prompt('Nama Penilai Khusus Akad Amanah:');
       if (!name) return;
-      const password = prompt('Buat password untuk penilai ini:', 'akad123') || 'akad123';
-      appState.akadAssessors.push({
-        id: 'akad-' + Date.now(),
-        name,
-        password,
-        avatar: '',
-        assignedIds: []
-      });
-      saveState('Admin', `Menambah penilai Akad Amanah: ${name}`);
+      const password = prompt('Password:', 'akad123') || 'akad123';
+      appState.akadAssessors.push({ id: 'akad-' + Date.now(), name, password, avatar: '', assignedIds: [] });
+      saveState('Admin', `Tambah penilai akad ${name}`);
+      renderStaffContent();
+    }
+    function deleteAkadAssessor(id) {
+      appState.akadAssessors = appState.akadAssessors.filter(x => x.id !== id);
+      saveState('Admin', 'Hapus penilai akad');
       renderStaffContent();
     }
 
-    function changeParticipantGroup(pid, newGroup) {
+    function changeParticipantGroup(pid, grp) {
       const p = appState.participants.find(x => x.id === pid);
-      if (p) {
-        p.group = newGroup;
-        saveState('Admin', `Memindahkan ${p.name} ke Kelompok ${newGroup}`);
-      }
+      if (p) { p.group = grp; saveState('Admin', `Pindah ${p.name} ke Kel. ${grp}`); }
+    }
+    function deleteParticipant(pid) {
+      const p = appState.participants.find(x => x.id === pid);
+      if (!p || !confirm(`Hapus peserta ${p.name}?`)) return;
+      appState.participants = appState.participants.filter(x => x.id !== pid);
+      saveState('Admin', `Hapus peserta ${p.name}`);
+      renderStaffContent();
     }
 
     // =========================================================================
-    // MODAL EDIT PROFIL & KOMPRESI FOTO OTOMATIS
+    // MODAL EDIT PROFIL
     // =========================================================================
-    function openEditProfileModal() {
-      if (!currentUser) return;
-      openEntityEditor(currentUser.role, currentUser.user.id);
-    }
-
+    function openEditProfileModal() { if (currentUser) openEntityEditor(currentUser.role, currentUser.user.id); }
     function openEntityEditor(type, id) {
       document.getElementById('editTargetType').value = type;
       document.getElementById('editTargetId').value = id;
-
-      let entity = null;
       const extraWrap = document.getElementById('editExtraFieldWrap');
       const passWrap = document.getElementById('editPasswordWrap');
-      extraWrap.innerHTML = '';
-      passWrap.classList.remove('hidden');
+      extraWrap.innerHTML = ''; passWrap.classList.remove('hidden');
 
+      let entity = null;
       if (type === 'admin') entity = appState.admin;
       else if (type === 'instructor') entity = appState.instructors.find(x => x.id === id);
       else if (type === 'akad') entity = appState.akadAssessors.find(x => x.id === id);
       else if (type === 'participant') {
         entity = appState.participants.find(x => x.id === id);
         passWrap.classList.add('hidden');
-        extraWrap.innerHTML = `
-          <label>Jabatan / Amanah</label>
-          <input type="text" id="editJabatanInput" value="${entity.jabatan}" />
-        `;
+        extraWrap.innerHTML = `<label class="field-label">Jabatan</label><input type="text" id="editJabatanInput" value="${entity.jabatan}" />`;
       }
 
       document.getElementById('editNameInput').value = entity.name;
       document.getElementById('editPasswordInput').value = '';
       document.getElementById('editPreviewAvatar').src = avatarSrc(entity);
-      window._tempUploadedAvatar = entity.avatar || '';
+      _tempUploadedAvatar = entity.avatar || '';
       document.getElementById('profileModal').classList.add('open');
     }
 
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-    function handleAvatarUpload(event, imgPreviewId) {
-      const file = event.target.files[0];
+    function handleAvatarUpload(e, previewId) {
+      const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = ev => {
         const img = new Image();
-        img.onload = function() {
+        img.onload = () => {
           const canvas = document.createElement('canvas');
-          const size = 180;
-          canvas.width = size;
-          canvas.height = size;
+          canvas.width = 180; canvas.height = 180;
           const ctx = canvas.getContext('2d');
-          const minSide = Math.min(img.width, img.height);
-          const sx = (img.width - minSide) / 2;
-          const sy = (img.height - minSide) / 2;
-          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
-          window._tempUploadedAvatar = dataUrl;
-          document.getElementById(imgPreviewId).src = dataUrl;
+          const side = Math.min(img.width, img.height);
+          ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 180, 180);
+          const url = canvas.toDataURL('image/jpeg', 0.78);
+          _tempUploadedAvatar = url;
+          document.getElementById(previewId).src = url;
         };
-        img.src = e.target.result;
+        img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -2100,17 +2068,17 @@
       else if (type === 'akad') entity = appState.akadAssessors.find(x => x.id === id);
       else if (type === 'participant') {
         entity = appState.participants.find(x => x.id === id);
-        const jabInp = document.getElementById('editJabatanInput');
-        if (jabInp) entity.jabatan = jabInp.value.trim();
+        const jab = document.getElementById('editJabatanInput');
+        if (jab) entity.jabatan = jab.value.trim();
       }
 
       if (entity && newName) {
         entity.name = newName;
         if (newPass && type !== 'participant') entity.password = newPass;
-        if (window._tempUploadedAvatar !== undefined) entity.avatar = window._tempUploadedAvatar;
+        entity.avatar = _tempUploadedAvatar;
       }
 
-      saveState(currentUser ? currentUser.user.name : 'Sistem', `Memperbarui profil ${newName}`);
+      saveState(currentUser ? currentUser.user.name : 'Sistem', `Edit profil ${newName}`);
       closeModal('profileModal');
       updateTopUserBar();
       refreshAllUI();
@@ -2122,9 +2090,6 @@
       if (currentUser) renderStaffContent();
     }
 
-    // =========================================================================
-    // INISIALISASI SAAT HALAMAN DIBUKA
-    // =========================================================================
     window.addEventListener('DOMContentLoaded', () => {
       refreshAllUI();
       pullFromCloud(false);
