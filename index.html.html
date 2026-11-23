@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baitul Arqam PPDA — Sistem Manajemen & Evaluasi Perkaderan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #F6F7F9;
+      --surface: rgba(255, 255, 255, 0.86);
+      --surface-solid: #FFFFFF;
+      --surface-subtle: #EEF1F5;
+      --border: #E2E6EC;
+      --border-strong: #CBD2DC;
+      --text: #0F172A;
+      --text-muted: #526071;
+      --primary: #0F5132;
+      --primary-hover: #0B3E26;
+      --primary-soft: rgba(15, 81, 50, 0.1);
+      --accent: #B45309;
+      --accent-soft: rgba(180, 83, 9, 0.12);
+      --danger: #B91C1C;
+      --danger-soft: rgba(185, 28, 28, 0.1);
+      --info: #1D4ED8;
+      --info-soft: rgba(29, 78, 216, 0.1);
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0B0E14;
+      --surface: rgba(21, 26, 35, 0.84);
+      --surface-solid: #151A23;
+      --surface-subtle: #1D2432;
+      --border: #283142;
+      --border-strong: #374359;
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --primary: #22C55E;
+      --primary-hover: #16A34A;
+      --primary-soft: rgba(34, 197, 94, 0.14);
+      --accent: #F59E0B;
+      --accent-soft: rgba(245, 158, 11, 0.14);
+      --danger: #F87171;
+      --danger-soft: rgba(248, 113, 113, 0.14);
+      --info: #60A5FA;
+      --info-soft: rgba(96, 165, 250, 0.14);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 14px 34px -10px rgba(0, 0, 0, 0.55);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    h1, h2, h3, h4, .brand-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Top Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.03em;
+    }
+
+    [data-theme="dark"] .brand-mark { color: #052E16; }
+
+    .brand-meta span {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons & Inputs */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 15px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface-solid);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover { border-color: var(--border-strong); background: var(--surface-subtle); }
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #FFFFFF;
+    }
+    [data-theme="dark"] .btn-primary { color: #052E16; }
+    .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+    .btn-danger {
+      background: var(--danger-soft);
+      border-color: transparent;
+      color: var(--danger);
+    }
+    .btn-sm { padding: 6px 11px; font-size: 12px; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface-solid);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.18s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Layout & Cards */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+
+    /* Avatars */
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+      border: 1.5px solid var(--border);
+    }
+    .avatar-lg { width: 64px; height: 64px; font-size: 20px; }
+
+    /* Pills & Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+    .badge-success { background: var(--primary-soft); color: var(--primary); }
+    .badge-warn { background: var(--accent-soft); color: var(--accent); }
+    .badge-danger { background: var(--danger-soft); color: var(--danger); }
+    .badge-info { background: var(--info-soft); color: var(--info); }
+
+    /* Portal Switcher Tabs */
+    .portal-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--surface-subtle);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .portal-tab {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .portal-tab.active {
+      background: var(--surface-solid);
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 11px 13px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--surface-subtle);
+      font-weight: 700;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(125, 125, 125, 0.03); }
+
+    /* Score Radio Pills */
+    .score-group {
+      display: inline-flex;
+      gap: 4px;
+    }
+
+    .score-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface-solid);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .score-btn.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    [data-theme="dark"] .score-btn.selected { color: #052E16; }
+
+    /* Sync Indicator */
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22C55E;
+      display: inline-block;
+    }
+    .sync-dot.syncing { background: #F59E0B; animation: pulse 1s infinite; }
+    .sync-dot.error { background: #EF4444; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      max-width: 520px;
+      width: 100%;
+      padding: 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Print ID Cards */
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; color: #000; }
+      .print-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .id-card-item {
+        border: 1px solid #333;
+        padding: 10px;
+        border-radius: 8px;
+        page-break-inside: avoid;
+        text-align: center;
+      }
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="topbar no-print">
+    <div class="brand">
+      <div class="brand-mark">BA</div>
+      <div class="brand-meta">
+        <div class="brand-title" style="font-size: 16px; font-weight: 800;">Baitul Arqam PPDA</div>
+        <span>Sistem Perkaderan & Evaluasi Terpadu</span>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <div id="syncBadge" class="badge badge-info" title="Status Koneksi Google Sheets">
+        <span id="syncDot" class="sync-dot"></span>
+        <span id="syncText">Terhubung ke Sheets</span>
+      </div>
+
+      <button class="btn btn-sm" onclick="pullFromCloud(true)" title="Muat ulang data terbaru dari Google Sheets">
+        ↻ Segarkan Data
+      </button>
+
+      <button class="btn btn-sm" onclick="toggleTheme()" id="themeBtn">
+        🌙 Mode Gelap
+      </button>
+
+      <div id="loggedUserBar" class="hidden" style="display:flex; align-items:center; gap:8px;">
+        <img id="topUserAvatar" class="avatar" src="" alt="" />
+        <span id="topUserName" style="font-size:13px; font-weight:600;"></span>
+        <button class="btn btn-sm" onclick="openEditProfileModal()">Edit Akun</button>
+        <button class="btn btn-sm btn-danger" onclick="logoutStaff()">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- GATEWAY / PORTAL SELECTOR (WHEN NOT LOGGED IN AS STAFF) -->
+    <section id="gatewaySection">
+      <div class="portal-tabs no-print">
+        <button class="portal-tab active" onclick="switchGatewayTab('peserta', this)">1. Portal Peserta (Pre & Post Test)</button>
+        <button class="portal-tab" onclick="switchGatewayTab('scan', this)">2. Panitia Scan Barcode Presensi</button>
+        <button class="portal-tab" onclick="switchGatewayTab('staff', this)">3. Login Admin / Instruktur / Penilai Akad</button>
+      </div>
+
+      <!-- TAB 1: PORTAL PESERTA -->
+      <div id="gw-peserta" class="card">
+        <div class="card-header">
+          <div>
+            <h2>Portal Ujian Peserta Baitul Arqam</h2>
+            <p style="color:var(--text-muted); font-size:13.5px;">Pilih kelompok dan nama Anda. Soal Pre-Test & Post-Test muncul otomatis saat dibuka oleh Admin.</p>
+          </div>
+        </div>
+
+        <div id="pesertaSelectorBox" class="grid-2">
+          <div>
+            <label>Pilih Kelompok</label>
+            <select id="pesertaGroupSelect" onchange="populatePesertaByGroup()">
+              <option value="">-- Pilih Kelompok Anda --</option>
+            </select>
+          </div>
+          <div>
+            <label>Pilih Nama Peserta</label>
+            <select id="pesertaNameSelect" onchange="selectPesertaPortal()">
+              <option value="">-- Pilih Nama Anda --</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="pesertaWorkspace" class="hidden" style="margin-top:22px; padding-top:20px; border-top:1px solid var(--border);">
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-wrap:wrap;">
+            <img id="pPortalAvatar" class="avatar avatar-lg" src="" alt="" />
+            <div>
+              <h3 id="pPortalName"></h3>
+              <p id="pPortalMeta" style="color:var(--text-muted); font-size:13px;"></p>
+            </div>
+          </div>
+
+          <div id="testButtonsArea" class="grid-2"></div>
+          <div id="quizRunnerArea" class="hidden" style="margin-top:20px;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: PORTAL PANITIA SCAN BARCODE -->
+      <div id="gw-scan" class="card hidden">
+        <div class="card-header">
+          <div>
+            <h2>Scan Barcode Presensi Materi & Ibadah</h2>
+            <p style="color:var(--text-muted); font-size:13.5px;">Khusus panitia presensi. Masukkan password panitia untuk membuka kamera pemindai ID Card.</p>
+          </div>
+        </div>
+
+        <div id="scanLockBox" style="max-width:420px;">
+          <label>Password Panitia Scan</label>
+          <div style="display:flex; gap:8px;">
+            <input type="password" id="scanPasswordInput" placeholder="Masukkan password panitia..." />
+            <button class="btn btn-primary" onclick="unlockScanPortal()">Buka Scanner</button>
+          </div>
+        </div>
+
+        <div id="scanUnlockedArea" class="hidden">
+          <div class="grid-3" style="margin-bottom:16px;">
+            <div>
+              <label>Pilih Hari Kegiatan</label>
+              <select id="scanDaySelect" onchange="updateScanSessionOptions()">
+                <option value="1">Hari Ke-1</option>
+                <option value="2">Hari Ke-2</option>
+                <option value="3">Hari Ke-3</option>
+              </select>
+            </div>
+            <div>
+              <label>Pilih Sesi Materi / Ibadah</label>
+              <select id="scanSessionSelect"></select>
+            </div>
+            <div>
+              <label>Status Kehadiran Saat Scan</label>
+              <select id="scanStatusSelect">
+                <option value="5">Hadir Tepat Waktu (+5 Poin)</option>
+                <option value="2">Terlambat (+2 Poin - Khusus Materi)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <div id="qrReader" style="width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--border);"></div>
+              <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" onclick="startCameraScanner()">📷 Aktifkan Kamera HP</button>
+                <button class="btn btn-sm" onclick="stopCameraScanner()">⏹ Matikan Kamera</button>
+                <button class="btn btn-sm" onclick="openPrintIdCards()">🪪 Cetak ID Card Barcode (66 Peserta)</button>
+              </div>
+            </div>
+
+            <div>
+              <label>Input Manual / Barcode Reader USB (Ketik ID: BA-01 s.d. BA-66)</label>
+              <div style="display:flex; gap:8px; margin-bottom:14px;">
+                <input type="text" id="manualBarcodeInput" placeholder="Contoh: BA-01" onkeyup="if(event.key==='Enter') processBarcodeScan(this.value)" />
+                <button class="btn btn-primary" onclick="processBarcodeScan(document.getElementById('manualBarcodeInput').value)">Catat</button>
+              </div>
+              <div id="scanFeedbackBox" class="card" style="background:var(--surface-subtle); box-shadow:none;">
+                <p style="font-size:13px; color:var(--text-muted);">Belum ada pemindaian pada sesi ini.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: LOGIN STAF (ADMIN / INSTRUKTUR / PENILAI AKAD) -->
+      <div id="gw-staff" class="card hidden">
+        <div class="card-header">
+          <div>
+            <h2>Login Panel Penilaian & Manajemen</h2>
+            <p style="color:var(--text-muted); font-size:13.5px;">Pilih nama akun Anda (Admin, 6 Instruktur Kelompok, atau Penilai Khusus Akad Amanah) lalu masukkan password.</p>
+          </div>
+        </div>
+
+        <div style="max-width:460px;">
+          <div style="margin-bottom:14px;">
+            <label>Pilih Nama Akun</label>
+            <select id="staffAccountSelect"></select>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label>Password</label>
+            <input type="password" id="staffPasswordInput" placeholder="Masukkan password akun..." onkeyup="if(event.key==='Enter') loginStaff()" />
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="loginStaff()">Masuk ke Ruang Kerja</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAFF WORKSPACE (VISIBLE AFTER STAFF LOGIN) -->
+    <section id="staffWorkspace" class="hidden">
+      <div id="staffNavTabs" class="portal-tabs no-print"></div>
+      <div id="staffContentArea"></div>
+    </section>
+
+    <!-- PRINT AREA FOR ID CARDS -->
+    <section id="printIdCardSection" class="hidden">
+      <div class="no-print" style="margin-bottom:16px; display:flex; gap:10px;">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak Sekarang</button>
+        <button class="btn" onclick="closePrintIdCards()">← Kembali</button>
+      </div>
+      <div id="printGridContainer" class="print-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- MODAL EDIT PROFIL / AKUN -->
+  <div id="profileModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="card-header">
+        <h3 id="profileModalTitle">Edit Akun & Foto Profil</h3>
+        <button class="btn btn-sm" onclick="closeModal('profileModal')">✕</button>
+      </div>
+      <input type="hidden" id="editTargetType" />
+      <input type="hidden" id="editTargetId" />
+
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+        <img id="editPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
+        <div style="flex:1;">
+          <label>Unggah Foto Baru (Otomatis Kompres)</label>
+          <input type="file" accept="image/*" onchange="handleAvatarUpload(event, 'editPreviewAvatar')" />
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label>Nama Lengkap</label>
+        <input type="text" id="editNameInput" />
+      </div>
+
+      <div id="editExtraFieldWrap" style="margin-bottom:12px;"></div>
+
+      <div id="editPasswordWrap" style="margin-bottom:16px;">
+        <label>Password Baru (Kosongkan jika tidak diubah)</label>
+        <input type="text" id="editPasswordInput" placeholder="Password baru..." />
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn" onclick="closeModal('profileModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveProfileEdit()">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // KONFIGURASI GOOGLE APPS SCRIPT (TERTANAM OTOMATIS)
+    // =========================================================================
+    const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-PhKppMosc19DPB7h_d8YL5IKCPegqQaLZKGIKeg9dR5h9b_jboMIakEeo2fd-gGY/exec';
+    const STORAGE_KEY = 'baitul_arqam_ppda_v2026';
+
+    // =========================================================================
+    // DATA MASTER PESERTA (66 ORANG) & INSTRUKTUR (6 ORANG)
+    // =========================================================================
+    const RAW_PARTICIPANTS = [
+      ["Abid Daffa Khairullah, S.Pd.", "Musyrif 1A Putra"],
+      ["Aceng Tasmanuddin, S.Pd", "TS kls 7 PA"],
+      ["Agi Muslih", "Panahan"],
+      ["Agniya Tazkiya, S.Pd", "Guru"],
+      ["Agus Setiawan", "Marching Band"],
+      ["Ai Mindarwati", "Read Guard"],
+      ["Angga Tiana Nugraha, M.Pd", "Musyrif 2A Putra"],
+      ["Ari Jaenal Bahri, S.Hum.", "Musyrif 4A Putra"],
+      ["Ase Purwanto, K.ka", "TS kls 7 PI"],
+      ["Asti Septiani", "Panahan"],
+      ["Bagus Hambali", "PMR"],
+      ["Bayu Baihaqi Pemana, S.Pd", "Musyrif 3A Putra"],
+      ["Dandi Purwandi, S.Sos", "Guru"],
+      ["Dani Ramdani, S.Pd", "Guru"],
+      ["Dede Ilyas, S. Pd", "Murofiq"],
+      ["Dewi Nurjanah Septiany, S.E", "Staf Keuangan"],
+      ["Dinda Nurul Fazriah, S.E", "Staf Kesekretariatan"],
+      ["Erias Hayi Sukma, S.Ag", "Guru"],
+      ["Fadil Mahbubilah, S.Sos.", "Musyrif 1B Putra"],
+      ["Fajar Abdussalam, S.Pd.", "Musyrif 1A Putra"],
+      ["Fatwa Andika Zayyin Al Zulfa I, S.H.", "Musyrif 1C Putra"],
+      ["Febriani Siti Barokah", "Murofiqoh"],
+      ["Giri Alghani Kartiwa, S.Pd", "Guru"],
+      ["Hibban Muttaqin, S.Pd", "Futsal"],
+      ["Ian Sudarisman", "Garda"],
+      ["Ikeu Munawaroh, S.Pd", "Paskibra"],
+      ["Iman Saefurrahman", "Marching Band"],
+      ["Luki Alawi, S. Pd", "Murofiq"],
+      ["M Fauzi Miftah, S. Pd", "Murofiq"],
+      ["M Wildan Aji Firmansyah S.Pd", "Murofiq"],
+      ["M. Farhan Ma'mun, S.T", "Padus"],
+      ["M. Syariful Ihsan, S.M, C.AHR", "Panahan"],
+      ["Maulida Tasa Tsania Tsuraya", "Murofiqoh"],
+      ["Mega Purnama", "TS kls 8-11 PI"],
+      ["Muhamad Ali, S.Ag", "Guru"],
+      ["Muhamad Bardan Salaman, S.H", "Musyrif 6A Putra"],
+      ["Muhammad Rifqi Rezatama, S.Pd", "Musyrif 2B Putra"],
+      ["Mulki Nurfathurrahman Hidayat, S.Sos", "Murofiq"],
+      ["Nabila Putri Irsalina, S.E", "Staf Kesekretariatan"],
+      ["Najma Zahra Firstaliya", "Murofiqoh"],
+      ["Neneng Mulkiyah Rahmawati, S.Pd", "Guru"],
+      ["Nurhayati", "Murofiqoh"],
+      ["Nurul Aisyah Jamilah", "Murofiqoh"],
+      ["Rabih Ramadhan, S.Pd", "Guru"],
+      ["Rahmi Rahmawati", "Murofiqoh"],
+      ["Rani Mulyani, S. Sos", "Murofiqoh"],
+      ["Rian Waroihan, S.Pd", "Guru"],
+      ["Rifqi Zaenal", "Garda"],
+      ["Risyan Ahmad Fauzi, Lc", "Guru"],
+      ["Rizki Kurniawan, M.Pd.", "Musyrif 4C Putra"],
+      ["Rofifah Qonitatin, S.Hum", "Staf Baitul Marhhamah"],
+      ["Sabrina Azzahra", "Murofiqoh"],
+      ["Salman Alfarizi", "Murofiq"],
+      ["Salsa Nurfitriyani, Lc", "Guru"],
+      ["Salsabila Rabiultsani, S.Ak", "Staf Keuangan"],
+      ["Shaddiq Amin Muttahid S.Ag", "Murofiq"],
+      ["Silmi Hanif Firyaal", "Panahan"],
+      ["Siti Rachma Azzahra", "Murofiqoh"],
+      ["Sitta Nurul Luthfiyah, S.Pd", "Guru"],
+      ["Sumi arianti", "Read Guard"],
+      ["Tohid Nurhidayat, S,Ag", "Musyrif 4B Putra"],
+      ["Ulfi Siti Hanifah, S.Pd", "Guru"],
+      ["Utruza Imba Bidara, M.Pd", "Guru"],
+      ["Wandi Abdul Rojak, S.Ag", "Guru"],
+      ["Yeti", "Read Guard"],
+      ["Yunita Sulistiani, S.Pd", "Musyrifah 3A Putri"]
+    ];
+
+    const DEFAULT_INSTRUCTORS = [
+      { id: 'ins-1', group: 1, name: 'Fiqri Fauzi Iqbal, A.Md.', password: 'ins123', avatar: '' },
+      { id: 'ins-2', group: 2, name: 'Safwannur, M.Pd.', password: 'ins123', avatar: '' },
+      { id: 'ins-3', group: 3, name: 'Rossi Siti Rahmawaty Mulyadi, S.Psi.', password: 'ins123', avatar: '' },
+      { id: 'ins-4', group: 4, name: 'Nur Shofaa Inarah, S.Psi.', password: 'ins123', avatar: '' },
+      { id: 'ins-5', group: 5, name: 'Yudi Ramdani, S.Pd.', password: 'ins123', avatar: '' },
+      { id: 'ins-6', group: 6, name: 'Dudi Gamal Firmansyah, S.Sos.', password: 'ins123', avatar: '' }
+    ];
+
+    const PRESENSI_SESSIONS = [
+      // Hari 1
+      { id: 'h1_m1', day: 1, type: 'materi', title: 'Registrasi Peserta & Pembukaan' },
+      { id: 'h1_m2', day: 1, type: 'materi', title: 'Orientasi dan Kontrak Belajar' },
+      { id: 'h1_m3', day: 1, type: 'materi', title: 'Materi ke-1' },
+      { id: 'h1_i1', day: 1, type: 'ibadah', title: 'Sholat Dzuhur' },
+      { id: 'h1_m4', day: 1, type: 'materi', title: 'Materi ke-2' },
+      { id: 'h1_i2', day: 1, type: 'ibadah', title: 'Shalat Ashar' },
+      { id: 'h1_m5', day: 1, type: 'materi', title: 'Pendalaman Materi ke-1 dan 2' },
+      { id: 'h1_i3', day: 1, type: 'ibadah', title: 'Shalat Maghrib' },
+      { id: 'h1_i4', day: 1, type: 'ibadah', title: "Shalat Isya'" },
+      { id: 'h1_m6', day: 1, type: 'materi', title: "Leveling Baca Al-Qur'an dan Praktik Sholat" },
+      // Hari 2
+      { id: 'h2_i1', day: 2, type: 'ibadah', title: 'Qiyamullail, Kultum, Shalat Shubuh, Fathul Qulub' },
+      { id: 'h2_m1', day: 2, type: 'materi', title: 'Materi ke-3 Outbound' },
+      { id: 'h2_m2', day: 2, type: 'materi', title: 'Materi ke-4' },
+      { id: 'h2_m3', day: 2, type: 'materi', title: 'Materi ke-5' },
+      { id: 'h2_i2', day: 2, type: 'ibadah', title: 'Sholat Dzuhur' },
+      { id: 'h2_m4', day: 2, type: 'materi', title: 'Pendalaman Materi ke-4 dan ke-5' },
+      { id: 'h2_i3', day: 2, type: 'ibadah', title: 'Shalat Ashar' },
+      { id: 'h2_m5', day: 2, type: 'materi', title: 'Materi ke-6' },
+      { id: 'h2_i4', day: 2, type: 'ibadah', title: 'Shalat Maghrib' },
+      { id: 'h2_i5', day: 2, type: 'ibadah', title: "Shalat Isya'" },
+      { id: 'h2_m6', day: 2, type: 'materi', title: 'Pendalaman Materi ke-6' },
+      // Hari 3
+      { id: 'h3_i1', day: 3, type: 'ibadah', title: 'Qiyamullail, Kultum, Shalat Shubuh, Fathul Qulub' },
+      { id: 'h3_m1', day: 3, type: 'materi', title: 'Materi ke-7 Outbound' },
+      { id: 'h3_m2', day: 3, type: 'materi', title: 'Materi ke-8' },
+      { id: 'h3_m3', day: 3, type: 'materi', title: 'Pendalaman Materi ke-8' }
+    ];
+
+    const INDEX_SESSIONS = [
+      { id: 'idx_1', day: 1, title: '1. Orientasi dan Kontrak Belajar' },
+      { id: 'idx_2', day: 1, title: '2. Materi ke-1' },
+      { id: 'idx_3', day: 1, title: '3. Materi ke-2' },
+      { id: 'idx_4', day: 1, title: '4. Pendalaman Materi ke-1 dan 2' },
+      { id: 'idx_5', day: 2, title: '5. Outbound (Materi ke-3)' },
+      { id: 'idx_6', day: 2, title: '6. Materi ke-4' },
+      { id: 'idx_7', day: 2, title: '7. Materi ke-5' },
+      { id: 'idx_8', day: 2, title: '8. Pendalaman Materi ke-4 dan 5' },
+      { id: 'idx_9', day: 2, title: '9. Materi ke-6' },
+      { id: 'idx_10', day: 2, title: '10. Pendalaman Materi ke-6' },
+      { id: 'idx_11', day: 3, title: '11. Outbound (Materi ke-7)' },
+      { id: 'idx_12', day: 3, title: '12. Materi ke-8' },
+      { id: 'idx_13', day: 3, title: '13. Pendalaman Materi ke-8' }
+    ];
+
+    const SKRINING_SECTIONS = [
+      {
+        id: 'wudlu',
+        title: 'Skrining Praktik Wudlu',
+        items: [
+          'Membaca bismillah sambil mencuci tangan',
+          'Melakukan kumur sambil menghirup air ke dalam hidung dan mengeluarkan kembali (istinsyaq wa al madmadha)',
+          'Sempurna mencuci wajah',
+          'Sempurna mencuci tangan sampai siku',
+          'Sempurna membasuh kepala dan diteruskan membasuh telinga',
+          'Sempurna mencuci kaki sampai mata kaki',
+          'Berdoa setelah berwudhu'
+        ]
+      },
+      {
+        id: 'shalat',
+        title: 'Skrining Praktik Shalat',
+        items: [
+          'Takbir dengan mengangkat tangan sejajar dengan bahu atau telinga',
+          'Meletakkan tangan di atas dada',
+          'Membaca doa iftitah',
+          'Sempurna membaca Al-Fatihah dan surat pendek',
+          'Ruku dengan sempurna (punggung dan kepala sejajar, tangan mengepal lutut) dan membaca doa ruku',
+          "I'tidal sambil mengangkat tangan sejajar bahu/telinga dan membaca doa sampai tegak berdiri",
+          'Sujud dengan sempurna (paha tegak, tangan sejajar bahu/telinga membentuk 45°) dan membaca doa sujud',
+          'Sempurna duduk di antara dua sujud (badan tegak, kaki kanan tegak, duduk pada kaki kiri)',
+          'Berdiri dengan takbir tanpa mengangkat tangan (rakaat ke-2), dan mengangkat tangan (rakaat ke-3)',
+          'Sempurna duduk Tahiyyat awal (tumpuan kaki kiri, kaki kanan tegak, telunjuk menunjuk sejak awal)',
+          'Sempurna duduk Tahiyyat akhir (duduk pada lantai, kaki kanan tegak, telunjuk menunjuk sejak awal)',
+          'Membaca doa sebelum salam'
+        ]
+      },
+      {
+        id: 'quran',
+        title: "Skrining Bacaan Al-Qur'an",
+        items: [
+          "Ta'awudh sebelum tadarus",
+          'Makhraj',
+          'Bacaan (Tajwid)',
+          'Tartil'
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // STATE APLIKASI
+    // =========================================================================
+    function createInitialState() {
+      const participants = RAW_PARTICIPANTS.map((item, idx) => {
+        const num = idx + 1;
+        const code = 'BA-' + String(num).padStart(2, '0');
+        const group = (idx % 6) + 1;
+        return {
+          id: code,
+          no: num,
+          name: item[0],
+          jabatan: item[1],
+          group: group,
+          avatar: ''
+        };
+      });
+
+      return {
+        webAppUrl: DEFAULT_WEB_APP_URL,
+        theme: 'light',
+        scanPassword: 'panitia2026',
+        admin: {
+          id: 'admin-1',
+          name: 'Riki Ahmad Roqin Muntaha, S.Pd.',
+          password: 'admin123',
+          avatar: ''
+        },
+        instructors: DEFAULT_INSTRUCTORS,
+        akadAssessors: [
+          { id: 'akad-1', name: 'Pimpinan Pondok / Penguji 1', password: 'akad123', avatar: '', assignedIds: [] }
+        ],
+        akadQuestions: [
+          'Sejauh mana kesiapan Anda menjaga komitmen bermuhammadiyah dan mengabdi di Pondok Pesantren Darul Arqam?',
+          'Bagaimana sikap Anda apabila amanah pesantren berbenturan dengan kepentingan pribadi?',
+          'Komitmen nyata apa yang siap Anda jalankan pasca kegiatan Baitul Arqam ini?'
+        ],
+        testConfig: {
+          preTestOpen: false,
+          postTestOpen: false,
+          questions: [
+            {
+              id: 'q1',
+              text: 'Apa tujuan utama diselenggarakan Baitul Arqam bagi civitas Pondok Pesantren Darul Arqam?',
+              options: [
+                'Peneguhan ideologi, integritas, dan komitmen berkhidmat dalam persyarikatan',
+                'Sekadar kegiatan rekreasi tahunan',
+                'Pelatihan administrasi keuangan semata',
+                'Lomba ketangkasan fisik antar bagian'
+              ],
+              answer: 0
+            },
+            {
+              id: 'q2',
+              text: 'Sikap utama seorang kader dan pendidik di lingkungan pesantren dalam bekerja adalah...',
+              options: [
+                'Menunggu perintah baru bergerak',
+                'Amanah, keteladanan (uswah), dan keikhlasan beramal',
+                'Bekerja secara individual tanpa koordinasi',
+                'Mengutamakan formalitas daripada kualitas'
+              ],
+              answer: 1
+            }
+          ]
+        },
+        participants,
+        presensi: {},     // { 'BA-01': { 'h1_m1': 5, ... } }
+        indexScores: {},  // { 'BA-01': { 'idx_1': { keaktifan:4, etika:4, kedisiplinan:4, empati:4 } } }
+        skrining: {},     // { 'BA-01': { wudlu: { items:[], note:'' }, shalat:{...}, quran:{...} } }
+        testResults: {},  // { 'BA-01': { pre: 5, post: 5 } }
+        akadScores: {}    // { 'BA-01': { score: 5, assessor: '...', note: '' } }
+      };
+    }
+
+    let appState = loadLocalState();
+    let currentUser = null; // { role: 'admin'|'instructor'|'akad', user: obj }
+    let activeStaffTab = 'dashboard';
+    let html5QrCode = null;
+    let selectedPesertaPortalId = null;
+
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (!parsed.webAppUrl) parsed.webAppUrl = DEFAULT_WEB_APP_URL;
+          return parsed;
+        }
+      } catch (e) {}
+      return createInitialState();
+    }
+
+    function saveState(actor = 'Sistem', summary = 'Pembaruan data') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      pushToCloud(actor, summary);
+    }
+
+    // =========================================================================
+    // SINKRONISASI GOOGLE SHEETS (APPS SCRIPT)
+    // =========================================================================
+    function setSyncStatus(mode, text) {
+      const dot = document.getElementById('syncDot');
+      const lbl = document.getElementById('syncText');
+      dot.className = 'sync-dot ' + (mode === 'syncing' ? 'syncing' : mode === 'error' ? 'error' : '');
+      lbl.textContent = text;
+    }
+
+    async function pullFromCloud(notify = false) {
+      const url = appState.webAppUrl || DEFAULT_WEB_APP_URL;
+      if (!url) return;
+      setSyncStatus('syncing', 'Menyinkronkan...');
+      try {
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.ok && json.data) {
+          const currentUrl = appState.webAppUrl;
+          appState = { ...createInitialState(), ...json.data, webAppUrl: currentUrl };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+          refreshAllUI();
+          setSyncStatus('ok', 'Tersinkronisasi');
+          if (notify) alert('Data terbaru berhasil dimuat dari Google Sheets!');
+        } else {
+          setSyncStatus('ok', 'Siap (Sheets Kosong)');
+          if (notify) alert('Terhubung ke Google Sheets. Belum ada data tersimpan di server, menggunakan data lokal saat ini.');
+        }
+      } catch (err) {
+        setSyncStatus('error', 'Mode Offline Lokal');
+        if (notify) alert('Gagal menghubungi Google Sheets: ' + err.message);
+      }
+    }
+
+    async function pushToCloud(actor, summary) {
+      const url = appState.webAppUrl || DEFAULT_WEB_APP_URL;
+      if (!url) return;
+      setSyncStatus('syncing', 'Menyimpan ke Sheets...');
+      try {
+        const summaryRows = appState.participants.map((p, i) => {
+          const calc = computeParticipantMetrics(p.id);
+          const ins = appState.instructors.find(x => x.group === p.group);
+          return [
+            i + 1, p.name, p.jabatan, 'Kelompok ' + p.group, ins ? ins.name : '-',
+            calc.presensiMateri, calc.presensiIbadah, calc.keaktifan, calc.etika,
+            calc.kedisiplinan, calc.empati, calc.testScore, calc.skriningScore, calc.akadScore
+          ];
+        });
+
+        await fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save_state',
+            actor,
+            summary,
+            data: appState,
+            summaryRows
+          })
+        });
+        setSyncStatus('ok', 'Tersimpan ke Sheets');
+      } catch (err) {
+        setSyncStatus('error', 'Gagal Sinkron');
+      }
+    }
+
+    // =========================================================================
+    // KALKULASI POIN 9 ASPEK & LEVEL
+    // =========================================================================
+    function computeParticipantMetrics(pid) {
+      const pPres = appState.presensi[pid] || {};
+      let presensiMateri = 0, presensiIbadah = 0;
+      PRESENSI_SESSIONS.forEach(s => {
+        const val = Number(pPres[s.id] || 0);
+        if (s.type === 'materi') presensiMateri += val;
+        else presensiIbadah += val;
+      });
+
+      const pIdx = appState.indexScores[pid] || {};
+      let keaktifan = 0, etika = 0, kedisiplinan = 0, empati = 0;
+      INDEX_SESSIONS.forEach(s => {
+        const row = pIdx[s.id];
+        if (row) {
+          keaktifan += Number(row.keaktifan || 0);
+          etika += Number(row.etika || 0);
+          kedisiplinan += Number(row.kedisiplinan || 0);
+          empati += Number(row.empati || 0);
+        }
+      });
+
+      const tRes = appState.testResults[pid] || {};
+      const testScore = Number(tRes.pre || 0) + Number(tRes.post || 0);
+
+      const skr = appState.skrining[pid] || {};
+      let skriningRaw = 0;
+      ['wudlu', 'shalat', 'quran'].forEach(sec => {
+        if (skr[sec] && Array.isArray(skr[sec].items)) {
+          skriningRaw += skr[sec].items.reduce((a, b) => a + Number(b || 0), 0);
+        }
+      });
+      // Konversi rata-rata skrining ke skala setara atau total poin
+      const skriningScore = skriningRaw;
+
+      const akad = appState.akadScores[pid] || {};
+      const akadScore = Number(akad.score || 0);
+
+      const totalPoint = presensiMateri + presensiIbadah + keaktifan + etika + kedisiplinan + empati + testScore + skriningScore + akadScore;
+
+      return {
+        presensiMateri, presensiIbadah, keaktifan, etika,
+        kedisiplinan, empati, testScore, skriningScore, akadScore,
+        totalPoint,
+        level: getLevelLabel(totalPoint)
+      };
+    }
+
+    function getLevelLabel(pts) {
+      if (pts >= 430) return 'AL-QAID AL-AAM (PANGLIMA TERTINGGI)';
+      if (pts >= 380) return 'AL-JENERAL (JENDERAL)';
+      if (pts >= 330) return 'AL-UQAID (KOLONEL)';
+      if (pts >= 280) return 'AL-QAID (KOMANDAN)';
+      if (pts >= 220) return 'AN-NAQIB (KAPTEN)';
+      if (pts >= 160) return 'AL-FARIS (KSATRIA)';
+      if (pts >= 90) return 'AL-JUNDI (PRAJURIT)';
+      return 'AL-MUJANNAD (REKRUT)';
+    }
+
+    function getPredikat(pct) {
+      if (pct >= 90) return 'Istimewa';
+      if (pct >= 75) return 'Sangat Baik';
+      if (pct >= 60) return 'Baik';
+      if (pct >= 45) return 'Cukup Baik';
+      return 'Kurang';
+    }
+
+    function avatarSrc(entity) {
+      if (entity && entity.avatar) return entity.avatar;
+      const initials = (entity?.name || 'BA').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="100%" height="100%" fill="#0F5132"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-weight="700" font-size="28">${initials}</text></svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    // =========================================================================
+    // THEME & GATEWAY NAVIGATION
+    // =========================================================================
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      appState.theme = next;
+      document.getElementById('themeBtn').textContent = next === 'light' ? '🌙 Mode Gelap' : '☀️ Mode Terang';
+    }
+
+    function switchGatewayTab(tab, btn) {
+      document.querySelectorAll('#gatewaySection .portal-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      ['peserta', 'scan', 'staff'].forEach(t => {
+        document.getElementById('gw-' + t).classList.toggle('hidden', t !== tab);
+      });
+    }
+
+    // =========================================================================
+    // PORTAL PESERTA (PRE-TEST & POST-TEST)
+    // =========================================================================
+    function initPesertaDropdowns() {
+      const grpSel = document.getElementById('pesertaGroupSelect');
+      grpSel.innerHTML = '<option value="">-- Pilih Kelompok Anda --</option>';
+      appState.instructors.forEach(ins => {
+        grpSel.innerHTML += `<option value="${ins.group}">Kelompok ${ins.group} — Instruktur: ${ins.name}</option>`;
+      });
+    }
+
+    function populatePesertaByGroup() {
+      const grp = Number(document.getElementById('pesertaGroupSelect').value);
+      const nameSel = document.getElementById('pesertaNameSelect');
+      nameSel.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
+      document.getElementById('pesertaWorkspace').classList.add('hidden');
+      if (!grp) return;
+
+      appState.participants.filter(p => p.group === grp).forEach(p => {
+        nameSel.innerHTML += `<option value="${p.id}">${p.no}. ${p.name} (${p.jabatan})</option>`;
+      });
+    }
+
+    function selectPesertaPortal() {
+      const pid = document.getElementById('pesertaNameSelect').value;
+      if (!pid) {
+        document.getElementById('pesertaWorkspace').classList.add('hidden');
+        return;
+      }
+      selectedPesertaPortalId = pid;
+      const p = appState.participants.find(x => x.id === pid);
+      const ins = appState.instructors.find(x => x.group === p.group);
+
+      document.getElementById('pPortalAvatar').src = avatarSrc(p);
+      document.getElementById('pPortalName').textContent = `${p.name} (${p.id})`;
+      document.getElementById('pPortalMeta').textContent = `${p.jabatan} • Kelompok ${p.group} (${ins ? ins.name : '-'})`;
+
+      const area = document.getElementById('testButtonsArea');
+      const res = appState.testResults[pid] || {};
+      const preOpen = appState.testConfig.preTestOpen;
+      const postOpen = appState.testConfig.postTestOpen;
+
+      area.innerHTML = `
+        <div class="card" style="box-shadow:none; margin:0;">
+          <h4>Pre-Test Pilihan Ganda</h4>
+          <p style="font-size:12.5px; color:var(--text-muted); margin:6px 0 12px;">
+            ${preOpen ? 'Sesi tes sedang dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Pre-Test.'}
+          </p>
+          ${res.pre !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Skor Poin: ${res.pre})</span>` :
+            preOpen ? `<button class="btn btn-primary" onclick="startQuiz('pre')">Mulai Kerjakan Pre-Test</button>` :
+            `<button class="btn" disabled>🔒 Belum Dibuka</button>`}
+        </div>
+        <div class="card" style="box-shadow:none; margin:0;">
+          <h4>Post-Test Pilihan Ganda</h4>
+          <p style="font-size:12.5px; color:var(--text-muted); margin:6px 0 12px;">
+            ${postOpen ? 'Sesi tes sedang dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Post-Test.'}
+          </p>
+          ${res.post !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Skor Poin: ${res.post})</span>` :
+            postOpen ? `<button class="btn btn-primary" onclick="startQuiz('post')">Mulai Kerjakan Post-Test</button>` :
+            `<button class="btn" disabled>🔒 Belum Dibuka</button>`}
+        </div>
+      `;
+      document.getElementById('quizRunnerArea').classList.add('hidden');
+      document.getElementById('pesertaWorkspace').classList.remove('hidden');
+    }
+
+    function startQuiz(type) {
+      const qs = appState.testConfig.questions || [];
+      const runner = document.getElementById('quizRunnerArea');
+      runner.classList.remove('hidden');
+      runner.innerHTML = `
+        <div class="card" style="background:var(--surface-subtle); box-shadow:none;">
+          <h3 style="margin-bottom:14px;">Lembar ${type === 'pre' ? 'Pre-Test' : 'Post-Test'}</h3>
+          ${qs.map((q, idx) => `
+            <div style="margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <p style="font-weight:600; margin-bottom:8px;">${idx + 1}. ${q.text}</p>
+              ${q.options.map((opt, oIdx) => `
+                <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400; color:var(--text); cursor:pointer; margin-bottom:6px;">
+                  <input type="radio" name="ans_${q.id}" value="${oIdx}" style="width:auto;" />
+                  <span>${String.fromCharCode(65 + oIdx)}. ${opt}</span>
+                </label>
+              `).join('')}
+            </div>
+          `).join('')}
+          <button class="btn btn-primary" onclick="submitQuiz('${type}')">Kirim Jawaban ${type === 'pre' ? 'Pre-Test' : 'Post-Test'}</button>
+        </div>
+      `;
+    }
+
+    function submitQuiz(type) {
+      const qs = appState.testConfig.questions || [];
+      let correct = 0;
+      qs.forEach(q => {
+        const picked = document.querySelector(`input[name="ans_${q.id}"]:checked`);
+        if (picked && Number(picked.value) === Number(q.answer)) correct++;
+      });
+      const pct = qs.length ? (correct / qs.length) * 100 : 0;
+      const point = pct >= 85 ? 5 : pct >= 70 ? 4 : pct >= 55 ? 3 : pct >= 40 ? 2 : 1;
+
+      if (!appState.testResults[selectedPesertaPortalId]) appState.testResults[selectedPesertaPortalId] = {};
+      appState.testResults[selectedPesertaPortalId][type] = point;
+
+      const p = appState.participants.find(x => x.id === selectedPesertaPortalId);
+      saveState(p.name, `Menyelesaikan ${type.toUpperCase()}-TEST (Poin: ${point})`);
+      selectPesertaPortal();
+      alert(`Jawaban terkirim! Anda mendapatkan ${point} poin.`);
+    }
+
+    // =========================================================================
+    // PORTAL PANITIA SCAN BARCODE
+    // =========================================================================
+    function unlockScanPortal() {
+      const pass = document.getElementById('scanPasswordInput').value;
+      if (pass !== appState.scanPassword) {
+        alert('Password panitia salah!');
+        return;
+      }
+      document.getElementById('scanLockBox').classList.add('hidden');
+      document.getElementById('scanUnlockedArea').classList.remove('hidden');
+      updateScanSessionOptions();
+    }
+
+    function updateScanSessionOptions() {
+      const day = Number(document.getElementById('scanDaySelect').value);
+      const sel = document.getElementById('scanSessionSelect');
+      sel.innerHTML = '';
+      PRESENSI_SESSIONS.filter(s => s.day === day).forEach(s => {
+        sel.innerHTML += `<option value="${s.id}">[${s.type.toUpperCase()}] ${s.title}</option>`;
+      });
+    }
+
+    function startCameraScanner() {
+      if (html5QrCode) return;
+      html5QrCode = new Html5Qrcode('qrReader');
+      html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        (decodedText) => {
+          processBarcodeScan(decodedText);
+        }
+      ).catch(err => alert('Kamera tidak dapat diakses: ' + err));
+    }
+
+    function stopCameraScanner() {
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => { html5QrCode = null; });
+      }
+    }
+
+    function processBarcodeScan(rawCode) {
+      const code = (rawCode || '').trim().toUpperCase();
+      const p = appState.participants.find(x => x.id === code);
+      const fb = document.getElementById('scanFeedbackBox');
+      if (!p) {
+        fb.innerHTML = `<span class="badge badge-danger">ID Tidak Dikenal: ${code}</span>`;
+        return;
+      }
+      const sessId = document.getElementById('scanSessionSelect').value;
+      const sess = PRESENSI_SESSIONS.find(s => s.id === sessId);
+      let pts = Number(document.getElementById('scanStatusSelect').value);
+      if (sess.type === 'ibadah' && pts === 2) pts = 5;
+
+      if (!appState.presensi[p.id]) appState.presensi[p.id] = {};
+      appState.presensi[p.id][sessId] = pts;
+      document.getElementById('manualBarcodeInput').value = '';
+
+      fb.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img class="avatar avatar-lg" src="${avatarSrc(p)}" />
+          <div>
+            <span class="badge badge-success">Tercatat +${pts} Poin</span>
+            <h4 style="margin-top:4px;">${p.name} (${p.id})</h4>
+            <p style="font-size:12.5px; color:var(--text-muted);">${sess.title}</p>
+          </div>
+        </div>
+      `;
+      saveState('Panitia Scan', `Presensi ${p.name} pada ${sess.title} (+${pts})`);
+    }
+
+    function openPrintIdCards() {
+      document.getElementById('gatewaySection').classList.add('hidden');
+      document.getElementById('printIdCardSection').classList.remove('hidden');
+      const grid = document.getElementById('printGridContainer');
+      grid.innerHTML = appState.participants.map(p => `
+        <div class="id-card-item">
+          <div style="font-size:10px; font-weight:700; letter-spacing:0.06em;">BAITUL ARQAM PPDA</div>
+          <img src="${avatarSrc(p)}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; margin:6px auto;" />
+          <div style="font-weight:700; font-size:12px;">${p.name}</div>
+          <div style="font-size:10.5px; color:#555;">${p.jabatan} • Kel. ${p.group}</div>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${p.id}" style="width:92px; height:92px; margin:6px auto;" />
+          <div class="mono" style="font-weight:700; font-size:12px;">${p.id}</div>
+        </div>
+      `).join('');
+    }
+
+    function closePrintIdCards() {
+      document.getElementById('printIdCardSection').classList.add('hidden');
+      document.getElementById('gatewaySection').classList.remove('hidden');
+    }
+
+    // =========================================================================
+    // LOGIN STAF & ROLE WORKSPACE
+    // =========================================================================
+    function initStaffDropdown() {
+      const sel = document.getElementById('staffAccountSelect');
+      sel.innerHTML = '';
+      sel.innerHTML += `<optgroup label="Administrator">
+        <option value="admin:${appState.admin.id}">${appState.admin.name} (Admin Utama)</option>
+      </optgroup>`;
+
+      sel.innerHTML += `<optgroup label="Instruktur Kelompok (6 Orang)">
+        ${appState.instructors.map(i => `<option value="instructor:${i.id}">Kelompok ${i.group} — ${i.name}</option>`).join('')}
+      </optgroup>`;
+
+      sel.innerHTML += `<optgroup label="Penilai Khusus Akad Amanah">
+        ${appState.akadAssessors.map(a => `<option value="akad:${a.id}">${a.name}</option>`).join('')}
+      </optgroup>`;
+    }
+
+    function loginStaff() {
+      const val = document.getElementById('staffAccountSelect').value;
+      const pass = document.getElementById('staffPasswordInput').value;
+      const [role, id] = val.split(':');
+
+      let account = null;
+      if (role === 'admin' && appState.admin.password === pass) account = appState.admin;
+      if (role === 'instructor') account = appState.instructors.find(x => x.id === id && x.password === pass);
+      if (role === 'akad') account = appState.akadAssessors.find(x => x.id === id && x.password === pass);
+
+      if (!account) {
+        alert('Password tidak sesuai!');
+        return;
+      }
+
+      currentUser = { role, user: account };
+      document.getElementById('staffPasswordInput').value = '';
+      document.getElementById('gatewaySection').classList.add('hidden');
+      document.getElementById('staffWorkspace').classList.remove('hidden');
+      document.getElementById('loggedUserBar').classList.remove('hidden');
+      updateTopUserBar();
+      renderStaffNavigation();
+    }
+
+    function updateTopUserBar() {
+      if (!currentUser) return;
+      document.getElementById('topUserAvatar').src = avatarSrc(currentUser.user);
+      document.getElementById('topUserName').textContent = currentUser.user.name;
+    }
+
+    function logoutStaff() {
+      currentUser = null;
+      document.getElementById('staffWorkspace').classList.add('hidden');
+      document.getElementById('loggedUserBar').classList.add('hidden');
+      document.getElementById('gatewaySection').classList.remove('hidden');
+      initStaffDropdown();
+    }
+
+    function renderStaffNavigation() {
+      const nav = document.getElementById('staffNavTabs');
+      const role = currentUser.role;
+      let tabs = [];
+
+      if (role === 'admin') {
+        tabs = [
+          { id: 'dashboard', label: 'Dashboard 9 Aspek' },
+          { id: 'index', label: 'Penilaian Index' },
+          { id: 'skrining', label: 'Penilaian Skrining' },
+          { id: 'akad', label: 'Akad Amanah' },
+          { id: 'final', label: 'Klasemen Final' },
+          { id: 'admin', label: 'Kontrol & Akun Admin' }
+        ];
+      } else if (role === 'instructor') {
+        tabs = [
+          { id: 'index', label: `Index Kelompok ${currentUser.user.group}` },
+          { id: 'skrining', label: `Skrining Kelompok ${currentUser.user.group}` }
+        ];
+      } else if (role === 'akad') {
+        tabs = [
+          { id: 'akad', label: 'Wawancara Akad Amanah' }
+        ];
+      }
+
+      if (!tabs.some(t => t.id === activeStaffTab)) activeStaffTab = tabs[0].id;
+
+      nav.innerHTML = tabs.map(t => `
+        <button class="portal-tab ${t.id === activeStaffTab ? 'active' : ''}" onclick="switchStaffTab('${t.id}')">${t.label}</button>
+      `).join('');
+
+      renderStaffContent();
+    }
+
+    function switchStaffTab(tabId) {
+      activeStaffTab = tabId;
+      renderStaffNavigation();
+    }
+
+    function renderStaffContent() {
+      const area = document.getElementById('staffContentArea');
+      if (activeStaffTab === 'dashboard') renderDashboardView(area);
+      else if (activeStaffTab === 'index') renderIndexView(area);
+      else if (activeStaffTab === 'skrining') renderSkriningView(area);
+      else if (activeStaffTab === 'akad') renderAkadView(area);
+      else if (activeStaffTab === 'final') renderFinalView(area);
+      else if (activeStaffTab === 'admin') renderAdminControlView(area);
+    }
+
+    // =========================================================================
+    // VIEW 1: DASHBOARD 9 ASPEK
+    // =========================================================================
+    function renderDashboardView(area) {
+      const count = appState.participants.length || 1;
+      const totals = {
+        presensiMateri: 0, presensiIbadah: 0, keaktifan: 0, etika: 0,
+        kedisiplinan: 0, empati: 0, testScore: 0, skriningScore: 0, akadScore: 0
+      };
+      appState.participants.forEach(p => {
+        const m = computeParticipantMetrics(p.id);
+        Object.keys(totals).forEach(k => totals[k] += m[k]);
+      });
+
+      const rows = [
+        { no: 1, aspek: 'Presensi Sesi Materi', ket: 'Hadir (5), Terlambat (2), Sakit/Izin (0), Alpha (-5)', avg: totals.presensiMateri / count, min: 30, max: 75 },
+        { no: 2, aspek: 'Presensi Ibadah', ket: 'Hadir (5), Sakit/Izin (0), Alpha (-5)', avg: totals.presensiIbadah / count, min: 25, max: 50 },
+        { no: 3, aspek: 'Keaktifan', ket: 'Sangat Aktif (5) s.d. Tidak Aktif (1)', avg: totals.keaktifan / count, min: 26, max: 65 },
+        { no: 4, aspek: 'Etika', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.etika / count, min: 26, max: 65 },
+        { no: 5, aspek: 'Kedisiplinan', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.kedisiplinan / count, min: 26, max: 65 },
+        { no: 6, aspek: 'Empati', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.empati / count, min: 26, max: 65 },
+        { no: 7, aspek: 'Pre-Test dan Post-Test', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.testScore / count, min: 4, max: 10 },
+        { no: 8, aspek: 'Skrining (Wudlu, Shalat, Al-Qur’an)', ket: 'Sangat Baik (5) s.d. Tidak Sesuai (1)', avg: totals.skriningScore / count, min: 46, max: 115 },
+        { no: 9, aspek: 'Akad Amanah', ket: 'Komitmen Sangat Kuat (5) s.d. Sangat Lemah (1)', avg: totals.akadScore / count, min: 2, max: 5 }
+      ];
+
+      area.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Dashboard Capaian 9 Aspek Evaluasi</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Rata-rata capaian seluruh ${appState.participants.length} peserta Baitul Arqam PPDA.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Aspek Penilaian</th>
+                  <th>Skala Keterangan</th>
+                  <th>Rata-rata Poin</th>
+                  <th>Target Min</th>
+                  <th>Target Maks</th>
+                  <th>Tercapai (%)</th>
+                  <th>Tidak Tercapai (%)</th>
+                  <th>Predikat</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map(r => {
+                  const pct = Math.min(100, Math.max(0, Math.round((r.avg / r.max) * 100)));
+                  const unpct = 100 - pct;
+                  return `
+                    <tr>
+                      <td class="mono">${r.no}</td>
+                      <td style="font-weight:700;">${r.aspek}</td>
+                      <td style="font-size:12px; color:var(--text-muted);">${r.ket}</td>
+                      <td class="mono" style="font-weight:700;">${r.avg.toFixed(1)}</td>
+                      <td class="mono">${r.min}</td>
+                      <td class="mono">${r.max}</td>
+                      <td><span class="badge badge-success">${pct}%</span></td>
+                      <td><span class="badge badge-warn">${unpct}%</span></td>
+                      <td><span class="badge badge-info">${getPredikat(pct)}</span></td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // VIEW 2: PENILAIAN INDEX (SEQUENTIAL UNLOCK PER SESI)
+    // =========================================================================
+    function renderIndexView(area) {
+      const isInstructor = currentUser.role === 'instructor';
+      const targetGroup = isInstructor ? currentUser.user.group : Number(window._adminIdxGroup || 1);
+      const members = appState.participants.filter(p => p.group === targetGroup);
+
+      // Hitung sesi yang sudah terisi lengkap untuk sequential unlock
+      let unlockedCount = 1;
+      for (let i = 0; i < INDEX_SESSIONS.length; i++) {
+        const sId = INDEX_SESSIONS[i].id;
+        const allFilled = members.every(m => {
+          const row = appState.indexScores[m.id]?.[sId];
+          return row && row.keaktifan && row.etika && row.kedisiplinan && row.empati;
+        });
+        if (allFilled) unlockedCount = i + 2;
+        else break;
+      }
+
+      const selectedSessionId = window._selectedIdxSession || INDEX_SESSIONS[Math.min(unlockedCount - 1, INDEX_SESSIONS.length - 1)].id;
+
+      area.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Penilaian Index — Kelompok ${targetGroup}</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Penilaian terbuka satu per satu secara berurutan. Selesaikan seluruh anggota pada sesi aktif untuk membuka sesi berikutnya.</p>
+            </div>
+            ${!isInstructor ? `
+              <div style="width:240px;">
+                <select onchange="window._adminIdxGroup=Number(this.value); renderStaffContent();">
+                  ${appState.instructors.map(i => `<option value="${i.group}" ${i.group === targetGroup ? 'selected' : ''}>Kelompok ${i.group} (${i.name})</option>`).join('')}
+                </select>
+              </div>
+            ` : ''}
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;">
+            ${INDEX_SESSIONS.map((s, idx) => {
+              const locked = isInstructor && (idx + 1 > unlockedCount);
+              const active = s.id === selectedSessionId;
+              return `
+                <button class="btn btn-sm ${active ? 'btn-primary' : ''}" ${locked ? 'disabled' : ''}
+                  onclick="window._selectedIdxSession='${s.id}'; renderStaffContent();">
+                  ${locked ? '🔒 ' : ''}${s.title}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Peserta</th>
+                  <th>Keaktifan (1-5)</th>
+                  <th>Etika (1-5)</th>
+                  <th>Kedisiplinan (1-5)</th>
+                  <th>Empati (1-5)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${members.map(m => {
+                  const row = appState.indexScores[m.id]?.[selectedSessionId] || {};
+                  return `
+                    <tr>
+                      <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                          <img class="avatar" src="${avatarSrc(m)}" />
+                          <div>
+                            <div style="font-weight:700;">${m.name}</div>
+                            <div style="font-size:11.5px; color:var(--text-muted);">${m.jabatan}</div>
+                          </div>
+                        </div>
+                      </td>
+                      ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(field => `
+                        <td>
+                          <div class="score-group">
+                            ${[1,2,3,4,5].map(val => `
+                              <button class="score-btn ${Number(row[field]) === val ? 'selected' : ''}"
+                                onclick="setIndexScore('${m.id}', '${selectedSessionId}', '${field}', ${val})">${val}</button>
+                            `).join('')}
+                          </div>
+                        </td>
+                      `).join('')}
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function setIndexScore(pid, sessId, field, val) {
+      if (!appState.indexScores[pid]) appState.indexScores[pid] = {};
+      if (!appState.indexScores[pid][sessId]) appState.indexScores[pid][sessId] = {};
+      appState.indexScores[pid][sessId][field] = val;
+      saveState(currentUser.user.name, `Index ${pid} (${sessId} - ${field}: ${val})`);
+      renderStaffContent();
+    }
+
+    // =========================================================================
+    // VIEW 3: PENILAIAN SKRINING (WUDLU, SHALAT, AL-QUR'AN)
+    // =========================================================================
+    function renderSkriningView(area) {
+      const isInstructor = currentUser.role === 'instructor';
+      const targetGroup = isInstructor ? currentUser.user.group : Number(window._adminSkrGroup || 1);
+      const members = appState.participants.filter(p => p.group === targetGroup);
+      const activeSecId = window._selectedSkrSec || 'wudlu';
+      const secObj = SKRINING_SECTIONS.find(s => s.id === activeSecId);
+
+      // Sequential unlock antar bagian skrining (Wudlu -> Shalat -> Qur'an)
+      const wudluDone = members.every(m => (appState.skrining[m.id]?.wudlu?.items || []).filter(Boolean).length === 7);
+      const shalatDone = members.every(m => (appState.skrining[m.id]?.shalat?.items || []).filter(Boolean).length === 12);
+
+      area.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Penilaian Skrining Ibadah & Al-Qur'an — Kelompok ${targetGroup}</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Rentang 1–5 per indikator. Bagian berikutnya terbuka otomatis setelah bagian sebelumnya terisi lengkap.</p>
+            </div>
+            ${!isInstructor ? `
+              <div style="width:240px;">
+                <select onchange="window._adminSkrGroup=Number(this.value); renderStaffContent();">
+                  ${appState.instructors.map(i => `<option value="${i.group}" ${i.group === targetGroup ? 'selected' : ''}>Kelompok ${i.group} (${i.name})</option>`).join('')}
+                </select>
+              </div>
+            ` : ''}
+          </div>
+
+          <div style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;">
+            ${SKRINING_SECTIONS.map(sec => {
+              const locked = isInstructor && ((sec.id === 'shalat' && !wudluDone) || (sec.id === 'quran' && (!wudluDone || !shalatDone)));
+              return `
+                <button class="btn ${sec.id === activeSecId ? 'btn-primary' : ''}" ${locked ? 'disabled' : ''}
+                  onclick="window._selectedSkrSec='${sec.id}'; renderStaffContent();">
+                  ${locked ? '🔒 ' : ''}${sec.title}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="min-width:210px;">Peserta</th>
+                  ${secObj.items.map((it, idx) => `<th title="${it}" style="min-width:135px;">${idx + 1}. ${it.slice(0, 26)}...</th>`).join('')}
+                  <th style="min-width:160px;">Catatan Khusus</th>
+                  <th>Skor</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${members.map(m => {
+                  const rec = appState.skrining[m.id]?.[secObj.id] || { items: [], note: '' };
+                  const sum = (rec.items || []).reduce((a, b) => a + Number(b || 0), 0);
+                  return `
+                    <tr>
+                      <td>
+                        <div style="display:flex; align-items:center; gap:9px;">
+                          <img class="avatar" src="${avatarSrc(m)}" />
+                          <span style="font-weight:700; font-size:12.5px;">${m.name}</span>
+                        </div>
+                      </td>
+                      ${secObj.items.map((_, iIdx) => `
+                        <td>
+                          <div class="score-group">
+                            ${[1,2,3,4,5].map(v => `
+                              <button class="score-btn ${Number(rec.items?.[iIdx]) === v ? 'selected' : ''}"
+                                onclick="setSkriningScore('${m.id}', '${secObj.id}', ${iIdx}, ${v})">${v}</button>
+                            `).join('')}
+                          </div>
+                        </td>
+                      `).join('')}
+                      <td>
+                        <input type="text" value="${rec.note || ''}" placeholder="Opsional..."
+                          onchange="setSkriningNote('${m.id}', '${secObj.id}', this.value)" />
+                      </td>
+                      <td class="mono" style="font-weight:700;">${sum}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function setSkriningScore(pid, secId, itemIdx, val) {
+      if (!appState.skrining[pid]) appState.skrining[pid] = {};
+      if (!appState.skrining[pid][secId]) appState.skrining[pid][secId] = { items: [], note: '' };
+      appState.skrining[pid][secId].items[itemIdx] = val;
+      saveState(currentUser.user.name, `Skrining ${secId} ${pid}`);
+      renderStaffContent();
+    }
+
+    function setSkriningNote(pid, secId, note) {
+      if (!appState.skrining[pid]) appState.skrining[pid] = {};
+      if (!appState.skrining[pid][secId]) appState.skrining[pid][secId] = { items: [], note: '' };
+      appState.skrining[pid][secId].note = note;
+      saveState(currentUser.user.name, `Catatan skrining ${pid}`);
+    }
+
+    // =========================================================================
+    // VIEW 4: WAWANCARA AKAD AMANAH (PENILAI KHUSUS & ADMIN)
+    // =========================================================================
+    function renderAkadView(area) {
+      const assessor = currentUser.user;
+      const assigned = assessor.assignedIds || [];
+      const list = (currentUser.role === 'akad' && assigned.length > 0)
+        ? appState.participants.filter(p => assigned.includes(p.id))
+        : appState.participants;
+
+      area.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Penilaian Wawancara Akad Amanah</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Penilai bebas memilih peserta mana saja yang diwawancarai (lintas kelompok). Rentang skor komitmen 1–5.</p>
+            </div>
+          </div>
+
+          <div class="card" style="background:var(--surface-subtle); box-shadow:none;">
+            <h4 style="margin-bottom:8px;">Panduan Pertanyaan Wawancara Akad Amanah</h4>
+            <ol style="padding-left:20px; font-size:13.5px; margin-bottom:10px;">
+              ${appState.akadQuestions.map(q => `<li style="margin-bottom:4px;">${q}</li>`).join('')}
+            </ol>
+            <div style="display:flex; gap:8px; max-width:560px;">
+              <input type="text" id="newAkadQuestionInput" placeholder="Tambah pertanyaan wawancara baru..." />
+              <button class="btn btn-sm btn-primary" onclick="addAkadQuestion()">+ Tambah</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Peserta</th>
+                  <th>Kelompok</th>
+                  <th>Skor Komitmen (1-5)</th>
+                  <th>Catatan Wawancara</th>
+                  <th>Penilai</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${list.map(p => {
+                  const rec = appState.akadScores[p.id] || {};
+                  return `
+                    <tr>
+                      <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                          <img class="avatar" src="${avatarSrc(p)}" />
+                          <div>
+                            <div style="font-weight:700;">${p.name}</div>
+                            <div style="font-size:11.5px; color:var(--text-muted);">${p.jabatan}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>Kelompok ${p.group}</td>
+                      <td>
+                        <div class="score-group">
+                          ${[1,2,3,4,5].map(v => `
+                            <button class="score-btn ${Number(rec.score) === v ? 'selected' : ''}"
+                              onclick="setAkadScore('${p.id}', ${v})">${v}</button>
+                          `).join('')}
+                        </div>
+                      </td>
+                      <td>
+                        <input type="text" value="${rec.note || ''}" placeholder="Catatan komitmen..."
+                          onchange="setAkadNote('${p.id}', this.value)" />
+                      </td>
+                      <td style="font-size:12px; color:var(--text-muted);">${rec.assessor || '-'}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function addAkadQuestion() {
+      const inp = document.getElementById('newAkadQuestionInput');
+      if (!inp.value.trim()) return;
+      appState.akadQuestions.push(inp.value.trim());
+      inp.value = '';
+      saveState(currentUser.user.name, 'Menambah pertanyaan Akad Amanah');
+      renderStaffContent();
+    }
+
+    function setAkadScore(pid, val) {
+      if (!appState.akadScores[pid]) appState.akadScores[pid] = {};
+      appState.akadScores[pid].score = val;
+      appState.akadScores[pid].assessor = currentUser.user.name;
+      saveState(currentUser.user.name, `Akad Amanah ${pid}: ${val}`);
+      renderStaffContent();
+    }
+
+    function setAkadNote(pid, note) {
+      if (!appState.akadScores[pid]) appState.akadScores[pid] = {};
+      appState.akadScores[pid].note = note;
+      appState.akadScores[pid].assessor = currentUser.user.name;
+      saveState(currentUser.user.name, `Catatan Akad Amanah ${pid}`);
+    }
+
+    // =========================================================================
+    // VIEW 5: KLASEMEN FINAL & 8 LEVEL KADER
+    // =========================================================================
+    function renderFinalView(area) {
+      const ranked = appState.participants.map(p => ({
+        ...p,
+        metrics: computeParticipantMetrics(p.id)
+      })).sort((a, b) => b.metrics.totalPoint - a.metrics.totalPoint);
+
+      area.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Klasemen Final & Pemeringkatan Jenjang Kader</h2>
+              <p style="color:var(--text-muted); font-size:13px;">Rekapitulasi otomatis seluruh 9 komponen penilaian untuk 66 peserta.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="exportFinalCsv()">⬇ Unduh CSV Rekap</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Nama Peserta</th>
+                  <th>Kelompok</th>
+                  <th>Materi</th>
+                  <th>Ibadah</th>
+                  <th>Aktif</th>
+                  <th>Etika</th>
+                  <th>Disiplin</th>
+                  <th>Empati</th>
+                  <th>Tes</th>
+                  <th>Skrining</th>
+                  <th>Akad</th>
+                  <th>Total Poin</th>
+                  <th>Level Jenjang</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${ranked.map((r, i) => `
+                  <tr>
+                    <td class="mono" style="font-weight:700;">#${i + 1}</td>
+                    <td>
+                      <div style="display:flex; align-items:center; gap:9px;">
+                        <img class="avatar" src="${avatarSrc(r)}" />
+                        <div>
+                          <div style="font-weight:700;">${r.name}</div>
+                          <div style="font-size:11px; color:var(--text-muted);">${r.jabatan}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>Kel. ${r.group}</td>
+                    <td class="mono">${r.metrics.presensiMateri}</td>
+                    <td class="mono">${r.metrics.presensiIbadah}</td>
+                    <td class="mono">${r.metrics.keaktifan}</td>
+                    <td class="mono">${r.metrics.etika}</td>
+                    <td class="mono">${r.metrics.kedisiplinan}</td>
+                    <td class="mono">${r.metrics.empati}</td>
+                    <td class="mono">${r.metrics.testScore}</td>
+                    <td class="mono">${r.metrics.skriningScore}</td>
+                    <td class="mono">${r.metrics.akadScore}</td>
+                    <td class="mono" style="font-weight:800; font-size:14px;">${r.metrics.totalPoint}</td>
+                    <td><span class="badge badge-success">${r.metrics.level}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function exportFinalCsv() {
+      const headers = ['No','Nama','Jabatan','Kelompok','Materi','Ibadah','Keaktifan','Etika','Kedisiplinan','Empati','Tes','Skrining','Akad','Total','Level'];
+      const lines = [headers.join(',')];
+      appState.participants.forEach((p, idx) => {
+        const m = computeParticipantMetrics(p.id);
+        lines.push([
+          idx + 1, `"${p.name}"`, `"${p.jabatan}"`, p.group,
+          m.presensiMateri, m.presensiIbadah, m.keaktifan, m.etika,
+          m.kedisiplinan, m.empati, m.testScore, m.skriningScore,
+          m.akadScore, m.totalPoint, `"${m.level}"`
+        ].join(','));
+      });
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Rekap_Final_Baitul_Arqam_PPDA.csv';
+      a.click();
+    }
+
+    // =========================================================================
+    // VIEW 6: KONTROL ADMIN (BUKA TES, AKUN, FOTO PESERTA, PENILAI AKAD)
+    // =========================================================================
+    function renderAdminControlView(area) {
+      area.innerHTML = `
+        <div class="grid-2">
+          <!-- KONTROL UJIAN PESERTA -->
+          <div class="card">
+            <h3>Kontrol Akses Pre-Test & Post-Test</h3>
+            <p style="font-size:13px; color:var(--text-muted); margin:6px 0 14px;">Peserta hanya bisa melihat dan mengerjakan tes jika sakelar di bawah ini diaktifkan.</p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+              <button class="btn ${appState.testConfig.preTestOpen ? 'btn-primary' : ''}" onclick="toggleTestAccess('preTestOpen')">
+                ${appState.testConfig.preTestOpen ? '✅ Pre-Test DIBUKA' : '🔒 Pre-Test DITUTUP'}
+              </button>
+              <button class="btn ${appState.testConfig.postTestOpen ? 'btn-primary' : ''}" onclick="toggleTestAccess('postTestOpen')">
+                ${appState.testConfig.postTestOpen ? '✅ Post-Test DIBUKA' : '🔒 Post-Test DITUTUP'}
+              </button>
+            </div>
+            <button class="btn btn-sm" onclick="addSampleQuizQuestion()">+ Tambah Soal Pilihan Ganda</button>
+          </div>
+
+          <!-- KONEKSI SHEETS & PASSWORD SCAN -->
+          <div class="card">
+            <h3>Koneksi Google Sheets & Panitia Scan</h3>
+            <div style="margin:10px 0;">
+              <label>URL Web App Google Apps Script</label>
+              <input type="text" id="adminWebAppInput" value="${appState.webAppUrl}" />
+            </div>
+            <div style="margin-bottom:12px;">
+              <label>Password Portal Scan Barcode Panitia</label>
+              <input type="text" id="adminScanPassInput" value="${appState.scanPassword}" />
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-primary btn-sm" onclick="saveAdminSystemSettings()">Simpan Pengaturan</button>
+              <button class="btn btn-sm" onclick="pushToCloud('Admin', 'Sinkronisasi manual penuh')">Paksa Kirim ke Sheets</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KELOLA 6 INSTRUKTUR & PENILAI KHUSUS AKAD AMANAH -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h3>Daftar 6 Instruktur Kelompok</h3>
+            </div>
+            ${appState.instructors.map(ins => `
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <img class="avatar" src="${avatarSrc(ins)}" />
+                  <div>
+                    <div style="font-weight:700; font-size:13px;">${ins.name}</div>
+                    <div style="font-size:11.5px; color:var(--text-muted);">Kelompok ${ins.group} • Pass: <span class="mono">${ins.password}</span></div>
+                  </div>
+                </div>
+                <button class="btn btn-sm" onclick="openEntityEditor('instructor', '${ins.id}')">Edit & Foto</button>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Penilai Khusus Akad Amanah</h3>
+              <button class="btn btn-primary btn-sm" onclick="addAkadAssessor()">+ Tambah Penilai</button>
+            </div>
+            ${appState.akadAssessors.map(ak => `
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <img class="avatar" src="${avatarSrc(ak)}" />
+                  <div>
+                    <div style="font-weight:700; font-size:13px;">${ak.name}</div>
+                    <div style="font-size:11.5px; color:var(--text-muted);">Pass: <span class="mono">${ak.password}</span></div>
+                  </div>
+                </div>
+                <button class="btn btn-sm" onclick="openEntityEditor('akad', '${ak.id}')">Edit & Foto</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- MANAJEMEN 66 PESERTA (FOTO & PEMBAGIAN KELOMPOK) -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3>Direktori 66 Peserta (Foto Profil & Pembagian Kelompok)</h3>
+              <p style="font-size:13px; color:var(--text-muted);">Unggah foto agar instruktur mengenali wajah peserta saat menilai.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Foto & Nama Peserta</th>
+                  <th>Jabatan</th>
+                  <th>Kelompok</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${appState.participants.map(p => `
+                  <tr>
+                    <td class="mono">${p.id}</td>
+                    <td>
+                      <div style="display:flex; align-items:center; gap:10px;">
+                        <img class="avatar" src="${avatarSrc(p)}" />
+                        <span style="font-weight:700;">${p.name}</span>
+                      </div>
+                    </td>
+                    <td>${p.jabatan}</td>
+                    <td>
+                      <select style="width:130px;" onchange="changeParticipantGroup('${p.id}', Number(this.value))">
+                        ${[1,2,3,4,5,6].map(g => `<option value="${g}" ${p.group === g ? 'selected' : ''}>Kelompok ${g}</option>`).join('')}
+                      </select>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm" onclick="openEntityEditor('participant', '${p.id}')">Edit / Foto</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleTestAccess(key) {
+      appState.testConfig[key] = !appState.testConfig[key];
+      saveState('Admin', `Ubah status ${key}: ${appState.testConfig[key]}`);
+      renderStaffContent();
+    }
+
+    function addSampleQuizQuestion() {
+      const text = prompt('Masukkan teks pertanyaan pilihan ganda:');
+      if (!text) return;
+      const a = prompt('Pilihan A:') || 'Pilihan A';
+      const b = prompt('Pilihan B:') || 'Pilihan B';
+      const c = prompt('Pilihan C:') || 'Pilihan C';
+      const d = prompt('Pilihan D:') || 'Pilihan D';
+      const ans = Number(prompt('Nomor jawaban benar (0 untuk A, 1 untuk B, 2 untuk C, 3 untuk D):') || 0);
+      appState.testConfig.questions.push({
+        id: 'q_' + Date.now(),
+        text,
+        options: [a, b, c, d],
+        answer: ans
+      });
+      saveState('Admin', 'Menambah soal pilihan ganda');
+      alert('Soal berhasil ditambahkan!');
+    }
+
+    function saveAdminSystemSettings() {
+      appState.webAppUrl = document.getElementById('adminWebAppInput').value.trim();
+      appState.scanPassword = document.getElementById('adminScanPassInput').value.trim();
+      saveState('Admin', 'Memperbarui URL Sheets & password scan');
+      alert('Pengaturan sistem tersimpan!');
+    }
+
+    function addAkadAssessor() {
+      const name = prompt('Masukkan nama Penilai Khusus Akad Amanah (Pimpinan / Tamu Undangan):');
+      if (!name) return;
+      const password = prompt('Buat password untuk penilai ini:', 'akad123') || 'akad123';
+      appState.akadAssessors.push({
+        id: 'akad-' + Date.now(),
+        name,
+        password,
+        avatar: '',
+        assignedIds: []
+      });
+      saveState('Admin', `Menambah penilai Akad Amanah: ${name}`);
+      renderStaffContent();
+    }
+
+    function changeParticipantGroup(pid, newGroup) {
+      const p = appState.participants.find(x => x.id === pid);
+      if (p) {
+        p.group = newGroup;
+        saveState('Admin', `Memindahkan ${p.name} ke Kelompok ${newGroup}`);
+      }
+    }
+
+    // =========================================================================
+    // MODAL EDIT PROFIL & KOMPRESI FOTO OTOMATIS
+    // =========================================================================
+    function openEditProfileModal() {
+      if (!currentUser) return;
+      openEntityEditor(currentUser.role, currentUser.user.id);
+    }
+
+    function openEntityEditor(type, id) {
+      document.getElementById('editTargetType').value = type;
+      document.getElementById('editTargetId').value = id;
+
+      let entity = null;
+      const extraWrap = document.getElementById('editExtraFieldWrap');
+      const passWrap = document.getElementById('editPasswordWrap');
+      extraWrap.innerHTML = '';
+      passWrap.classList.remove('hidden');
+
+      if (type === 'admin') entity = appState.admin;
+      else if (type === 'instructor') entity = appState.instructors.find(x => x.id === id);
+      else if (type === 'akad') entity = appState.akadAssessors.find(x => x.id === id);
+      else if (type === 'participant') {
+        entity = appState.participants.find(x => x.id === id);
+        passWrap.classList.add('hidden');
+        extraWrap.innerHTML = `
+          <label>Jabatan / Amanah</label>
+          <input type="text" id="editJabatanInput" value="${entity.jabatan}" />
+        `;
+      }
+
+      document.getElementById('editNameInput').value = entity.name;
+      document.getElementById('editPasswordInput').value = '';
+      document.getElementById('editPreviewAvatar').src = avatarSrc(entity);
+      window._tempUploadedAvatar = entity.avatar || '';
+      document.getElementById('profileModal').classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function handleAvatarUpload(event, imgPreviewId) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const size = 180;
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+          window._tempUploadedAvatar = dataUrl;
+          document.getElementById(imgPreviewId).src = dataUrl;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveProfileEdit() {
+      const type = document.getElementById('editTargetType').value;
+      const id = document.getElementById('editTargetId').value;
+      const newName = document.getElementById('editNameInput').value.trim();
+      const newPass = document.getElementById('editPasswordInput').value.trim();
+
+      let entity = null;
+      if (type === 'admin') entity = appState.admin;
+      else if (type === 'instructor') entity = appState.instructors.find(x => x.id === id);
+      else if (type === 'akad') entity = appState.akadAssessors.find(x => x.id === id);
+      else if (type === 'participant') {
+        entity = appState.participants.find(x => x.id === id);
+        const jabInp = document.getElementById('editJabatanInput');
+        if (jabInp) entity.jabatan = jabInp.value.trim();
+      }
+
+      if (entity && newName) {
+        entity.name = newName;
+        if (newPass && type !== 'participant') entity.password = newPass;
+        if (window._tempUploadedAvatar !== undefined) entity.avatar = window._tempUploadedAvatar;
+      }
+
+      saveState(currentUser ? currentUser.user.name : 'Sistem', `Memperbarui profil ${newName}`);
+      closeModal('profileModal');
+      updateTopUserBar();
+      refreshAllUI();
+    }
+
+    function refreshAllUI() {
+      initPesertaDropdowns();
+      initStaffDropdown();
+      if (currentUser) renderStaffContent();
+    }
+
+    // =========================================================================
+    // INISIALISASI SAAT HALAMAN DIBUKA
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      refreshAllUI();
+      pullFromCloud(false);
+    });
+  </script>
+</body>
+</html>
