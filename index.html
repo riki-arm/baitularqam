@@ -4,56 +4,57 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Baitul Arqam PPDA — Sistem Manajemen & Evaluasi Perkaderan</title>
+  <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F5132'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23FBBF24' stroke-width='3'/%3E%3Ctext x='32' y='39' text-anchor='middle' fill='%23FFFFFF' font-family='sans-serif' font-weight='800' font-size='22'%3EBA%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root {
-      --bg: #F6F7F9;
-      --surface: rgba(255, 255, 255, 0.88);
+      --bg: #F4F6F8;
+      --surface: rgba(255, 255, 255, 0.92);
       --surface-solid: #FFFFFF;
-      --surface-subtle: #EEF1F5;
-      --border: #E2E6EC;
-      --border-strong: #CBD2DC;
+      --surface-subtle: #EBF0F5;
+      --border: #DCE2E8;
+      --border-strong: #C4CED8;
       --text: #0F172A;
-      --text-muted: #526071;
+      --text-muted: #475569;
       --primary: #0F5132;
       --primary-hover: #0B3E26;
-      --primary-soft: rgba(15, 81, 50, 0.1);
+      --primary-soft: rgba(15, 81, 50, 0.12);
       --accent: #B45309;
-      --accent-soft: rgba(180, 83, 9, 0.12);
+      --accent-soft: rgba(180, 83, 9, 0.14);
       --danger: #B91C1C;
-      --danger-soft: rgba(185, 28, 28, 0.1);
+      --danger-soft: rgba(185, 28, 28, 0.12);
       --info: #1D4ED8;
-      --info-soft: rgba(29, 78, 216, 0.1);
-      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-      --shadow-md: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+      --info-soft: rgba(29, 78, 216, 0.12);
+      --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 12px 28px -10px rgba(15, 23, 42, 0.1);
       --radius-lg: 16px;
       --radius-md: 12px;
-      --radius-sm: 8px;
+      --radius-sm: 10px;
     }
 
     [data-theme="dark"] {
       --bg: #0B0E14;
-      --surface: rgba(21, 26, 35, 0.86);
+      --surface: rgba(21, 26, 35, 0.9);
       --surface-solid: #151A23;
       --surface-subtle: #1D2432;
       --border: #283142;
       --border-strong: #374359;
-      --text: #F1F5F9;
+      --text: #F8FAFC;
       --text-muted: #94A3B8;
       --primary: #22C55E;
       --primary-hover: #16A34A;
-      --primary-soft: rgba(34, 197, 94, 0.14);
+      --primary-soft: rgba(34, 197, 94, 0.15);
       --accent: #F59E0B;
-      --accent-soft: rgba(245, 158, 11, 0.14);
+      --accent-soft: rgba(245, 158, 11, 0.15);
       --danger: #F87171;
-      --danger-soft: rgba(248, 113, 113, 0.14);
+      --danger-soft: rgba(248, 113, 113, 0.15);
       --info: #60A5FA;
-      --info-soft: rgba(96, 165, 250, 0.14);
-      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-      --shadow-md: 0 14px 34px -10px rgba(0, 0, 0, 0.55);
+      --info-soft: rgba(96, 165, 250, 0.15);
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.45);
+      --shadow-md: 0 14px 32px -10px rgba(0, 0, 0, 0.6);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +62,8 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.5;
+      font-size: 15px;
+      line-height: 1.55;
       min-height: 100vh;
       transition: background 0.25s ease, color 0.25s ease;
     }
@@ -70,140 +72,174 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
       letter-spacing: -0.02em;
     }
+    h2 { font-size: 20px; }
+    h3 { font-size: 17px; }
+    h4 { font-size: 15.5px; }
     .mono { font-family: 'JetBrains Mono', monospace; }
 
+    /* Top Bar */
     .topbar {
       position: sticky; top: 0; z-index: 40;
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
     }
     .brand { display: flex; align-items: center; gap: 12px; }
-    .brand-mark {
-      width: 38px; height: 38px; border-radius: 10px; background: var(--primary); color: #fff;
-      display: grid; place-items: center; font-weight: 800; font-size: 15px;
+    .brand-logo-img {
+      width: 44px; height: 44px; border-radius: 12px; object-fit: cover;
+      border: 1.5px solid var(--border-strong); background: var(--surface-solid); flex-shrink: 0;
     }
-    [data-theme="dark"] .brand-mark { color: #052E16; }
     .brand-meta span {
-      display: block; font-size: 11px; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600;
+      display: block; font-size: 11.5px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--text-muted); font-weight: 700;
     }
-    .topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
+    /* Controls */
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 9px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-      background: var(--surface-solid); color: var(--text); font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.16s ease; text-decoration: none;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+      background: var(--surface-solid); color: var(--text); font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.16s ease; text-decoration: none; min-height: 42px;
     }
     .btn:hover { border-color: var(--border-strong); background: var(--surface-subtle); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .btn-primary { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
     [data-theme="dark"] .btn-primary { color: #052E16; }
-    .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
     .btn-danger { background: var(--danger-soft); border-color: transparent; color: var(--danger); }
     .btn-warn { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
-    .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .btn-sm { padding: 8px 12px; font-size: 13px; min-height: 38px; }
 
     input, select, textarea {
-      width: 100%; padding: 9px 12px; border-radius: var(--radius-sm);
+      width: 100%; padding: 11px 14px; border-radius: var(--radius-sm);
       border: 1px solid var(--border); background: var(--surface-solid); color: var(--text);
-      font-family: inherit; font-size: 13.5px; outline: none;
+      font-family: inherit; font-size: 15px; outline: none; min-height: 44px;
     }
     input:focus, select:focus, textarea:focus { border-color: var(--primary); }
     label.field-label {
-      display: block; font-size: 11.5px; font-weight: 700; color: var(--text-muted);
-      margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em;
+      display: block; font-size: 12.5px; font-weight: 700; color: var(--text-muted);
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;
     }
 
-    .container { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    /* Container & Cards */
+    .container { max-width: 1160px; margin: 0 auto; padding: 18px 16px 48px; }
     .card {
       background: var(--surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px;
-      box-shadow: var(--shadow-md); margin-bottom: 20px;
+      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px;
+      box-shadow: var(--shadow-md); margin-bottom: 18px;
     }
     .card-header {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: flex-start; justify-content: space-between;
       gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
     }
 
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
 
     .avatar {
-      width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+      width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
       background: var(--primary-soft); color: var(--primary); display: inline-flex;
-      align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
-      flex-shrink: 0; border: 1.5px solid var(--border);
+      align-items: center; justify-content: center; font-weight: 700; font-size: 14px;
+      flex-shrink: 0; border: 1.5px solid var(--border-strong);
     }
-    .avatar-lg { width: 64px; height: 64px; font-size: 20px; }
+    .avatar-lg { width: 68px; height: 68px; font-size: 20px; }
 
     .badge {
-      display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
-      border-radius: 999px; font-size: 11.5px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px;
+      border-radius: 999px; font-size: 12.5px; font-weight: 700;
     }
     .badge-success { background: var(--primary-soft); color: var(--primary); }
     .badge-warn { background: var(--accent-soft); color: var(--accent); }
     .badge-danger { background: var(--danger-soft); color: var(--danger); }
     .badge-info { background: var(--info-soft); color: var(--info); }
 
+    /* Navigation Tabs */
     .portal-tabs {
       display: flex; gap: 8px; background: var(--surface-subtle); padding: 6px;
-      border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 22px; flex-wrap: wrap;
+      border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 18px; flex-wrap: wrap;
     }
     .portal-tab {
-      flex: 1; min-width: 150px; padding: 10px 14px; border-radius: var(--radius-sm);
-      border: none; background: transparent; color: var(--text-muted); font-weight: 600;
-      font-size: 13px; cursor: pointer; transition: all 0.16s ease;
+      flex: 1 1 180px; padding: 11px 14px; border-radius: var(--radius-sm);
+      border: none; background: transparent; color: var(--text-muted); font-weight: 700;
+      font-size: 14px; cursor: pointer; transition: all 0.16s ease; min-height: 44px;
     }
     .portal-tab.active { background: var(--surface-solid); color: var(--text); box-shadow: var(--shadow-sm); }
 
+    /* Tables */
     .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
     th {
-      background: var(--surface-subtle); font-weight: 700; font-size: 11px;
+      background: var(--surface-subtle); font-weight: 700; font-size: 12px;
       text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); white-space: nowrap;
     }
     tr:last-child td { border-bottom: none; }
 
-    .score-group { display: inline-flex; gap: 4px; flex-wrap: wrap; }
-    .score-btn {
-      width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--border);
-      background: var(--surface-solid); color: var(--text); font-weight: 700; font-size: 12.5px; cursor: pointer;
+    /* Large Score Buttons (1-5) below each aspect */
+    .score-group {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(46px, 1fr));
+      gap: 8px;
+      width: 100%;
+      max-width: 340px;
+      margin-top: 8px;
     }
-    .score-btn.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .score-btn {
+      height: 46px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--surface-solid);
+      color: var(--text);
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+    .score-btn:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .score-btn.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+    }
     [data-theme="dark"] .score-btn.selected { color: #052E16; }
 
-    /* Stacked vertical cards for mobile-friendly Index & Skrining */
+    /* Stacked Vertical Layout for Mobile Clarity */
     .vertical-stack { display: flex; flex-direction: column; gap: 14px; }
     .item-card-vertical {
       background: var(--surface-solid); border: 1px solid var(--border);
-      border-radius: var(--radius-md); padding: 16px;
+      border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-sm);
     }
-    .aspect-row {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--border); flex-wrap: wrap;
+    .aspect-block {
+      padding: 12px 0;
+      border-top: 1px dashed var(--border);
     }
-    .aspect-row:last-child { border-bottom: none; }
+    .aspect-title {
+      font-weight: 700;
+      font-size: 15px;
+      display: block;
+    }
 
-    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #22C55E; display: inline-block; }
+    .sync-dot { width: 9px; height: 9px; border-radius: 50%; background: #22C55E; display: inline-block; }
     .sync-dot.syncing { background: #F59E0B; animation: pulse 1s infinite; }
     .sync-dot.error { background: #EF4444; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(6px);
-      display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100;
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100;
     }
     .modal-backdrop.open { display: flex; }
     .modal-box {
       background: var(--surface-solid); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      max-width: 560px; width: 100%; padding: 24px; max-height: 90vh; overflow-y: auto;
+      max-width: 560px; width: 100%; padding: 22px; max-height: 90vh; overflow-y: auto;
     }
 
     @media print {
       .no-print { display: none !important; }
-      body { background: #fff; color: #000; }
+      body { background: #fff; color: #000; font-size: 12px; }
       .print-grid { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 10px; }
       .id-card-item { border: 1px solid #333; padding: 10px; border-radius: 8px; page-break-inside: avoid; text-align: center; }
     }
@@ -214,24 +250,24 @@
 
   <header class="topbar no-print">
     <div class="brand">
-      <div class="brand-mark">BA</div>
+      <img id="headerCommitteeLogo" class="brand-logo-img" src="" alt="Logo Panitia Baitul Arqam PPDA" />
       <div class="brand-meta">
-        <div class="brand-title" style="font-size: 16px; font-weight: 800;">Baitul Arqam PPDA</div>
-        <span>Sistem Perkaderan & Evaluasi Terpadu</span>
+        <div class="brand-title" style="font-size: 17px; font-weight: 800;">Baitul Arqam PPDA</div>
+        <span>Panitia Perkaderan • Darul Arqam</span>
       </div>
     </div>
 
     <div class="topbar-actions">
       <div id="syncBadge" class="badge badge-info">
         <span id="syncDot" class="sync-dot"></span>
-        <span id="syncText">Terhubung ke Sheets</span>
+        <span id="syncText">Sheets Aktif</span>
       </div>
       <button class="btn btn-sm" onclick="pullFromCloud(true)">↻ Segarkan</button>
-      <button class="btn btn-sm" onclick="toggleTheme()" id="themeBtn">🌙 Mode Gelap</button>
+      <button class="btn btn-sm" onclick="toggleTheme()" id="themeBtn">🌙 Gelap</button>
 
-      <div id="loggedUserBar" class="hidden" style="display:flex; align-items:center; gap:8px;">
+      <div id="loggedUserBar" class="hidden" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <img id="topUserAvatar" class="avatar" src="" alt="" />
-        <span id="topUserName" style="font-size:13px; font-weight:600;"></span>
+        <span id="topUserName" style="font-size:14px; font-weight:700;"></span>
         <button class="btn btn-sm" onclick="openEditProfileModal()">Edit Akun</button>
         <button class="btn btn-sm btn-danger" onclick="logoutStaff()">Keluar</button>
       </div>
@@ -242,9 +278,9 @@
     <!-- GATEWAY -->
     <section id="gatewaySection">
       <div class="portal-tabs no-print">
-        <button class="portal-tab active" onclick="switchGatewayTab('peserta', this)">1. Portal Peserta (Biodata & Tes)</button>
-        <button class="portal-tab" onclick="switchGatewayTab('scan', this)">2. Panitia Scan Barcode</button>
-        <button class="portal-tab" onclick="switchGatewayTab('staff', this)">3. Login Admin / Instruktur / Penilai Akad</button>
+        <button class="portal-tab active" onclick="switchGatewayTab('peserta', this)">1. Portal Peserta</button>
+        <button class="portal-tab" onclick="switchGatewayTab('scan', this)">2. Scan Barcode</button>
+        <button class="portal-tab" onclick="switchGatewayTab('staff', this)">3. Login Pengurus</button>
       </div>
 
       <!-- TAB 1: PORTAL PESERTA -->
@@ -252,7 +288,7 @@
         <div class="card-header">
           <div>
             <h2>Portal Peserta Baitul Arqam</h2>
-            <p style="color:var(--text-muted); font-size:13.5px;">Pilih kelompok dan nama Anda untuk mengisi Biodata Peserta, Pre-Test, atau Post-Test (saat dibuka Admin).</p>
+            <p style="color:var(--text-muted); font-size:14.5px;">Pilih kelompok dan nama Anda untuk mengisi Biodata Peserta, Pre-Test, atau Post-Test.</p>
           </div>
         </div>
 
@@ -271,13 +307,13 @@
           </div>
         </div>
 
-        <div id="pesertaWorkspace" class="hidden" style="margin-top:22px; padding-top:20px; border-top:1px solid var(--border);">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px; flex-wrap:wrap;">
+        <div id="pesertaWorkspace" class="hidden" style="margin-top:20px; padding-top:18px; border-top:1px solid var(--border);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:14px;">
               <img id="pPortalAvatar" class="avatar avatar-lg" src="" alt="" />
               <div>
                 <h3 id="pPortalName"></h3>
-                <p id="pPortalMeta" style="color:var(--text-muted); font-size:13px;"></p>
+                <p id="pPortalMeta" style="color:var(--text-muted); font-size:14px;"></p>
               </div>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -289,7 +325,7 @@
           <div id="pesertaBiodataArea" class="hidden"></div>
           <div id="pesertaTestArea">
             <div id="testButtonsArea" class="grid-2"></div>
-            <div id="quizRunnerArea" class="hidden" style="margin-top:20px;"></div>
+            <div id="quizRunnerArea" class="hidden" style="margin-top:18px;"></div>
           </div>
         </div>
       </div>
@@ -299,13 +335,13 @@
         <div class="card-header">
           <div>
             <h2>Scan Barcode Presensi Materi & Ibadah</h2>
-            <p style="color:var(--text-muted); font-size:13.5px;">Khusus panitia presensi. Masukkan password panitia untuk membuka pemindai.</p>
+            <p style="color:var(--text-muted); font-size:14.5px;">Khusus panitia presensi. Masukkan password panitia untuk membuka pemindai.</p>
           </div>
         </div>
 
-        <div id="scanLockBox" style="max-width:420px;">
+        <div id="scanLockBox" style="max-width:440px;">
           <label class="field-label">Password Panitia Scan</label>
-          <div style="display:flex; gap:8px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <input type="password" id="scanPasswordInput" placeholder="Masukkan password panitia..." onkeyup="if(event.key==='Enter') unlockScanPortal()" />
             <button class="btn btn-primary" onclick="unlockScanPortal()">Buka Scanner</button>
           </div>
@@ -338,20 +374,20 @@
             <div>
               <div id="qrReader" style="width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--border);"></div>
               <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                <button class="btn btn-primary btn-sm" onclick="startCameraScanner()">📷 Aktifkan Kamera HP</button>
-                <button class="btn btn-sm" onclick="stopCameraScanner()">⏹ Matikan Kamera</button>
-                <button class="btn btn-sm" onclick="openPrintIdCards()">🪪 Cetak ID Card (66 Peserta)</button>
+                <button class="btn btn-primary btn-sm" onclick="startCameraScanner()">📷 Kamera HP</button>
+                <button class="btn btn-sm" onclick="stopCameraScanner()">⏹ Matikan</button>
+                <button class="btn btn-sm" onclick="openPrintIdCards()">🪪 Cetak ID Card</button>
               </div>
             </div>
 
             <div>
-              <label class="field-label">Input Manual / Barcode Reader (BA-01 s.d. BA-66)</label>
+              <label class="field-label">Input Manual / Scanner (BA-01 s.d. BA-66)</label>
               <div style="display:flex; gap:8px; margin-bottom:14px;">
                 <input type="text" id="manualBarcodeInput" placeholder="Contoh: BA-01" onkeyup="if(event.key==='Enter') processBarcodeScan(this.value)" />
                 <button class="btn btn-primary" onclick="processBarcodeScan(document.getElementById('manualBarcodeInput').value)">Catat</button>
               </div>
               <div id="scanFeedbackBox" class="card" style="background:var(--surface-subtle); box-shadow:none;">
-                <p style="font-size:13px; color:var(--text-muted);">Belum ada pemindaian pada sesi ini.</p>
+                <p style="font-size:14px; color:var(--text-muted);">Belum ada pemindaian pada sesi ini.</p>
               </div>
             </div>
           </div>
@@ -362,12 +398,12 @@
       <div id="gw-staff" class="card hidden">
         <div class="card-header">
           <div>
-            <h2>Login Panel Penilaian & Manajemen</h2>
-            <p style="color:var(--text-muted); font-size:13.5px;">Pilih nama akun Anda lalu masukkan password.</p>
+            <h2>Login Admin / Instruktur / Penilai Akad</h2>
+            <p style="color:var(--text-muted); font-size:14.5px;">Pilih nama akun Anda lalu masukkan password.</p>
           </div>
         </div>
 
-        <div style="max-width:460px;">
+        <div style="max-width:480px;">
           <div style="margin-bottom:14px;">
             <label class="field-label">Pilih Nama Akun</label>
             <select id="staffAccountSelect"></select>
@@ -376,7 +412,7 @@
             <label class="field-label">Password</label>
             <input type="password" id="staffPasswordInput" placeholder="Masukkan password akun..." onkeyup="if(event.key==='Enter') loginStaff()" />
           </div>
-          <button class="btn btn-primary" style="width:100%;" onclick="loginStaff()">Masuk ke Ruang Kerja</button>
+          <button class="btn btn-primary" style="width:100%;" onclick="loginStaff()">Masuk</button>
         </div>
       </div>
     </section>
@@ -390,7 +426,7 @@
     <!-- PRINT AREA -->
     <section id="printIdCardSection" class="hidden">
       <div class="no-print" style="margin-bottom:16px; display:flex; gap:10px;">
-        <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak Sekarang</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak ID Card</button>
         <button class="btn" onclick="closePrintIdCards()">← Kembali</button>
       </div>
       <div id="printGridContainer" class="print-grid"></div>
@@ -401,16 +437,16 @@
   <div id="profileModal" class="modal-backdrop">
     <div class="modal-box">
       <div class="card-header">
-        <h3 id="profileModalTitle">Edit Akun & Foto Profil</h3>
+        <h3>Edit Akun & Foto Profil</h3>
         <button class="btn btn-sm" onclick="closeModal('profileModal')">✕</button>
       </div>
       <input type="hidden" id="editTargetType" />
       <input type="hidden" id="editTargetId" />
 
-      <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
         <img id="editPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
-        <div style="flex:1;">
-          <label class="field-label">Unggah Foto Baru (Otomatis Kompres)</label>
+        <div style="flex:1; min-width:200px;">
+          <label class="field-label">Unggah Foto Baru</label>
           <input type="file" accept="image/*" onchange="handleAvatarUpload(event, 'editPreviewAvatar')" />
         </div>
       </div>
@@ -421,20 +457,29 @@
       </div>
       <div id="editExtraFieldWrap" style="margin-bottom:12px;"></div>
       <div id="editPasswordWrap" style="margin-bottom:16px;">
-        <label class="field-label">Password Baru (Kosongkan jika tidak diubah)</label>
+        <label class="field-label">Password Baru (Kosongkan jika tetap)</label>
         <input type="text" id="editPasswordInput" placeholder="Password baru..." />
       </div>
 
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn" onclick="closeModal('profileModal')">Batal</button>
-        <button class="btn btn-primary" onclick="saveProfileEdit()">Simpan Perubahan</button>
+        <button class="btn btn-primary" onclick="saveProfileEdit()">Simpan</button>
       </div>
     </div>
   </div>
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-PhKppMosc19DPB7h_d8YL5IKCPegqQaLZKGIKeg9dR5h9b_jboMIakEeo2fd-gGY/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_v2026_2';
+    const STORAGE_KEY = 'baitul_arqam_ppda_v2026_3';
+
+    const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+        <rect width="120" height="120" rx="24" fill="#0F5132"/>
+        <circle cx="60" cy="60" r="44" fill="none" stroke="#FBBF24" stroke-width="5"/>
+        <polygon points="60,22 69,43 92,45 74,60 80,82 60,70 40,82 46,60 28,45 51,43" fill="#FBBF24" opacity="0.22"/>
+        <text x="60" y="67" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="800" font-size="30">PPDA</text>
+      </svg>
+    `);
 
     const RAW_PARTICIPANTS = [
       ["Abid Daffa Khairullah, S.Pd.", "Musyrif 1A Putra"], ["Aceng Tasmanuddin, S.Pd", "TS kls 7 PA"],
@@ -530,21 +575,34 @@
       { id: 'f_kontribusi', label: 'Kontribusi Apa yang Dapat Anda Berikan di Persyarikatan Muhammadiyah?', type: 'textarea', options: [] }
     ];
 
+    function renumberGroups(participants) {
+      const counters = {};
+      participants.forEach(p => {
+        const g = Number(p.group || 1);
+        counters[g] = (counters[g] || 0) + 1;
+        p.groupNo = counters[g];
+      });
+      return participants;
+    }
+
     function createInitialState() {
       const participants = RAW_PARTICIPANTS.map((item, idx) => {
         const num = idx + 1;
         return {
           id: 'BA-' + String(num).padStart(2, '0'),
           no: num,
+          groupNo: 1,
           name: item[0],
           jabatan: item[1],
           group: (idx % 6) + 1,
           avatar: ''
         };
       });
+      renumberGroups(participants);
 
       return {
         webAppUrl: DEFAULT_WEB_APP_URL,
+        committeeLogo: '',
         theme: 'light',
         scanPassword: 'panitia2026',
         admin: { id: 'admin-1', name: 'Riki Ahmad Roqin Muntaha, S.Pd.', password: 'admin123', avatar: '' },
@@ -651,15 +709,24 @@
         if (raw) {
           const base = createInitialState();
           const parsed = JSON.parse(raw);
-          return { ...base, ...parsed, webAppUrl: parsed.webAppUrl || DEFAULT_WEB_APP_URL };
+          const merged = { ...base, ...parsed, webAppUrl: parsed.webAppUrl || DEFAULT_WEB_APP_URL };
+          renumberGroups(merged.participants || []);
+          return merged;
         }
       } catch (e) {}
       return createInitialState();
     }
 
     function saveState(actor = 'Sistem', summary = 'Pembaruan data') {
+      renumberGroups(appState.participants || []);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
       pushToCloud(actor, summary);
+    }
+
+    function applyBranding() {
+      const logo = appState.committeeLogo || DEFAULT_COMMITTEE_LOGO;
+      document.getElementById('headerCommitteeLogo').src = logo;
+      document.getElementById('faviconLink').href = logo;
     }
 
     // =========================================================================
@@ -680,12 +747,13 @@
         if (json.ok && json.data) {
           const currentUrl = appState.webAppUrl;
           appState = { ...createInitialState(), ...json.data, webAppUrl: currentUrl };
+          renumberGroups(appState.participants || []);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
           refreshAllUI();
           setSyncStatus('ok', 'Tersinkronisasi');
           if (notify) alert('Data terbaru dimuat dari Google Sheets!');
         } else {
-          setSyncStatus('ok', 'Siap');
+          setSyncStatus('ok', 'Sheets Aktif');
           if (notify) alert('Terhubung ke Google Sheets.');
         }
       } catch (err) {
@@ -703,7 +771,7 @@
           const m = computeParticipantMetrics(p.id);
           const ins = appState.instructors.find(x => x.group === p.group);
           return [
-            i + 1, p.name, p.jabatan, 'Kelompok ' + p.group, ins ? ins.name : '-',
+            i + 1, p.name, p.jabatan, `Kelompok ${p.group} (#${p.groupNo || i + 1})`, ins ? ins.name : '-',
             m.presensiMateri, m.presensiIbadah, m.keaktifan, m.etika,
             m.kedisiplinan, m.empati, m.testScore, m.skriningScore, m.akadScore
           ];
@@ -799,7 +867,7 @@
       const html = document.documentElement;
       const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
       html.setAttribute('data-theme', next);
-      document.getElementById('themeBtn').textContent = next === 'light' ? '🌙 Mode Gelap' : '☀️ Mode Terang';
+      document.getElementById('themeBtn').textContent = next === 'light' ? '🌙 Gelap' : '☀️ Terang';
     }
 
     function switchGatewayTab(tab, btn) {
@@ -811,7 +879,7 @@
     }
 
     // =========================================================================
-    // PORTAL PESERTA (BIODATA DINAMIS + PRE/POST TEST + PRESENSI MATERI OTOMATIS)
+    // PORTAL PESERTA
     // =========================================================================
     function initPesertaDropdowns() {
       const grpSel = document.getElementById('pesertaGroupSelect');
@@ -828,7 +896,7 @@
       document.getElementById('pesertaWorkspace').classList.add('hidden');
       if (!grp) return;
       appState.participants.filter(p => p.group === grp).forEach(p => {
-        nameSel.innerHTML += `<option value="${p.id}">${p.no}. ${p.name} (${p.jabatan})</option>`;
+        nameSel.innerHTML += `<option value="${p.id}">${p.groupNo}. ${p.name} (${p.jabatan})</option>`;
       });
     }
 
@@ -844,7 +912,7 @@
 
       document.getElementById('pPortalAvatar').src = avatarSrc(p);
       document.getElementById('pPortalName').textContent = `${p.name} (${p.id})`;
-      document.getElementById('pPortalMeta').textContent = `${p.jabatan} • Kelompok ${p.group} (${ins ? ins.name : '-'})`;
+      document.getElementById('pPortalMeta').textContent = `${p.jabatan} • Kelompok ${p.group} No. ${p.groupNo} (${ins ? ins.name : '-'})`;
 
       renderPesertaBiodataForm(p);
       renderPesertaTests(pid);
@@ -871,14 +939,14 @@
             const val = saved[f.id];
             if (f.type === 'text') {
               const initVal = val !== undefined ? val : (f.id === 'f_nama' ? p.name : '');
-              return `<div style="margin-bottom:12px;"><label class="field-label">${f.label}</label><input type="text" id="bio_${f.id}" value="${initVal}" /></div>`;
+              return `<div style="margin-bottom:14px;"><label class="field-label">${f.label}</label><input type="text" id="bio_${f.id}" value="${initVal}" /></div>`;
             }
             if (f.type === 'textarea') {
-              return `<div style="margin-bottom:12px;"><label class="field-label">${f.label}</label><textarea rows="2" id="bio_${f.id}">${val || ''}</textarea></div>`;
+              return `<div style="margin-bottom:14px;"><label class="field-label">${f.label}</label><textarea rows="2" id="bio_${f.id}">${val || ''}</textarea></div>`;
             }
             if (f.type === 'select') {
               return `
-                <div style="margin-bottom:12px;">
+                <div style="margin-bottom:14px;">
                   <label class="field-label">${f.label}</label>
                   <select id="bio_${f.id}">
                     <option value="">-- Pilih --</option>
@@ -889,25 +957,25 @@
             if (f.type === 'custom_select') {
               const isCustom = val && !f.options.includes(val);
               return `
-                <div style="margin-bottom:12px;">
+                <div style="margin-bottom:14px;">
                   <label class="field-label">${f.label}</label>
                   <select id="bio_${f.id}" onchange="document.getElementById('bio_custom_${f.id}').classList.toggle('hidden', this.value !== '__custom__')">
                     <option value="">-- Pilih --</option>
                     ${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}
                     <option value="__custom__" ${isCustom ? 'selected' : ''}>Tulis Sendiri...</option>
                   </select>
-                  <input type="text" id="bio_custom_${f.id}" class="${isCustom ? '' : 'hidden'}" style="margin-top:6px;" placeholder="Tuliskan jawaban Anda..." value="${isCustom ? val : ''}" />
+                  <input type="text" id="bio_custom_${f.id}" class="${isCustom ? '' : 'hidden'}" style="margin-top:8px;" placeholder="Tuliskan jawaban Anda..." value="${isCustom ? val : ''}" />
                 </div>`;
             }
             if (f.type === 'checkbox') {
               const arr = Array.isArray(val) ? val : [];
               return `
-                <div style="margin-bottom:12px;">
+                <div style="margin-bottom:14px;">
                   <label class="field-label">${f.label}</label>
-                  <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                  <div style="display:flex; flex-wrap:wrap; gap:12px;">
                     ${f.options.map(o => `
-                      <label style="display:inline-flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" name="bio_chk_${f.id}" value="${o}" ${arr.includes(o) ? 'checked' : ''} style="width:auto;" />
+                      <label style="display:inline-flex; align-items:center; gap:7px; font-size:14px; cursor:pointer;">
+                        <input type="checkbox" name="bio_chk_${f.id}" value="${o}" ${arr.includes(o) ? 'checked' : ''} style="width:20px; height:20px; min-height:20px;" />
                         <span>${o}</span>
                       </label>
                     `).join('')}
@@ -970,9 +1038,9 @@
 
       area.innerHTML = `
         <div class="card" style="box-shadow:none; margin:0;">
-          <h4>Pre-Test (Otomatis Presensi Sesi Materi)</h4>
-          <p style="font-size:12.5px; color:var(--text-muted); margin:6px 0 12px;">
-            ${preOpen ? 'Sesi Pre-Test dibuka oleh Admin. Mengisi Pre-Test otomatis mencatat presensi materi.' : 'Terkunci — Menunggu Admin membuka sesi Pre-Test.'}
+          <h4>Pre-Test (Otomatis Presensi Materi)</h4>
+          <p style="font-size:14px; color:var(--text-muted); margin:6px 0 14px;">
+            ${preOpen ? 'Sesi Pre-Test dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Pre-Test.'}
           </p>
           ${res.pre !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Poin: ${res.pre})</span>` :
             preOpen ? `<button class="btn btn-primary" onclick="startQuiz('pre')">Kerjakan Pre-Test</button>` :
@@ -980,7 +1048,7 @@
         </div>
         <div class="card" style="box-shadow:none; margin:0;">
           <h4>Post-Test</h4>
-          <p style="font-size:12.5px; color:var(--text-muted); margin:6px 0 12px;">
+          <p style="font-size:14px; color:var(--text-muted); margin:6px 0 14px;">
             ${postOpen ? 'Sesi Post-Test dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Post-Test.'}
           </p>
           ${res.post !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Poin: ${res.post})</span>` :
@@ -1004,11 +1072,11 @@
         <div class="card" style="background:var(--surface-subtle); box-shadow:none;">
           <h3 style="margin-bottom:14px;">${type === 'pre' ? 'Pre-Test' : 'Post-Test'}</h3>
           ${qs.map((q, idx) => `
-            <div style="margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border);">
-              <p style="font-weight:600; margin-bottom:8px;">${idx + 1}. ${q.text}</p>
+            <div style="margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+              <p style="font-weight:700; margin-bottom:10px; font-size:15px;">${idx + 1}. ${q.text}</p>
               ${q.type === 'mc' ? q.options.map((opt, oIdx) => `
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:6px; font-size:13px;">
-                  <input type="radio" name="ans_${q.id}" value="${oIdx}" style="width:auto;" />
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom:8px; font-size:14.5px;">
+                  <input type="radio" name="ans_${q.id}" value="${oIdx}" style="width:20px; height:20px; min-height:20px;" />
                   <span>${String.fromCharCode(65 + oIdx)}. ${opt}</span>
                 </label>
               `).join('') : `<input type="text" id="short_${q.id}" placeholder="Tuliskan jawaban singkat Anda..." />`}
@@ -1037,7 +1105,6 @@
       if (!appState.testResults[selectedPesertaPortalId]) appState.testResults[selectedPesertaPortalId] = {};
       appState.testResults[selectedPesertaPortalId][type] = point;
 
-      // Catatan #6: Pre-Test otomatis mencatat presensi kehadiran materi
       if (type === 'pre' && appState.testConfig.preAttendanceSessionId) {
         if (!appState.presensi[selectedPesertaPortalId]) appState.presensi[selectedPesertaPortalId] = {};
         appState.presensi[selectedPesertaPortalId][appState.testConfig.preAttendanceSessionId] = 5;
@@ -1104,7 +1171,7 @@
           <div>
             <span class="badge badge-success">Tercatat +${pts} Poin</span>
             <h4 style="margin-top:4px;">${p.name} (${p.id})</h4>
-            <p style="font-size:12.5px; color:var(--text-muted);">${sess.title}</p>
+            <p style="font-size:14px; color:var(--text-muted);">${sess.title}</p>
           </div>
         </div>`;
       saveState('Panitia Scan', `Presensi ${p.name} (+${pts})`);
@@ -1115,11 +1182,11 @@
       document.getElementById('printIdCardSection').classList.remove('hidden');
       document.getElementById('printGridContainer').innerHTML = appState.participants.map(p => `
         <div class="id-card-item">
-          <div style="font-size:10px; font-weight:700;">BAITUL ARQAM PPDA</div>
-          <img src="${avatarSrc(p)}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; margin:6px auto;" />
+          <div style="font-size:10px; font-weight:800;">BAITUL ARQAM PPDA</div>
+          <img src="${avatarSrc(p)}" style="width:52px; height:52px; border-radius:50%; object-fit:cover; margin:6px auto;" />
           <div style="font-weight:700; font-size:12px;">${p.name}</div>
-          <div style="font-size:10.5px; color:#555;">${p.jabatan} • Kel. ${p.group}</div>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${p.id}" style="width:90px; height:90px; margin:6px auto;" />
+          <div style="font-size:10.5px; color:#555;">${p.jabatan} • Kel. ${p.group} #${p.groupNo}</div>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${p.id}" style="width:88px; height:88px; margin:6px auto;" />
           <div class="mono" style="font-weight:700;">${p.id}</div>
         </div>`).join('');
     }
@@ -1179,12 +1246,12 @@
       let tabs = [];
       if (role === 'admin') {
         tabs = [
-          { id: 'dashboard', label: 'Dashboard 9 Aspek' },
+          { id: 'dashboard', label: 'Dashboard' },
           { id: 'index', label: 'Index' },
           { id: 'skrining', label: 'Skrining' },
           { id: 'akad', label: 'Akad Amanah' },
-          { id: 'final', label: 'Klasemen Final' },
-          { id: 'admin', label: 'Kontrol Admin & CRUD' }
+          { id: 'final', label: 'Final' },
+          { id: 'admin', label: 'Kontrol Admin' }
         ];
       } else if (role === 'instructor') {
         tabs = [
@@ -1239,12 +1306,12 @@
           <div class="card-header">
             <div>
               <h2>Dashboard 9 Aspek</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Target Min: ${appState.dashboardRules.minTarget} • Target Maks: ${appState.dashboardRules.maxTarget}</p>
+              <p style="color:var(--text-muted); font-size:14px;">Target Min: ${appState.dashboardRules.minTarget} • Target Maks: ${appState.dashboardRules.maxTarget}</p>
             </div>
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>No</th><th>Aspek</th><th>Rata-rata Poin</th><th>Tercapai (%)</th><th>Tidak Tercapai (%)</th><th>Predikat</th></tr></thead>
+              <thead><tr><th>No</th><th>Aspek</th><th>Rata-rata</th><th>Tercapai</th><th>Tidak Tercapai</th><th>Predikat</th></tr></thead>
               <tbody>
                 ${rows.map(r => {
                   const pct = Math.min(100, Math.max(0, Math.round((r.avg / r.max) * 100)));
@@ -1264,106 +1331,118 @@
     }
 
     // =========================================================================
-    // VIEW 2: INDEX (VERTIKAL KE BAWAH + BULK APPLY + RESET PER PESERTA/SESI)
+    // VIEW 2: INDEX (SESI TERKUNCI DISEMBUNYIKAN + ASPEK DI ATAS, ANGKA BESAR DI BAWAH)
     // =========================================================================
     function renderIndexView(area) {
       const isInstructor = currentUser.role === 'instructor';
       const targetGroup = isInstructor ? currentUser.user.group : Number(window._adminIdxGroup || 1);
       const members = appState.participants.filter(p => p.group === targetGroup);
 
-      let unlockedCount = 1;
+      // Hitung batas sesi yang sudah terbuka (hanya sesi yang sudah terbuka yang ditampilkan)
+      let maxUnlockedIdx = 0;
       for (let i = 0; i < appState.indexSessions.length; i++) {
         const sId = appState.indexSessions[i].id;
-        const ok = members.every(m => {
+        const doneAll = members.length > 0 && members.every(m => {
           const r = appState.indexScores[m.id]?.[sId];
           return r && r.keaktifan && r.etika && r.kedisiplinan && r.empati;
         });
-        if (ok) unlockedCount = i + 2;
+        if (doneAll) maxUnlockedIdx = Math.min(i + 1, appState.indexSessions.length - 1);
         else break;
       }
 
-      const activeSessId = window._selectedIdxSession || appState.indexSessions[Math.min(unlockedCount - 1, appState.indexSessions.length - 1)]?.id;
+      const visibleSessions = isInstructor
+        ? appState.indexSessions.slice(0, maxUnlockedIdx + 1)
+        : appState.indexSessions;
+
+      let activeSessId = window._selectedIdxSession;
+      if (!visibleSessions.some(s => s.id === activeSessId)) {
+        activeSessId = visibleSessions[visibleSessions.length - 1]?.id;
+        window._selectedIdxSession = activeSessId;
+      }
+
+      const activeSess = visibleSessions.find(s => s.id === activeSessId) || visibleSessions[0];
 
       area.innerHTML = `
         <div class="card">
           <div class="card-header">
             <div>
               <h2>Index — Kelompok ${targetGroup}</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Tampilan bertumpuk ke bawah. Selesaikan sesi aktif untuk membuka sesi berikutnya.</p>
+              <p style="color:var(--text-muted); font-size:14px;">${activeSess ? activeSess.title : 'Belum ada sesi'}</p>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               ${!isInstructor ? `<select style="width:200px;" onchange="window._adminIdxGroup=Number(this.value); renderStaffContent();">
                 ${appState.instructors.map(i => `<option value="${i.group}" ${i.group === targetGroup ? 'selected' : ''}>Kelompok ${i.group}</option>`).join('')}
               </select>` : ''}
-              <button class="btn btn-sm btn-warn" onclick="resetIndexSession(${targetGroup}, '${activeSessId}')">↺ Reset Sesi Ini</button>
+              ${activeSess ? `<button class="btn btn-sm btn-warn" onclick="resetIndexSession(${targetGroup}, '${activeSess.id}')">↺ Reset Sesi</button>` : ''}
             </div>
           </div>
 
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-            ${appState.indexSessions.map((s, idx) => {
-              const locked = isInstructor && (idx + 1 > unlockedCount);
-              return `<button class="btn btn-sm ${s.id === activeSessId ? 'btn-primary' : ''}" ${locked ? 'disabled' : ''}
-                onclick="window._selectedIdxSession='${s.id}'; renderStaffContent();">${locked ? '🔒 ' : ''}${s.title}</button>`;
-            }).join('')}
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+            ${visibleSessions.map(s => `
+              <button class="btn btn-sm ${activeSess && s.id === activeSess.id ? 'btn-primary' : ''}"
+                onclick="window._selectedIdxSession='${s.id}'; renderStaffContent();">${s.title}</button>
+            `).join('')}
           </div>
 
-          <!-- BULK SET ALL PARTICIPANTS IN GROUP -->
-          <div class="card" style="background:var(--surface-subtle); box-shadow:none; padding:14px;">
-            <div style="font-size:12.5px; font-weight:700; margin-bottom:8px;">Terapkan Nilai Otomatis ke Semua Peserta di Kelompok ${targetGroup} (Lalu edit yang perlu saja):</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-              ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(asp => `
-                <div style="display:flex; align-items:center; gap:4px;">
-                  <span style="font-size:12px; font-weight:600; text-transform:capitalize;">${asp}:</span>
-                  ${[1,2,3,4,5].map(v => `<button class="score-btn" onclick="bulkSetIndex(${targetGroup}, '${activeSessId}', '${asp}', ${v})">${v}</button>`).join('')}
-                </div>
-              `).join('')}
-            </div>
-          </div>
-
-          <!-- STACKED VERTICAL CARDS -->
-          <div class="vertical-stack">
-            ${members.map(m => {
-              const row = appState.indexScores[m.id]?.[activeSessId] || {};
-              return `
-                <div class="item-card-vertical">
-                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                      <img class="avatar" src="${avatarSrc(m)}" />
-                      <div>
-                        <div style="font-weight:700;">${m.name}</div>
-                        <div style="font-size:12px; color:var(--text-muted);">${m.jabatan}</div>
-                      </div>
+          ${activeSess ? `
+            <div class="card" style="background:var(--surface-subtle); box-shadow:none; padding:14px;">
+              <div style="font-size:14px; font-weight:700; margin-bottom:10px;">Nilai Otomatis Semua Peserta Kel. ${targetGroup} (Klik 1–5 lalu edit yang perlu):</div>
+              <div class="grid-2">
+                ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(asp => `
+                  <div>
+                    <span class="aspect-title" style="text-transform:capitalize;">${asp} (1–5)</span>
+                    <div class="score-group">
+                      ${[1,2,3,4,5].map(v => `<button class="score-btn" onclick="bulkSetIndex(${targetGroup}, '${activeSess.id}', '${asp}', ${v})">${v}</button>`).join('')}
                     </div>
-                    <button class="btn btn-sm btn-danger" onclick="resetIndexParticipant('${m.id}', '${activeSessId}')">Batal / Reset</button>
                   </div>
-                  ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(field => `
-                    <div class="aspect-row">
-                      <span style="font-weight:600; font-size:13px; text-transform:capitalize;">${field} (1–5)</span>
-                      <div class="score-group">
-                        ${[1,2,3,4,5].map(val => {
-                          const selected = Number(row[field]) === val;
-                          return `<button class="score-btn ${selected ? 'selected' : ''}"
-                            onclick="toggleIndexScore('${m.id}', '${activeSessId}', '${field}', ${val})">${val}</button>`;
-                        }).join('')}
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="vertical-stack">
+              ${members.map(m => {
+                const row = appState.indexScores[m.id]?.[activeSess.id] || {};
+                return `
+                  <div class="item-card-vertical">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                      <div style="display:flex; align-items:center; gap:12px;">
+                        <span class="badge badge-info mono">#${m.groupNo}</span>
+                        <img class="avatar" src="${avatarSrc(m)}" />
+                        <div>
+                          <div style="font-weight:700; font-size:15.5px;">${m.name}</div>
+                          <div style="font-size:13px; color:var(--text-muted);">${m.jabatan}</div>
+                        </div>
                       </div>
+                      <button class="btn btn-sm btn-danger" onclick="resetIndexParticipant('${m.id}', '${activeSess.id}')">Batal</button>
                     </div>
-                  `).join('')}
-                </div>`;
-            }).join('')}
-          </div>
+
+                    ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(field => {
+                      const labelMap = { keaktifan: 'Keaktifan (1-5)', etika: 'Etika (1-5)', kedisiplinan: 'Kedisiplinan (1-5)', empati: 'Empati (1-5)' };
+                      return `
+                        <div class="aspect-block">
+                          <span class="aspect-title">${labelMap[field]}</span>
+                          <div class="score-group">
+                            ${[1,2,3,4,5].map(val => {
+                              const selected = Number(row[field]) === val;
+                              return `<button class="score-btn ${selected ? 'selected' : ''}"
+                                onclick="toggleIndexScore('${m.id}', '${activeSess.id}', '${field}', ${val})">${val}</button>`;
+                            }).join('')}
+                          </div>
+                        </div>`;
+                    }).join('')}
+                  </div>`;
+              }).join('')}
+            </div>
+          ` : ''}
         </div>`;
     }
 
     function toggleIndexScore(pid, sessId, field, val) {
       if (!appState.indexScores[pid]) appState.indexScores[pid] = {};
       if (!appState.indexScores[pid][sessId]) appState.indexScores[pid][sessId] = {};
-      // Klik nilai yang sama = batalkan/kosongkan
-      if (Number(appState.indexScores[pid][sessId][field]) === val) {
-        delete appState.indexScores[pid][sessId][field];
-      } else {
-        appState.indexScores[pid][sessId][field] = val;
-      }
-      saveState(currentUser.user.name, `Update index ${pid}`);
+      if (Number(appState.indexScores[pid][sessId][field]) === val) delete appState.indexScores[pid][sessId][field];
+      else appState.indexScores[pid][sessId][field] = val;
+      saveState(currentUser.user.name, `Index ${pid}`);
       renderStaffContent();
     }
 
@@ -1373,7 +1452,7 @@
         if (!appState.indexScores[p.id][sessId]) appState.indexScores[p.id][sessId] = {};
         appState.indexScores[p.id][sessId][field] = val;
       });
-      saveState(currentUser.user.name, `Bulk set ${field}=${val} Kel.${group}`);
+      saveState(currentUser.user.name, `Bulk ${field}=${val} Kel.${group}`);
       renderStaffContent();
     }
 
@@ -1386,7 +1465,7 @@
     }
 
     function resetIndexSession(group, sessId) {
-      if (!confirm('Reset seluruh nilai pada sesi ini untuk kelompok?')) return;
+      if (!confirm('Reset seluruh nilai sesi ini?')) return;
       appState.participants.filter(p => p.group === group).forEach(p => {
         if (appState.indexScores[p.id]?.[sessId]) delete appState.indexScores[p.id][sessId];
       });
@@ -1395,14 +1474,13 @@
     }
 
     // =========================================================================
-    // VIEW 3: SKRINING (PILIH 1 PESERTA + TAMPILAN KE BAWAH + BULK + RESET)
+    // VIEW 3: SKRINING (FOKUS 1 PESERTA KE BAWAH + ANGKA BESAR DI BAWAH ITEM)
     // =========================================================================
     function renderSkriningView(area) {
       const isInstructor = currentUser.role === 'instructor';
       const targetGroup = isInstructor ? currentUser.user.group : Number(window._adminSkrGroup || 1);
       const members = appState.participants.filter(p => p.group === targetGroup);
-      const selectedPid = window._selectedSkrPid || members[0]?.id || '';
-      const activeParticipant = members.find(m => m.id === selectedPid) || members[0];
+      const activeParticipant = members.find(m => m.id === window._selectedSkrPid) || members[0];
       const activeSecId = window._selectedSkrSec || appState.skriningSections[0]?.id;
       const secObj = appState.skriningSections.find(s => s.id === activeSecId) || appState.skriningSections[0];
 
@@ -1413,8 +1491,8 @@
         <div class="card">
           <div class="card-header">
             <div>
-              <h2>Penilaian Skrining — Kelompok ${targetGroup}</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Pilih peserta yang sedang dites agar fokus ke bawah tanpa melebar ke samping.</p>
+              <h2>Skrining — Kelompok ${targetGroup}</h2>
+              <p style="color:var(--text-muted); font-size:14px;">Pilih peserta yang sedang dites; indikator dan angka 1–5 tampil ke bawah.</p>
             </div>
             ${!isInstructor ? `<select style="width:200px;" onchange="window._adminSkrGroup=Number(this.value); window._selectedSkrPid=''; renderStaffContent();">
               ${appState.instructors.map(i => `<option value="${i.group}" ${i.group === targetGroup ? 'selected' : ''}>Kelompok ${i.group}</option>`).join('')}
@@ -1423,13 +1501,13 @@
 
           <div class="grid-2" style="margin-bottom:16px;">
             <div>
-              <label class="field-label">Pilih Peserta yang Sedang Dites</label>
+              <label class="field-label">Pilih Peserta</label>
               <select onchange="window._selectedSkrPid=this.value; renderStaffContent();">
-                ${members.map(m => `<option value="${m.id}" ${activeParticipant && m.id === activeParticipant.id ? 'selected' : ''}>${m.no}. ${m.name} (${m.jabatan})</option>`).join('')}
+                ${members.map(m => `<option value="${m.id}" ${activeParticipant && m.id === activeParticipant.id ? 'selected' : ''}>${m.groupNo}. ${m.name} (${m.jabatan})</option>`).join('')}
               </select>
             </div>
             <div>
-              <label class="field-label">Pilih Bagian Skrining</label>
+              <label class="field-label">Pilih Jenis Skrining</label>
               <select onchange="window._selectedSkrSec=this.value; renderStaffContent();">
                 ${appState.skriningSections.map(s => `<option value="${s.id}" ${s.id === secObj.id ? 'selected' : ''}>${s.title}</option>`).join('')}
               </select>
@@ -1437,27 +1515,30 @@
           </div>
 
           ${activeParticipant ? `
-            <div class="item-card-vertical" style="margin-bottom:16px;">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+            <div class="item-card-vertical">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
                 <div style="display:flex; align-items:center; gap:12px;">
                   <img class="avatar avatar-lg" src="${avatarSrc(activeParticipant)}" />
                   <div>
-                    <h3>${activeParticipant.name}</h3>
-                    <p style="font-size:12.5px; color:var(--text-muted);">${activeParticipant.jabatan} • Skor ${secObj.title}: <strong class="mono">${sum}</strong></p>
+                    <h3>#${activeParticipant.groupNo} • ${activeParticipant.name}</h3>
+                    <p style="font-size:13.5px; color:var(--text-muted);">${activeParticipant.jabatan} • Skor: <strong class="mono">${sum}</strong></p>
                   </div>
                 </div>
-                <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                  <span style="font-size:12px; font-weight:600;">Semua Item:</span>
+                <button class="btn btn-sm btn-danger" onclick="resetSkrining('${activeParticipant.id}', '${secObj.id}')">Reset</button>
+              </div>
+
+              <div class="aspect-block">
+                <span class="aspect-title">Nilai Otomatis Semua Item ${secObj.title} (1–5)</span>
+                <div class="score-group">
                   ${[1,2,3,4,5].map(v => `<button class="score-btn" onclick="bulkSetSkrining('${activeParticipant.id}', '${secObj.id}', ${secObj.items.length}, ${v})">${v}</button>`).join('')}
-                  <button class="btn btn-sm btn-danger" onclick="resetSkrining('${activeParticipant.id}', '${secObj.id}')">Reset</button>
                 </div>
               </div>
 
               ${secObj.items.map((itemText, idx) => {
                 const curVal = Number(rec.items?.[idx] || 0);
                 return `
-                  <div class="aspect-row">
-                    <span style="font-size:13px; flex:1; min-width:220px;"><strong>${idx + 1}.</strong> ${itemText}</span>
+                  <div class="aspect-block">
+                    <span class="aspect-title">${idx + 1}. ${itemText} (1–5)</span>
                     <div class="score-group">
                       ${[1,2,3,4,5].map(v => `
                         <button class="score-btn ${curVal === v ? 'selected' : ''}"
@@ -1467,7 +1548,7 @@
                   </div>`;
               }).join('')}
 
-              <div style="margin-top:14px;">
+              <div class="aspect-block">
                 <label class="field-label">Catatan Khusus Peserta (Tidak Wajib)</label>
                 <input type="text" value="${rec.note || ''}" placeholder="Catatan pembina / penguji..."
                   onchange="setSkriningNote('${activeParticipant.id}', '${secObj.id}', this.value)" />
@@ -1480,11 +1561,8 @@
     function toggleSkriningScore(pid, secId, idx, val) {
       if (!appState.skrining[pid]) appState.skrining[pid] = {};
       if (!appState.skrining[pid][secId]) appState.skrining[pid][secId] = { items: [], note: '' };
-      if (Number(appState.skrining[pid][secId].items[idx]) === val) {
-        appState.skrining[pid][secId].items[idx] = 0;
-      } else {
-        appState.skrining[pid][secId].items[idx] = val;
-      }
+      if (Number(appState.skrining[pid][secId].items[idx]) === val) appState.skrining[pid][secId].items[idx] = 0;
+      else appState.skrining[pid][secId].items[idx] = val;
       saveState(currentUser.user.name, `Skrining ${pid}`);
       renderStaffContent();
     }
@@ -1493,7 +1571,7 @@
       if (!appState.skrining[pid]) appState.skrining[pid] = {};
       if (!appState.skrining[pid][secId]) appState.skrining[pid][secId] = { items: [], note: '' };
       appState.skrining[pid][secId].items = Array(count).fill(val);
-      saveState(currentUser.user.name, `Bulk skrining ${pid} = ${val}`);
+      saveState(currentUser.user.name, `Bulk skrining ${pid}`);
       renderStaffContent();
     }
 
@@ -1521,18 +1599,18 @@
           <div class="card-header">
             <div>
               <h2>Wawancara Akad Amanah</h2>
-              <p style="color:var(--text-muted); font-size:13px;">Penilai bebas memilih peserta lintas kelompok dan mengatur pertanyaan wawancara.</p>
+              <p style="color:var(--text-muted); font-size:14px;">Penilai bebas memilih peserta lintas kelompok dan mengatur pertanyaan wawancara.</p>
             </div>
           </div>
 
           <div class="card" style="background:var(--surface-subtle); box-shadow:none;">
             <h4>Pertanyaan Wawancara Akad Amanah</h4>
-            <ol style="padding-left:20px; font-size:13px; margin:8px 0 12px;">
+            <ol style="padding-left:20px; font-size:14px; margin:8px 0 12px;">
               ${appState.akadQuestions.map((q, i) => `
-                <li style="margin-bottom:5px;">${q} <button class="btn btn-sm btn-danger" style="padding:2px 7px;" onclick="deleteAkadQuestion(${i})">Hapus</button></li>
+                <li style="margin-bottom:6px;">${q} <button class="btn btn-sm btn-danger" style="padding:2px 8px; min-height:28px;" onclick="deleteAkadQuestion(${i})">Hapus</button></li>
               `).join('')}
             </ol>
-            <div style="display:flex; gap:8px; max-width:560px;">
+            <div style="display:flex; gap:8px; max-width:560px; flex-wrap:wrap;">
               <input type="text" id="newAkadQ" placeholder="Tambah pertanyaan wawancara..." />
               <button class="btn btn-sm btn-primary" onclick="addAkadQ()">+ Tambah</button>
             </div>
@@ -1543,21 +1621,22 @@
               const rec = appState.akadScores[p.id] || {};
               return `
                 <div class="item-card-vertical">
-                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
                     <div style="display:flex; align-items:center; gap:10px;">
                       <img class="avatar" src="${avatarSrc(p)}" />
                       <div>
-                        <div style="font-weight:700;">${p.name}</div>
-                        <div style="font-size:12px; color:var(--text-muted);">${p.jabatan} • Kel. ${p.group}</div>
+                        <div style="font-weight:700; font-size:15px;">${p.name}</div>
+                        <div style="font-size:13px; color:var(--text-muted);">${p.jabatan} • Kel. ${p.group} #${p.groupNo}</div>
                       </div>
                     </div>
-                    <div style="display:flex; gap:6px; align-items:center;">
-                      <div class="score-group">
-                        ${[1,2,3,4,5].map(v => `
-                          <button class="score-btn ${Number(rec.score) === v ? 'selected' : ''}" onclick="toggleAkadScore('${p.id}', ${v})">${v}</button>
-                        `).join('')}
-                      </div>
-                      <button class="btn btn-sm btn-danger" onclick="resetAkad('${p.id}')">Reset</button>
+                    <button class="btn btn-sm btn-danger" onclick="resetAkad('${p.id}')">Reset</button>
+                  </div>
+                  <div class="aspect-block">
+                    <span class="aspect-title">Skor Komitmen Akad Amanah (1–5)</span>
+                    <div class="score-group">
+                      ${[1,2,3,4,5].map(v => `
+                        <button class="score-btn ${Number(rec.score) === v ? 'selected' : ''}" onclick="toggleAkadScore('${p.id}', ${v})">${v}</button>
+                      `).join('')}
                     </div>
                   </div>
                   <input type="text" value="${rec.note || ''}" placeholder="Catatan wawancara..." onchange="setAkadNote('${p.id}', this.value)" />
@@ -1659,12 +1738,17 @@
     }
 
     // =========================================================================
-    // VIEW 6: KONTROL ADMIN (CRUD SOAL, BIODATA, INDEX/SKRINING, DASHBOARD, AKUN & RESET)
+    // VIEW 6: KONTROL ADMIN
     // =========================================================================
     function renderAdminControlView(area) {
       area.innerHTML = `
-        <!-- 1. BUKA TES & RESET TOTAL -->
         <div class="grid-2">
+          <div class="card">
+            <h3>Logo Panitia & Favicon</h3>
+            <p style="font-size:13.5px; color:var(--text-muted); margin:6px 0 12px;">Unggah logo resmi panitia Baitul Arqam PPDA untuk header & favicon.</p>
+            <input type="file" accept="image/*" onchange="handleCommitteeLogoUpload(event)" />
+          </div>
+
           <div class="card">
             <h3>Kontrol Pre-Test, Post-Test & Presensi Materi Otomatis</h3>
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin:12px 0;">
@@ -1675,8 +1759,8 @@
                 ${appState.testConfig.postTestOpen ? '✅ Post-Test DIBUKA' : '🔒 Post-Test DITUTUP'}
               </button>
             </div>
-            <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:10px; cursor:pointer;">
-              <input type="checkbox" style="width:auto;" ${appState.testConfig.sameQuestions ? 'checked' : ''} onchange="appState.testConfig.sameQuestions=this.checked; saveState('Admin','Ubah opsi soal sama');" />
+            <label style="display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;">
+              <input type="checkbox" style="width:20px; height:20px; min-height:20px;" ${appState.testConfig.sameQuestions ? 'checked' : ''} onchange="appState.testConfig.sameQuestions=this.checked; saveState('Admin','Ubah opsi soal sama');" />
               <span>Samakan soal Pre-Test dan Post-Test</span>
             </label>
             <label class="field-label">Sesi Materi Otomatis Terisi Saat Pre-Test</label>
@@ -1685,7 +1769,9 @@
               ${PRESENSI_SESSIONS.filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${appState.testConfig.preAttendanceSessionId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}
             </select>
           </div>
+        </div>
 
+        <div class="grid-2">
           <div class="card">
             <h3>Ketentuan Dashboard & Reset Data</h3>
             <div class="grid-2" style="margin:10px 0;">
@@ -1697,43 +1783,36 @@
               <button class="btn btn-sm btn-danger" onclick="wipeAllData()">🗑 Hapus Semua Data Dari Awal</button>
             </div>
           </div>
-        </div>
 
-        <!-- 2. CRUD BANK SOAL (PRE & POST TEST) -->
-        <div class="card">
-          <div class="card-header">
-            <h3>CRUD Bank Soal (Pilihan Ganda, Isian Singkat / Esai, Campuran)</h3>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-sm btn-primary" onclick="createQuestionBatch('pre')">+ Buat Paket Soal Pre-Test</button>
-              <button class="btn btn-sm btn-primary" onclick="createQuestionBatch('post')">+ Buat Paket Soal Post-Test</button>
+          <div class="card">
+            <h3>CRUD Bank Soal</h3>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;">
+              <button class="btn btn-sm btn-primary" onclick="createQuestionBatch('pre')">+ Paket Soal Pre-Test</button>
+              <button class="btn btn-sm btn-primary" onclick="createQuestionBatch('post')">+ Paket Soal Post-Test</button>
             </div>
+            ${['pre', 'post'].map(t => {
+              const list = getActiveQuestions(t);
+              return `
+                <div style="margin-top:10px;">
+                  <strong>${t === 'pre' ? 'Pre-Test' : 'Post-Test'} (${list.length} soal)</strong>
+                  ${list.map((q, idx) => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:13.5px;">
+                      <span>${idx + 1}. ${q.text}</span>
+                      <div style="display:flex; gap:4px;">
+                        <button class="btn btn-sm" onclick="editQuestion('${t}', ${idx})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteQuestion('${t}', ${idx})">Hapus</button>
+                      </div>
+                    </div>`).join('')}
+                </div>`;
+            }).join('')}
           </div>
-          ${['pre', 'post'].map(t => {
-            const list = getActiveQuestions(t);
-            return `
-              <div style="margin-bottom:14px;">
-                <h4>${t === 'pre' ? 'Daftar Soal Pre-Test' : 'Daftar Soal Post-Test'} (${list.length} soal)</h4>
-                ${list.map((q, idx) => `
-                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;">
-                    <span><strong>${idx + 1}.</strong> [${q.type === 'mc' ? `PG (${q.options.length} opsi)` : 'Isian/Esai'}] ${q.text}</span>
-                    <div style="display:flex; gap:6px;">
-                      <button class="btn btn-sm" onclick="editQuestion('${t}', ${idx})">Edit</button>
-                      <button class="btn btn-sm btn-danger" onclick="deleteQuestion('${t}', ${idx})">Hapus</button>
-                    </div>
-                  </div>`).join('')}
-              </div>`;
-          }).join('')}
         </div>
 
-        <!-- 3. STRUKTUR INDEX & SKRINING -->
         <div class="grid-2">
           <div class="card">
-            <div class="card-header">
-              <h3>Struktur Sesi Index</h3>
-              <button class="btn btn-sm btn-primary" onclick="addIndexSession()">+ Tambah Sesi</button>
-            </div>
+            <div class="card-header"><h3>Struktur Sesi Index</h3><button class="btn btn-sm btn-primary" onclick="addIndexSession()">+ Tambah</button></div>
             ${appState.indexSessions.map((s, idx) => `
-              <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:13.5px;">
                 <span>${s.title}</span>
                 <div style="display:flex; gap:4px;">
                   <button class="btn btn-sm" onclick="renameIndexSession(${idx})">Edit</button>
@@ -1743,15 +1822,12 @@
           </div>
 
           <div class="card">
-            <div class="card-header">
-              <h3>Struktur Bagian & Item Skrining</h3>
-              <button class="btn btn-sm btn-primary" onclick="addSkriningItem()">+ Tambah Indikator</button>
-            </div>
+            <div class="card-header"><h3>Struktur Skrining</h3><button class="btn btn-sm btn-primary" onclick="addSkriningItem()">+ Tambah Item</button></div>
             ${appState.skriningSections.map((sec, sIdx) => `
               <div style="margin-bottom:10px;">
                 <strong>${sec.title}</strong>
                 ${sec.items.map((it, iIdx) => `
-                  <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:12.5px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:13px;">
                     <span>${iIdx + 1}. ${it}</span>
                     <div style="display:flex; gap:4px;">
                       <button class="btn btn-sm" onclick="editSkriningItem(${sIdx}, ${iIdx})">Edit</button>
@@ -1762,14 +1838,10 @@
           </div>
         </div>
 
-        <!-- 4. EDIT PERTANYAAN BIODATA PESERTA -->
         <div class="card">
-          <div class="card-header">
-            <h3>Pengaturan Pertanyaan Biodata Peserta (${appState.biodataFields.length} Pertanyaan)</h3>
-            <button class="btn btn-sm btn-primary" onclick="addBiodataField()">+ Tambah Pertanyaan Biodata</button>
-          </div>
+          <div class="card-header"><h3>Pertanyaan Biodata Peserta (${appState.biodataFields.length})</h3><button class="btn btn-sm btn-primary" onclick="addBiodataField()">+ Tambah</button></div>
           ${appState.biodataFields.map((f, idx) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:13.5px;">
               <span><strong>${idx + 1}.</strong> ${f.label} <span class="badge badge-info">${f.type}</span></span>
               <div style="display:flex; gap:4px;">
                 <button class="btn btn-sm" onclick="editBiodataField(${idx})">Edit</button>
@@ -1778,13 +1850,12 @@
             </div>`).join('')}
         </div>
 
-        <!-- 5. KELOLA INSTRUKTUR & PENILAI KHUSUS -->
         <div class="grid-2">
           <div class="card">
             <div class="card-header"><h3>Instruktur (${appState.instructors.length})</h3><button class="btn btn-sm btn-primary" onclick="addInstructor()">+ Tambah</button></div>
             ${appState.instructors.map(ins => `
               <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
-                <div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(ins)}" /><div><div style="font-weight:700; font-size:13px;">${ins.name}</div><div style="font-size:11.5px; color:var(--text-muted);">Kel. ${ins.group} • Pass: ${ins.password}</div></div></div>
+                <div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(ins)}" /><div><div style="font-weight:700; font-size:14px;">${ins.name}</div><div style="font-size:12px; color:var(--text-muted);">Kel. ${ins.group} • Pass: ${ins.password}</div></div></div>
                 <div style="display:flex; gap:4px;"><button class="btn btn-sm" onclick="openEntityEditor('instructor', '${ins.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteInstructor('${ins.id}')">Hapus</button></div>
               </div>`).join('')}
           </div>
@@ -1793,27 +1864,26 @@
             <div class="card-header"><h3>Penilai Khusus Akad Amanah (${appState.akadAssessors.length})</h3><button class="btn btn-sm btn-primary" onclick="addAkadAssessor()">+ Tambah</button></div>
             ${appState.akadAssessors.map(ak => `
               <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
-                <div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(ak)}" /><div><div style="font-weight:700; font-size:13px;">${ak.name}</div><div style="font-size:11.5px; color:var(--text-muted);">Pass: ${ak.password}</div></div></div>
+                <div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(ak)}" /><div><div style="font-weight:700; font-size:14px;">${ak.name}</div><div style="font-size:12px; color:var(--text-muted);">Pass: ${ak.password}</div></div></div>
                 <div style="display:flex; gap:4px;"><button class="btn btn-sm" onclick="openEntityEditor('akad', '${ak.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteAkadAssessor('${ak.id}')">Hapus</button></div>
               </div>`).join('')}
           </div>
         </div>
 
-        <!-- 6. DAFTAR PESERTA (HAPUS / EDIT / KELOMPOK) -->
         <div class="card">
-          <div class="card-header"><h3>Daftar Peserta (${appState.participants.length} Orang)</h3></div>
+          <div class="card-header"><h3>Daftar Peserta (${appState.participants.length} Orang — Urut 1..N per Kelompok)</h3></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>ID</th><th>Foto & Nama</th><th>Jabatan</th><th>Kelompok</th><th>Aksi</th></tr></thead>
+              <thead><tr><th>Kel.</th><th>No. Kel</th><th>Foto & Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
               <tbody>
                 ${appState.participants.map(p => `
                   <tr>
-                    <td class="mono">${p.id}</td>
-                    <td><div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(p)}" /><strong>${p.name}</strong></div></td>
-                    <td>${p.jabatan}</td>
                     <td><select style="width:125px;" onchange="changeParticipantGroup('${p.id}', Number(this.value))">
                       ${[1,2,3,4,5,6].map(g => `<option value="${g}" ${p.group === g ? 'selected' : ''}>Kel. ${g}</option>`).join('')}
                     </select></td>
+                    <td class="mono" style="font-weight:800;">${p.groupNo}</td>
+                    <td><div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(p)}" /><strong>${p.name}</strong></div></td>
+                    <td>${p.jabatan}</td>
                     <td><div style="display:flex; gap:4px;">
                       <button class="btn btn-sm" onclick="openEntityEditor('participant', '${p.id}')">Edit/Foto</button>
                       <button class="btn btn-sm btn-danger" onclick="deleteParticipant('${p.id}')">Hapus</button>
@@ -1825,6 +1895,28 @@
         </div>`;
     }
 
+    function handleCommitteeLogoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 160; canvas.height = 160;
+          const ctx = canvas.getContext('2d');
+          const side = Math.min(img.width, img.height);
+          ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 160, 160);
+          appState.committeeLogo = canvas.toDataURL('image/png');
+          applyBranding();
+          saveState('Admin', 'Update logo panitia & favicon');
+          alert('Logo panitia dan favicon berhasil diperbarui!');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
     function toggleTest(k) { appState.testConfig[k] = !appState.testConfig[k]; saveState('Admin', `Toggle ${k}`); renderStaffContent(); }
     function saveDashboardRules() {
       appState.dashboardRules.minTarget = Number(document.getElementById('ruleMin').value || 0);
@@ -1833,23 +1925,24 @@
       alert('Ketentuan Dashboard tersimpan!');
     }
     function wipeAllData() {
-      if (!confirm('Yakin hapus SEMUA nilai, presensi, biodata, dan reset ke kondisi awal?')) return;
+      if (!confirm('Yakin hapus SEMUA nilai, presensi, biodata, dan reset ke awal?')) return;
       if (!confirm('Konfirmasi kedua: seluruh data penilaian akan dikosongkan. Lanjutkan?')) return;
       const fresh = createInitialState();
       fresh.webAppUrl = appState.webAppUrl;
+      fresh.committeeLogo = appState.committeeLogo;
       appState = fresh;
       saveState('Admin', 'Reset total semua data');
       renderStaffContent();
     }
 
     function createQuestionBatch(type) {
-      const mode = prompt('Pilih jenis soal: ketik "mc" (Pilihan Ganda), "short" (Isian Singkat/Esai), atau "mix" (Campuran PG + Isian Singkat):', 'mc');
+      const mode = prompt('Jenis soal: ketik "mc" (Pilihan Ganda), "short" (Isian Singkat/Esai), atau "mix" (Campuran):', 'mc');
       if (!mode) return;
       const targetArr = type === 'pre' ? appState.testConfig.preQuestions : appState.testConfig.postQuestions;
 
       if (mode === 'mix') {
         const mcCount = Number(prompt('Jumlah soal Pilihan Ganda:', 10) || 10);
-        const optCount = Number(prompt('Jumlah opsi jawaban per PG (misal 4 atau 5):', 5) || 5);
+        const optCount = Number(prompt('Jumlah opsi jawaban per PG:', 5) || 5);
         const shortCount = Number(prompt('Jumlah soal Isian Singkat / Esai:', 10) || 10);
         for (let i = 1; i <= mcCount; i++) {
           targetArr.push({ id: `${type}_mc_${Date.now()}_${i}`, type: 'mc', text: `Soal Pilihan Ganda #${i}`, options: Array.from({ length: optCount }, (_, k) => `Opsi ${String.fromCharCode(65 + k)}`), answer: 0 });
@@ -1858,13 +1951,13 @@
           targetArr.push({ id: `${type}_sh_${Date.now()}_${j}`, type: 'short', text: `Pertanyaan Isian Singkat / Esai #${j}` });
         }
       } else if (mode === 'short') {
-        const count = Number(prompt('Berapa jumlah soal isian singkat / esai?', 10) || 10);
+        const count = Number(prompt('Jumlah soal isian singkat / esai:', 10) || 10);
         for (let i = 1; i <= count; i++) {
           targetArr.push({ id: `${type}_sh_${Date.now()}_${i}`, type: 'short', text: `Pertanyaan Isian Singkat / Esai #${i}` });
         }
       } else {
-        const count = Number(prompt('Berapa jumlah soal pilihan ganda?', 10) || 10);
-        const optCount = Number(prompt('Berapa opsi jawaban per soal? (misal 5):', 5) || 5);
+        const count = Number(prompt('Jumlah soal pilihan ganda:', 10) || 10);
+        const optCount = Number(prompt('Jumlah opsi jawaban per soal:', 5) || 5);
         for (let i = 1; i <= count; i++) {
           targetArr.push({ id: `${type}_mc_${Date.now()}_${i}`, type: 'mc', text: `Pertanyaan Pilihan Ganda #${i}`, options: Array.from({ length: optCount }, (_, k) => `Pilihan ${String.fromCharCode(65 + k)}`), answer: 0 });
         }
@@ -1914,9 +2007,9 @@
     }
 
     function addSkriningItem() {
-      const secId = prompt('Pilih bagian skrining: ketik "wudlu", "shalat", atau "quran":', 'wudlu');
+      const secId = prompt('Bagian skrining ("wudlu", "shalat", atau "quran"):', 'wudlu');
       const sec = appState.skriningSections.find(s => s.id === secId) || appState.skriningSections[0];
-      const text = prompt(`Tambah indikator baru pada ${sec.title}:`);
+      const text = prompt(`Tambah indikator pada ${sec.title}:`);
       if (!text) return;
       sec.items.push(text);
       saveState('Admin', 'Tambah item skrining');
@@ -1938,9 +2031,9 @@
     function addBiodataField() {
       const label = prompt('Teks pertanyaan biodata baru:');
       if (!label) return;
-      const type = prompt('Tipe input: ketik "text", "textarea", "select", "custom_select", atau "checkbox":', 'text') || 'text';
+      const type = prompt('Tipe input ("text", "textarea", "select", "custom_select", "checkbox"):', 'text') || 'text';
       const optsRaw = (type === 'select' || type === 'custom_select' || type === 'checkbox')
-        ? (prompt('Pisahkan pilihan dengan koma (,):', 'Opsi 1, Opsi 2, Opsi 3') || '') : '';
+        ? (prompt('Pisahkan pilihan dengan koma (,):', 'Opsi 1, Opsi 2') || '') : '';
       const options = optsRaw ? optsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
       appState.biodataFields.push({ id: 'f_' + Date.now(), label, type, options });
       saveState('Admin', 'Tambah pertanyaan biodata');
@@ -1952,7 +2045,7 @@
       if (!label) return;
       f.label = label;
       if (f.options?.length) {
-        const raw = prompt('Edit pilihan (pisahkan dengan koma):', f.options.join(', '));
+        const raw = prompt('Edit pilihan (pisahkan koma):', f.options.join(', '));
         if (raw !== null) f.options = raw.split(',').map(s => s.trim()).filter(Boolean);
       }
       saveState('Admin', 'Edit pertanyaan biodata');
@@ -1995,12 +2088,18 @@
 
     function changeParticipantGroup(pid, grp) {
       const p = appState.participants.find(x => x.id === pid);
-      if (p) { p.group = grp; saveState('Admin', `Pindah ${p.name} ke Kel. ${grp}`); }
+      if (p) {
+        p.group = grp;
+        renumberGroups(appState.participants);
+        saveState('Admin', `Pindah ${p.name} ke Kel. ${grp}`);
+        renderStaffContent();
+      }
     }
     function deleteParticipant(pid) {
       const p = appState.participants.find(x => x.id === pid);
       if (!p || !confirm(`Hapus peserta ${p.name}?`)) return;
       appState.participants = appState.participants.filter(x => x.id !== pid);
+      renumberGroups(appState.participants);
       saveState('Admin', `Hapus peserta ${p.name}`);
       renderStaffContent();
     }
@@ -2085,6 +2184,7 @@
     }
 
     function refreshAllUI() {
+      applyBranding();
       initPesertaDropdowns();
       initStaffDropdown();
       if (currentUser) renderStaffContent();
