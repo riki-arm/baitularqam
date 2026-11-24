@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baitul Arqam PPDA</title>
+  <title>Baitul Arqam PPDA — Bento Grid Perkaderan</title>
   <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F5132'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23FBBF24' stroke-width='3'/%3E%3Ctext x='32' y='39' text-anchor='middle' fill='%23FFFFFF' font-family='sans-serif' font-weight='800' font-size='22'%3EBA%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -846,6 +846,8 @@
       renumberGroups(participants);
 
       return {
+        updatedAt: Date.now(),
+        committeeLogoUpdatedAt: 0,
         webAppUrl: DEFAULT_WEB_APP_URL,
         committeeLogo: '',
         theme: 'light',
@@ -976,6 +978,8 @@
       const merged = {
         ...base,
         ...parsed,
+        updatedAt: Number(parsed.updatedAt || 0),
+        committeeLogoUpdatedAt: Number(parsed.committeeLogoUpdatedAt || 0),
         webAppUrl: parsed.webAppUrl || DEFAULT_WEB_APP_URL,
         eventStartDate: parsed.eventStartDate || base.eventStartDate,
         superadmin,
@@ -1051,16 +1055,23 @@
     }
 
     function saveState(actor = 'Sistem', summary = 'Pembaruan data') {
+      appState.updatedAt = Date.now();
       renumberGroups(appState.participants || []);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (err) {
+        alert('Penyimpanan browser penuh. Gunakan gambar logo yang lebih kecil atau kompres.');
+      }
       persistSessionMeta();
       pushToCloud(actor, summary);
     }
 
     function applyBranding() {
       const logo = appState.committeeLogo || DEFAULT_COMMITTEE_LOGO;
-      document.getElementById('headerCommitteeLogo').src = logo;
-      document.getElementById('faviconLink').href = logo;
+      const headerImg = document.getElementById('headerCommitteeLogo');
+      const favLink = document.getElementById('faviconLink');
+      if (headerImg) headerImg.src = logo;
+      if (favLink) favLink.href = logo;
 
       const greetEl = document.getElementById('personalizedGreeting');
       if (currentUser) {
@@ -1091,16 +1102,33 @@
         const res = await fetch(url);
         const json = await res.json();
         if (json.ok && json.data) {
-          appState = normalizeState({ ...json.data, webAppUrl: url });
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+          const cloudState = normalizeState({ ...json.data, webAppUrl: url });
+          const localUpdated = Number(appState.updatedAt || 0);
+          const cloudUpdated = Number(cloudState.updatedAt || 0);
+
+          if (cloudUpdated > localUpdated) {
+            appState = cloudState;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+          } else {
+            if (!appState.committeeLogo && cloudState.committeeLogo) {
+              appState.committeeLogo = cloudState.committeeLogo;
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            }
+            if (localUpdated > cloudUpdated) {
+              pushToCloud('Sinkronisasi Lokal', 'Unggah perubahan terbaru ke cloud');
+            }
+          }
+
           currentUser = resolveSessionUser();
           refreshAllUI();
           setSyncStatus('ok', 'Tersinkronisasi');
           if (notify) alert('Data terbaru dimuat dari Google Sheets!');
         } else {
+          applyBranding();
           setSyncStatus('ok', 'Sheets Aktif');
         }
       } catch (err) {
+        applyBranding();
         setSyncStatus('error', 'Mode Lokal');
       }
     }
@@ -2887,8 +2915,10 @@
           const ctx = canvas.getContext('2d'); const side = Math.min(img.width, img.height);
           ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 160, 160);
           appState.committeeLogo = canvas.toDataURL('image/png');
-          applyBranding(); saveState('Admin', 'Update logo panitia & favicon');
-          alert('Logo panitia dan favicon berhasil diperbarui!');
+          appState.committeeLogoUpdatedAt = Date.now();
+          applyBranding();
+          saveState(currentUser ? currentUser.user.name : 'Admin', 'Update logo panitia & favicon');
+          alert('Logo panitia dan favicon berhasil disimpan!');
         };
         img.src = ev.target.result;
       };
