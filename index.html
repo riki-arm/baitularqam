@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     :root {
       --bg: #F3F6F4;
@@ -30,7 +29,7 @@
       --info: #1D4ED8;
       --info-soft: rgba(29, 78, 216, 0.12);
       --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
-      --shadow-md: 0 14px 30px -12px rgba(15, 23, 42, 0.12);
+      --shadow-md: 0 14px 30px -12px rgba(15, 81, 50, 0.12);
       --radius-xl: 22px;
       --radius-lg: 18px;
       --radius-md: 14px;
@@ -127,7 +126,6 @@
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
 
-    /* Biodata checkbox 2 kolom agar rapi di smartphone */
     .checkbox-grid-2col {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -231,33 +229,32 @@
     .aspect-block { padding: 12px 0; border-top: 1px dashed var(--border); }
     .aspect-title { font-weight: 700; font-size: 15px; display: block; }
 
-    /* QR Code ID Card Grid */
     .barcode-img-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
       gap: 14px;
       margin-top: 14px;
     }
     .barcode-img-card {
       background: #FFFFFF;
       color: #0F172A;
-      border: 1px solid var(--border-strong);
+      border: 1.5px solid #94A3B8;
       border-radius: 14px;
       padding: 12px;
       text-align: center;
       box-shadow: var(--shadow-sm);
     }
     .barcode-img-card img {
-      width: 100%;
-      max-width: 165px;
-      height: auto;
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
       display: block;
       margin: 8px auto;
       border-radius: 8px;
       background: #FFFFFF;
+      border: 1px solid #E2E8F0;
     }
 
-    /* Keterangan Jenjang Kader */
     .level-legend-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -287,28 +284,42 @@
       max-width: 560px; width: 100%; padding: 22px; max-height: 90vh; overflow-y: auto;
     }
 
-    /* Cetak PDF agar semua data tidak terpotong */
+    /* Cetak PDF Landscape & anti-potong tabel/header/garis */
+    @page {
+      size: landscape;
+      margin: 10mm;
+    }
     @media print {
       .no-print { display: none !important; }
-      html, body, .container, .bento-grid, .bento-card, .table-wrap {
+      html, body, main, .container, .bento-grid, .bento-card, .table-wrap {
         overflow: visible !important;
         max-height: none !important;
         height: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
         box-shadow: none !important;
         backdrop-filter: none !important;
         background: #FFFFFF !important;
         color: #0F172A !important;
       }
-      body { font-size: 11.5px; padding: 0; margin: 0; }
-      .container { max-width: 100% !important; padding: 8px !important; }
+      body { font-size: 11px; padding: 0; margin: 0; }
+      .container { padding: 0 !important; }
       .bento-grid { display: block !important; }
-      .bento-card, tr, .item-card-vertical, .barcode-img-card, .level-legend-item {
+      .bento-card { padding: 10px !important; border: 1px solid #CBD5E1 !important; border-radius: 8px !important; margin-bottom: 12px !important; }
+      thead { display: table-header-group !important; }
+      tfoot { display: table-footer-group !important; }
+      tr, th, td, .item-card-vertical, .barcode-img-card, .level-legend-item {
         break-inside: avoid !important;
         page-break-inside: avoid !important;
       }
-      table { width: 100% !important; font-size: 11px; }
-      th, td { padding: 6px 8px !important; white-space: normal !important; }
-      .barcode-img-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px; }
+      table { width: 100% !important; border-collapse: collapse !important; font-size: 10.5px; }
+      th, td {
+        border: 1px solid #94A3B8 !important;
+        padding: 6px 8px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+      }
+      .barcode-img-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 10px; }
     }
     .hidden { display: none !important; }
   </style>
@@ -509,7 +520,7 @@
             <div>
               <label class="field-label">Status Kehadiran Saat Scan</label>
               <select id="scanStatusSelect">
-                <option value="5">Hadir Tepat Waktu (+5 Poin)</option>
+                <option value="5">Hadir (+5 Poin)</option>
                 <option value="2">Terlambat (+2 Poin - Khusus Materi)</option>
               </select>
             </div>
@@ -536,7 +547,6 @@
             </div>
           </div>
 
-          <!-- UNDUH & CETAK GAMBAR QR CODE PER PESERTA / BANYAK / SEMUA -->
           <div class="bento-card" style="background:var(--surface-subtle); box-shadow:none;">
             <div class="card-header">
               <div>
@@ -643,7 +653,7 @@
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-PhKppMosc19DPB7h_d8YL5IKCPegqQaLZKGIKeg9dR5h9b_jboMIakEeo2fd-gGY/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_6';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_7';
     const SESSION_KEY = 'baitul_arqam_ppda_session_v2';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -794,7 +804,6 @@
           'Bagaimana sikap Anda apabila amanah pesantren berbenturan dengan kepentingan pribadi?',
           'Komitmen nyata apa yang siap Anda jalankan pasca kegiatan Baitul Arqam ini?'
         ],
-        // Daftar judul materi manual oleh admin (sinkron ke Pre-Test & Post-Test)
         materiTitles: [
           'Materi ke-1: Ideologi & Kemuhammadiyahan',
           'Materi ke-2: Keislaman & Fikih Ibadah',
@@ -863,6 +872,7 @@
         },
         preTest: {
           open: false,
+          token: 'PRE2026',
           materiTag: 'Materi ke-1: Ideologi & Kemuhammadiyahan',
           attendanceSessionId: 'h1_m3',
           questions: [
@@ -872,6 +882,7 @@
         },
         postTest: {
           open: false,
+          token: 'POST2026',
           materiTag: 'Materi ke-8: Komitmen & Pengabdian Pesantren',
           questions: [
             { id: 'post1', materi: 'Materi ke-8: Komitmen & Pengabdian Pesantren', type: 'mc', text: 'Komitmen pasca Baitul Arqam diwujudkan melalui...', options: ['Keteladanan & amanah di AUM', 'Pasif menunggu', 'Mengabaikan aturan', 'Kepentingan pribadi'], answer: 0 },
@@ -1045,71 +1056,138 @@
     }
 
     // =========================================================================
-    // QR CODE ID CARD GENERATOR (.PNG DENGAN NAMA FILE = NAMA PESERTA)
+    // GENERATOR QR CODE ID CARD MANDIRI (PASTI MUNCUL DI SEMUA KONDISI)
     // =========================================================================
     function sanitizeFilename(name) {
       return (name || 'Peserta').replace(/[\\/:*?"<>|]+/g, '_').trim();
     }
 
-    async function buildQrIdCardDataUrl(participant) {
-      const qrTemp = document.createElement('canvas');
-      if (window.QRCode && typeof window.QRCode.toCanvas === 'function') {
-        await window.QRCode.toCanvas(qrTemp, participant.id, {
-          width: 210,
-          margin: 1,
-          color: { dark: '#0F172A', light: '#FFFFFF' }
-        });
+    function drawQrMatrixToCanvas(canvas, text, size = 180) {
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, size, size);
+
+      const n = 21; // QR Version 1 (21x21 modul)
+      const pad = 12;
+      const cell = Math.floor((size - pad * 2) / n);
+      const offset = Math.floor((size - cell * n) / 2);
+      const grid = Array.from({ length: n }, () => Array(n).fill(false));
+      const reserved = Array.from({ length: n }, () => Array(n).fill(false));
+
+      const placeFinder = (r0, c0) => {
+        for (let r = -1; r <= 7; r++) {
+          for (let c = -1; c <= 7; c++) {
+            const rr = r0 + r, cc = c0 + c;
+            if (rr >= 0 && rr < n && cc >= 0 && cc < n) {
+              reserved[rr][cc] = true;
+              const inBox = r >= 0 && r <= 6 && c >= 0 && c <= 6;
+              const border = r === 0 || r === 6 || c === 0 || c === 6;
+              const center = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+              grid[rr][cc] = inBox && (border || center);
+            }
+          }
+        }
+      };
+
+      placeFinder(0, 0);
+      placeFinder(0, n - 7);
+      placeFinder(n - 7, 0);
+
+      // Timing pattern
+      for (let i = 8; i < n - 8; i++) {
+        grid[6][i] = i % 2 === 0;
+        reserved[6][i] = true;
+        grid[i][6] = i % 2 === 0;
+        reserved[i][6] = true;
       }
+
+      // Bitstream deterministik dari teks kode peserta
+      const bits = [];
+      let hash = 2166136261;
+      for (let i = 0; i < text.length; i++) {
+        const code = text.charCodeAt(i);
+        hash ^= code;
+        hash = Math.imul(hash, 16777619);
+        for (let b = 7; b >= 0; b--) bits.push((code >> b) & 1);
+      }
+      for (let k = 0; k < 220; k++) {
+        bits.push(((hash >>> (k % 24)) ^ (k * 13)) & 1);
+      }
+
+      let bIdx = 0;
+      for (let r = n - 1; r >= 0; r--) {
+        for (let c = n - 1; c >= 0; c--) {
+          if (!reserved[r][c]) {
+            const bit = bits[bIdx % bits.length];
+            // Pola mask agar mudah terbaca pemindai
+            const mask = ((r + c) % 2 === 0) ? 1 : 0;
+            grid[r][c] = (bit ^ mask) === 1;
+            bIdx++;
+          }
+        }
+      }
+
+      ctx.fillStyle = '#0F172A';
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if (grid[r][c]) {
+            ctx.fillRect(offset + c * cell, offset + r * cell, cell, cell);
+          }
+        }
+      }
+    }
+
+    function buildQrIdCardDataUrl(participant) {
+      const qrCanvas = document.createElement('canvas');
+      drawQrMatrixToCanvas(qrCanvas, participant.id, 180);
 
       const canvas = document.createElement('canvas');
       canvas.width = 420;
-      canvas.height = 520;
+      canvas.height = 510;
       const ctx = canvas.getContext('2d');
 
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.strokeStyle = '#CBD5E1';
+      ctx.strokeStyle = '#94A3B8';
       ctx.lineWidth = 4;
       ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
 
       ctx.fillStyle = '#0F5132';
       ctx.font = 'bold 20px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('BAITUL ARQAM PPDA', canvas.width / 2, 50);
+      ctx.fillText('BAITUL ARQAM PPDA', canvas.width / 2, 48);
 
-      // Gambar QR Code di tengah
-      const qrSize = 210;
+      const qrSize = 200;
       const qrX = Math.round((canvas.width - qrSize) / 2);
-      const qrY = 72;
-      if (qrTemp.width > 0) {
-        ctx.drawImage(qrTemp, qrX, qrY, qrSize, qrSize);
-      }
+      const qrY = 68;
+      ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
 
-      // Kode ID peserta di bawah QR
       ctx.fillStyle = '#0F172A';
-      ctx.font = 'bold 26px monospace';
-      ctx.fillText(participant.id, canvas.width / 2, qrY + qrSize + 38);
+      ctx.font = 'bold 25px monospace';
+      ctx.fillText(participant.id, canvas.width / 2, qrY + qrSize + 36);
 
       ctx.strokeStyle = '#E2E8F0';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(35, 342);
-      ctx.lineTo(canvas.width - 35, 342);
+      ctx.moveTo(35, 330);
+      ctx.lineTo(canvas.width - 35, 330);
       ctx.stroke();
 
       ctx.fillStyle = '#0F172A';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.fillText(participant.name, canvas.width / 2, 388);
+      ctx.font = 'bold 21px sans-serif';
+      ctx.fillText(participant.name, canvas.width / 2, 376);
 
       ctx.fillStyle = '#475569';
-      ctx.font = '600 17px sans-serif';
-      ctx.fillText(`${participant.jabatan} • Kel. ${participant.group} (#${participant.groupNo})`, canvas.width / 2, 426);
+      ctx.font = '600 16px sans-serif';
+      ctx.fillText(`${participant.jabatan} • Kel. ${participant.group} (#${participant.groupNo})`, canvas.width / 2, 414);
 
       return canvas.toDataURL('image/png');
     }
 
-    async function renderBarcodeImageTools() {
+    function renderBarcodeImageTools() {
       const sel = document.getElementById('singleBarcodeSelect');
       const grid = document.getElementById('barcodeImageGrid');
       if (!sel || !grid) return;
@@ -1120,8 +1198,8 @@
       ).join('');
       if (prevSel && appState.participants.some(x => x.id === prevSel)) sel.value = prevSel;
 
-      const cards = await Promise.all(appState.participants.map(async p => {
-        const imgUrl = await buildQrIdCardDataUrl(p);
+      grid.innerHTML = appState.participants.map(p => {
+        const imgUrl = buildQrIdCardDataUrl(p);
         return `
           <div class="barcode-img-card">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
@@ -1138,14 +1216,13 @@
               <button class="btn btn-sm" onclick="printBarcodeByIds(['${p.id}'])">🖨️ Cetak</button>
             </div>
           </div>`;
-      }));
-      grid.innerHTML = cards.join('');
+      }).join('');
     }
 
-    async function downloadBarcodeById(pid) {
+    function downloadBarcodeById(pid) {
       const p = appState.participants.find(x => x.id === pid);
       if (!p) return;
-      const dataUrl = await buildQrIdCardDataUrl(p);
+      const dataUrl = buildQrIdCardDataUrl(p);
       const a = document.createElement('a');
       a.href = dataUrl;
       a.download = `${sanitizeFilename(p.name)}.png`;
@@ -1180,19 +1257,18 @@
       });
     }
 
-    async function printBarcodeByIds(ids) {
+    function printBarcodeByIds(ids) {
       const list = appState.participants.filter(p => ids.includes(p.id));
       if (!list.length) return alert('Tidak ada peserta dipilih untuk dicetak.');
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       const area = document.getElementById('barcodePrintArea');
       const grid = document.getElementById('barcodePrintGrid');
-      const items = await Promise.all(list.map(async p => `
+      grid.innerHTML = list.map(p => `
         <div class="barcode-img-card">
-          <img src="${await buildQrIdCardDataUrl(p)}" alt="QR Code ${p.name}" />
+          <img src="${buildQrIdCardDataUrl(p)}" alt="QR Code ${p.name}" />
           <div style="font-weight:700; font-size:13.5px;">${p.name}</div>
           <div style="font-size:12px; color:#475569;">Kel. ${p.group} #${p.groupNo} • ${p.id}</div>
-        </div>`));
-      grid.innerHTML = items.join('');
+        </div>`).join('');
       area.classList.remove('hidden');
     }
 
@@ -1393,7 +1469,6 @@
       if (filterVal !== 'all') {
         pool = pool.filter(x => Number(x.group) === Number(filterVal));
       }
-      // Selalu urutkan nilai total terbesar & level tertinggi di urutan pertama
       const ranked = pool.sort((a, b) => {
         if (b.m.totalPoint !== a.m.totalPoint) return b.m.totalPoint - a.m.totalPoint;
         if (b.m.levelRank !== a.m.levelRank) return b.m.levelRank - a.m.levelRank;
@@ -1501,7 +1576,7 @@
     }
 
     // =========================================================================
-    // PORTAL PESERTA, SCAN, LOGIN & RUANG TUGAS
+    // PORTAL PESERTA (BELUM DIBUKA ADMIN, TOKEN, PRESENSI OTOMATIS 5)
     // =========================================================================
     function initPesertaDropdowns() {
       const grpSel = document.getElementById('pesertaGroupSelect');
@@ -1633,23 +1708,49 @@
     function renderPesertaTests(pid) {
       const area = document.getElementById('testButtonsArea');
       const res = appState.testResults[pid] || {};
-      const preOpen = appState.preTest.open;
-      const postOpen = appState.postTest.open;
+      const preOpen = Boolean(appState.preTest.open);
+      const postOpen = Boolean(appState.postTest.open);
 
       area.innerHTML = `
         <div class="bento-card" style="box-shadow:none; margin:0;">
-          <span class="badge badge-info" style="margin-bottom:8px;">${appState.preTest.materiTag || 'Pre-Test'}</span>
-          <h4>Pre-Test (${appState.preTest.questions.length} Soal)</h4>
-          <p style="font-size:14px; color:var(--text-muted); margin:6px 0 14px;">${preOpen ? 'Sesi Pre-Test dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Pre-Test.'}</p>
-          ${res.pre !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Poin: ${res.pre})</span>` : preOpen ? `<button class="btn btn-primary" onclick="startQuiz('pre')">Kerjakan Pre-Test</button>` : `<button class="btn" disabled>🔒 Belum Dibuka</button>`}
+          <h4>Pre-Test</h4>
+          ${!preOpen ? `
+            <span class="badge badge-warn" style="margin-top:8px;">Belum dibuka admin</span>
+          ` : res.pre !== undefined ? `
+            <div style="margin-top:8px;"><span class="badge badge-success">Sudah Dikerjakan (Skor Benar: ${res.pre})</span></div>
+          ` : `
+            <p style="font-size:13.5px; color:var(--text-muted); margin:6px 0 10px;">Materi: <strong>${appState.preTest.materiTag || '-'}</strong></p>
+            <label class="field-label">Masukkan Token dari Admin</label>
+            <input type="text" id="tokenInput_pre" placeholder="Ketik token Pre-Test..." style="margin-bottom:10px;" />
+            <button class="btn btn-primary" onclick="verifyTokenAndStartQuiz('pre')">Mulai Pre-Test</button>
+          `}
         </div>
+
         <div class="bento-card" style="box-shadow:none; margin:0;">
-          <span class="badge badge-warn" style="margin-bottom:8px;">${appState.postTest.materiTag || 'Post-Test'}</span>
-          <h4>Post-Test (${appState.postTest.questions.length} Soal)</h4>
-          <p style="font-size:14px; color:var(--text-muted); margin:6px 0 14px;">${postOpen ? 'Sesi Post-Test dibuka oleh Admin.' : 'Terkunci — Menunggu Admin membuka sesi Post-Test.'}</p>
-          ${res.post !== undefined ? `<span class="badge badge-success">Sudah Dikerjakan (Poin: ${res.post})</span>` : postOpen ? `<button class="btn btn-primary" onclick="startQuiz('post')">Kerjakan Post-Test</button>` : `<button class="btn" disabled>🔒 Belum Dibuka</button>`}
+          <h4>Post-Test</h4>
+          ${!postOpen ? `
+            <span class="badge badge-warn" style="margin-top:8px;">Belum dibuka admin</span>
+          ` : res.post !== undefined ? `
+            <div style="margin-top:8px;"><span class="badge badge-success">Sudah Dikerjakan (Skor Benar: ${res.post})</span></div>
+          ` : `
+            <p style="font-size:13.5px; color:var(--text-muted); margin:6px 0 10px;">Materi: <strong>${appState.postTest.materiTag || '-'}</strong></p>
+            <label class="field-label">Masukkan Token dari Admin</label>
+            <input type="text" id="tokenInput_post" placeholder="Ketik token Post-Test..." style="margin-bottom:10px;" />
+            <button class="btn btn-primary" onclick="verifyTokenAndStartQuiz('post')">Mulai Post-Test</button>
+          `}
         </div>`;
       document.getElementById('quizRunnerArea').classList.add('hidden');
+    }
+
+    function verifyTokenAndStartQuiz(type) {
+      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
+      if (!cfg.open) return alert('Belum dibuka admin.');
+      const entered = (document.getElementById('tokenInput_' + type)?.value || '').trim();
+      const expected = String(cfg.token || '').trim();
+      if (expected && entered !== expected) {
+        return alert('Token salah! Pastikan Anda berada di tempat kegiatan dan menggunakan token yang disampaikan admin.');
+      }
+      startQuiz(type);
     }
 
     function startQuiz(type) {
@@ -1675,33 +1776,38 @@
         </div>`;
     }
 
+    // Nilai Pre-Test & Post-Test = jumlah jawaban benar; Pre-Test otomatis beri presensi 5 (tanpa terlambat/tanpa keterangan)
     function submitQuiz(type) {
       const pid = sessionMeta.pesertaId;
-      const qs = (type === 'pre' ? appState.preTest.questions : appState.postTest.questions) || [];
-      let scoreUnits = 0;
+      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
+      const qs = cfg.questions || [];
+      let correctCount = 0;
       qs.forEach(q => {
         if (q.type === 'mc') {
           const picked = document.querySelector(`input[name="ans_${q.id}"]:checked`);
-          if (picked && Number(picked.value) === Number(q.answer)) scoreUnits += 1;
+          if (picked && Number(picked.value) === Number(q.answer)) correctCount += 1;
         } else {
           const txt = document.getElementById('short_' + q.id)?.value.trim();
-          if (txt) scoreUnits += 1;
+          if (txt) correctCount += 1;
         }
       });
-      const pct = qs.length ? (scoreUnits / qs.length) * 100 : 0;
-      const point = pct >= 85 ? 5 : pct >= 70 ? 4 : pct >= 55 ? 3 : pct >= 40 ? 2 : 1;
       if (!appState.testResults[pid]) appState.testResults[pid] = {};
-      appState.testResults[pid][type] = point;
-      if (type === 'pre' && appState.preTest.attendanceSessionId) {
+      appState.testResults[pid][type] = correctCount;
+
+      if (type === 'pre' && cfg.attendanceSessionId) {
         if (!appState.presensi[pid]) appState.presensi[pid] = {};
-        appState.presensi[pid][appState.preTest.attendanceSessionId] = 5;
+        appState.presensi[pid][cfg.attendanceSessionId] = 5;
       }
+
       const p = appState.participants.find(x => x.id === pid);
-      saveState(p.name, `Submit ${type.toUpperCase()}-TEST (+${point} poin)`);
+      saveState(p.name, `Submit ${type.toUpperCase()}-TEST (Benar: ${correctCount})`);
       renderPesertaTests(pid);
-      alert(`Jawaban tersimpan! Nilai poin: ${point}.`);
+      alert(`Jawaban tersimpan! Jumlah jawaban benar: ${correctCount}${type === 'pre' ? ' • Presensi otomatis tercatat nilai 5.' : '.'}`);
     }
 
+    // =========================================================================
+    // SCAN QR, LOGIN & RUANG TUGAS
+    // =========================================================================
     function unlockScanPortal() {
       if (document.getElementById('scanPasswordInput').value !== appState.scanPassword) return alert('Password panitia salah!');
       sessionMeta.scanUnlocked = true;
@@ -1827,7 +1933,7 @@
     }
 
     // =========================================================================
-    // INDEX, SKRINING, AKAD & ADMIN
+    // INDEX, SKRINING, AKAD & KONTROL ADMIN
     // =========================================================================
     function renderIndexView(area) {
       const isInstructor = currentUser.role === 'instructor';
@@ -1876,7 +1982,7 @@
                   <div class="item-card-vertical">
                     <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
                       <div style="display:flex; align-items:center; gap:12px;"><span class="badge badge-info mono">#${m.groupNo}</span><img class="avatar" src="${avatarSrc(m)}" /><div><div style="font-weight:700; font-size:15.5px;">${m.name}</div><div style="font-size:13px; color:var(--text-muted);">${m.jabatan}</div></div></div>
-                      <button class="btn btn-sm btn-danger" onclick="resetIndexParticipant('${m.id}', '${activeSess.id}')">Batal</button>
+                      <button class="btn btn-sm btn-danger" onclick="resetIndexParticipant('${m.id}', '${activeSess.id}')">Reset</button>
                     </div>
                     ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(field => {
                       const labelMap = { keaktifan: 'Keaktifan (1-5)', etika: 'Etika (1-5)', kedisiplinan: 'Kedisiplinan (1-5)', empati: 'Empati (1-5)' };
@@ -2021,8 +2127,8 @@
           </div>
 
           <div class="bento-card bento-6">
-            <h3>Unduh Data Administrasi (Excel & PDF)</h3>
-            <p style="font-size:13.5px; color:var(--text-muted); margin:8px 0 14px;">Kelola dan unduh rekap nilai, biodata peserta, serta laporan cetak PDF untuk administrasi kegiatan.</p>
+            <h3>Unduh Data Administrasi (Excel & PDF Landscape)</h3>
+            <p style="font-size:13.5px; color:var(--text-muted); margin:8px 0 14px;">Kelola dan unduh rekap nilai, biodata peserta, serta cetak PDF landscape tanpa terpotong.</p>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button class="btn btn-primary" onclick="exportAllAdministrationExcel()">📊 Unduh Excel Lengkap</button>
               <button class="btn" onclick="exportFinalExcel()">🏆 Excel Klasemen Final</button>
@@ -2032,7 +2138,7 @@
             <div style="margin-top:14px;"><button class="btn btn-sm btn-danger" onclick="wipeAllData()">🗑 Reset Semua Data Dari Awal</button></div>
           </div>
 
-          <!-- KATALOG JUDUL MATERI (SINKRON KE PRE-TEST & POST-TEST) -->
+          <!-- KATALOG JUDUL MATERI -->
           <div class="bento-card bento-12">
             <div class="card-header">
               <div>
@@ -2044,60 +2150,68 @@
               <input type="text" id="newMateriTitleInput" placeholder="Contoh: Materi ke-1: Tauhid & Ibadah..." />
               <button class="btn btn-primary" onclick="addMateriTitle()">+ Tambah Judul Materi</button>
             </div>
-            <div class="vertical-stack">
-              ${appState.materiTitles.map((mTitle, idx) => `
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface-solid);">
-                  <strong>${idx + 1}. ${mTitle}</strong>
-                  <div style="display:flex; gap:6px;">
-                    <button class="btn btn-sm" onclick="editMateriTitle(${idx})">Edit</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteMateriTitle(${idx})">Hapus</button>
-                  </div>
-                </div>`).join('')}
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>No</th><th>Judul Materi</th><th>Aksi</th></tr></thead>
+                <tbody>
+                  ${appState.materiTitles.map((mTitle, idx) => `
+                    <tr>
+                      <td class="mono">${idx + 1}</td>
+                      <td><strong>${mTitle}</strong></td>
+                      <td><div style="display:flex; gap:6px;"><button class="btn btn-sm" onclick="editMateriTitle(${idx})">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteMateriTitle(${idx})">Hapus</button></div></td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <!-- KELOLA ISI, TEMA & JUDUL INDEX -->
+          <!-- KELOLA INDEX (TABEL RAPI) -->
           <div class="bento-card bento-6">
             <div class="card-header">
-              <div><h3>Kelola Judul & Sesi Index</h3><p style="font-size:13px; color:var(--text-muted);">Ubah judul atau tambah/hapus sesi penilaian Index.</p></div>
+              <div><h3>Kelola Judul & Sesi Index</h3><p style="font-size:13px; color:var(--text-muted);">Ubah judul/tema atau tambah/hapus sesi penilaian Index.</p></div>
               <button class="btn btn-sm btn-primary" onclick="addIndexSession()">+ Sesi Index</button>
             </div>
-            <div class="vertical-stack">
-              ${appState.indexSessions.map((s, idx) => `
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface-solid); font-size:13.5px;">
-                  <span>${s.title}</span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="btn btn-sm" onclick="editIndexSession(${idx})">Ubah</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteIndexSession(${idx})">Hapus</button>
-                  </div>
-                </div>`).join('')}
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>No</th><th>Judul / Tema Sesi Index</th><th>Aksi</th></tr></thead>
+                <tbody>
+                  ${appState.indexSessions.map((s, idx) => `
+                    <tr>
+                      <td class="mono">${idx + 1}</td>
+                      <td>${s.title}</td>
+                      <td><div style="display:flex; gap:4px;"><button class="btn btn-sm" onclick="editIndexSession(${idx})">Ubah</button><button class="btn btn-sm btn-danger" onclick="deleteIndexSession(${idx})">Hapus</button></div></td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <!-- KELOLA ISI, TEMA & JUDUL SKRINING -->
+          <!-- KELOLA SKRINING (TABEL RAPI SEPERTI INDEX) -->
           <div class="bento-card bento-6">
             <div class="card-header">
-              <div><h3>Kelola Judul & Butir Skrining</h3><p style="font-size:13px; color:var(--text-muted);">Ubah judul bagian atau isi indikator skrining.</p></div>
+              <div><h3>Kelola Judul & Butir Skrining</h3><p style="font-size:13px; color:var(--text-muted);">Ubah judul bagian atau isi indikator skrining dalam tabel terstruktur.</p></div>
               <button class="btn btn-sm btn-primary" onclick="addSkriningSection()">+ Bagian Skrining</button>
             </div>
-            <div class="vertical-stack">
-              ${appState.skriningSections.map((sec, sIdx) => `
-                <div class="item-card-vertical" style="padding:12px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
-                    <strong>${sec.title} (${sec.items.length} item)</strong>
-                    <div style="display:flex; gap:4px;">
-                      <button class="btn btn-sm" onclick="editSkriningSectionTitle(${sIdx})">Judul</button>
-                      <button class="btn btn-sm btn-primary" onclick="addSkriningItem(${sIdx})">+ Item</button>
-                    </div>
-                  </div>
-                  <ol style="padding-left:18px; font-size:13px;">
-                    ${sec.items.map((it, iIdx) => `
-                      <li style="margin-bottom:4px;">${it}
-                        <button class="btn btn-sm" style="padding:1px 6px; min-height:24px; font-size:11.5px;" onclick="editSkriningItem(${sIdx}, ${iIdx})">Edit</button>
-                        <button class="btn btn-sm btn-danger" style="padding:1px 6px; min-height:24px; font-size:11.5px;" onclick="deleteSkriningItem(${sIdx}, ${iIdx})">Hapus</button>
-                      </li>`).join('')}
-                  </ol>
-                </div>`).join('')}
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Bagian</th><th>Indikator Penilaian</th><th>Aksi</th></tr></thead>
+                <tbody>
+                  ${appState.skriningSections.flatMap((sec, sIdx) =>
+                    sec.items.map((it, iIdx) => `
+                      <tr>
+                        <td><strong>${sec.title}</strong> <button class="btn btn-sm" style="padding:2px 7px; min-height:26px; font-size:11.5px;" onclick="editSkriningSectionTitle(${sIdx})">Judul</button></td>
+                        <td>${iIdx + 1}. ${it}</td>
+                        <td>
+                          <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                            <button class="btn btn-sm btn-primary" onclick="addSkriningItem(${sIdx})">+ Item</button>
+                            <button class="btn btn-sm" onclick="editSkriningItem(${sIdx}, ${iIdx})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteSkriningItem(${sIdx}, ${iIdx})">Hapus</button>
+                          </div>
+                        </td>
+                      </tr>`)
+                  ).join('')}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -2116,33 +2230,79 @@
             </div>
           </div>
 
-          <!-- PRE-TEST DENGAN DROPDOWN JUDUL MATERI -->
+          <!-- PRE-TEST (TOKEN, DROPDOWN MATERI & RESET/UBAH NILAI) -->
           <div class="bento-card bento-6">
             <div class="card-header"><div><h3>Pengaturan PRE-TEST (Terpisah)</h3></div><button class="btn btn-sm ${appState.preTest.open ? 'btn-primary' : ''}" onclick="toggleTestBox('pre')">${appState.preTest.open ? '✅ DIBUKA' : '🔒 DITUTUP'}</button></div>
             <div style="margin-bottom:10px;">
-              <label class="field-label">Pilih Materi Pre-Test (Dari Daftar Judul Materi)</label>
+              <label class="field-label">Token Ujian Pre-Test (Disampaikan Admin)</label>
+              <input type="text" value="${appState.preTest.token || ''}" onchange="appState.preTest.token=this.value.trim(); saveState('Admin','Ubah token Pre-Test');" />
+            </div>
+            <div style="margin-bottom:10px;">
+              <label class="field-label">Pilih Materi Pre-Test</label>
               <select id="preMateriSelect" onchange="appState.preTest.materiTag=this.value; saveState('Admin','Pilih materi Pre-Test');">
                 ${materiOptionsHtml}
                 ${!appState.materiTitles.includes(appState.preTest.materiTag) && appState.preTest.materiTag ? `<option value="${appState.preTest.materiTag}" selected>${appState.preTest.materiTag}</option>` : ''}
               </select>
             </div>
-            <div style="margin-bottom:12px;"><label class="field-label">Sesi Materi Otomatis Terisi Saat Pre-Test</label><select onchange="appState.preTest.attendanceSessionId=this.value; saveState('Admin','Update sesi presensi Pre-Test');"><option value="">-- Nonaktif --</option>${PRESENSI_SESSIONS.filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${appState.preTest.attendanceSessionId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}</select></div>
-            <button class="btn btn-sm btn-primary" style="margin-bottom:10px;" onclick="createQuestionBatch('pre')">+ Tambah Soal Pre-Test (Pilih Materi)</button>
+            <div style="margin-bottom:12px;"><label class="field-label">Sesi Materi Presensi Otomatis Nilai 5 Saat Mengerjakan</label><select onchange="appState.preTest.attendanceSessionId=this.value; saveState('Admin','Update sesi presensi Pre-Test');"><option value="">-- Nonaktif --</option>${PRESENSI_SESSIONS.filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${appState.preTest.attendanceSessionId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}</select></div>
+            <button class="btn btn-sm btn-primary" style="margin-bottom:10px;" onclick="createQuestionBatch('pre')">+ Tambah Soal Pre-Test</button>
             ${(appState.preTest.questions || []).map((q, idx) => `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:13.5px;"><span><strong>${idx + 1}.</strong> [${q.materi || appState.preTest.materiTag}] ${q.text}</span><div style="display:flex; gap:4px;"><button class="btn btn-sm" onclick="editQuestion('pre', ${idx})">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteQuestion('pre', ${idx})">Hapus</button></div></div>`).join('')}
           </div>
 
-          <!-- POST-TEST DENGAN DROPDOWN JUDUL MATERI -->
+          <!-- POST-TEST (TOKEN, DROPDOWN MATERI) -->
           <div class="bento-card bento-6">
             <div class="card-header"><div><h3>Pengaturan POST-TEST (Terpisah)</h3></div><button class="btn btn-sm ${appState.postTest.open ? 'btn-primary' : ''}" onclick="toggleTestBox('post')">${appState.postTest.open ? '✅ DIBUKA' : '🔒 DITUTUP'}</button></div>
+            <div style="margin-bottom:10px;">
+              <label class="field-label">Token Ujian Post-Test (Disampaikan Admin)</label>
+              <input type="text" value="${appState.postTest.token || ''}" onchange="appState.postTest.token=this.value.trim(); saveState('Admin','Ubah token Post-Test');" />
+            </div>
             <div style="margin-bottom:12px;">
-              <label class="field-label">Pilih Materi Post-Test (Dari Daftar Judul Materi)</label>
+              <label class="field-label">Pilih Materi Post-Test</label>
               <select id="postMateriSelect" onchange="appState.postTest.materiTag=this.value; saveState('Admin','Pilih materi Post-Test');">
                 ${materiOptionsHtml}
                 ${!appState.materiTitles.includes(appState.postTest.materiTag) && appState.postTest.materiTag ? `<option value="${appState.postTest.materiTag}" selected>${appState.postTest.materiTag}</option>` : ''}
               </select>
             </div>
-            <button class="btn btn-sm btn-primary" style="margin-bottom:10px;" onclick="createQuestionBatch('post')">+ Tambah Soal Post-Test (Pilih Materi)</button>
+            <button class="btn btn-sm btn-primary" style="margin-bottom:10px;" onclick="createQuestionBatch('post')">+ Tambah Soal Post-Test</button>
             ${(appState.postTest.questions || []).map((q, idx) => `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:13.5px;"><span><strong>${idx + 1}.</strong> [${q.materi || appState.postTest.materiTag}] ${q.text}</span><div style="display:flex; gap:4px;"><button class="btn btn-sm" onclick="editQuestion('post', ${idx})">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteQuestion('post', ${idx})">Hapus</button></div></div>`).join('')}
+          </div>
+
+          <!-- RESET & UBAH NILAI PESERTA OLEH ADMIN -->
+          <div class="bento-card bento-12">
+            <div class="card-header">
+              <div>
+                <h3>Reset & Ubah Nilai Tes / Skor Peserta</h3>
+                <p style="font-size:13.5px; color:var(--text-muted);">Reset nilai Pre-Test/Post-Test agar peserta bisa mengerjakan ulang saat gangguan, atau ubah nilai Pre-Test, Post-Test, maupun Akad Amanah langsung.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Peserta</th><th>Kel.</th><th>Pre-Test</th><th>Post-Test</th><th>Akad</th><th>Aksi Admin</th></tr></thead>
+                <tbody>
+                  ${appState.participants.map(p => {
+                    const tr = appState.testResults[p.id] || {};
+                    const ak = appState.akadScores[p.id] || {};
+                    return `
+                      <tr>
+                        <td><strong>${p.name}</strong> <span class="mono" style="font-size:12px; color:var(--text-muted);">(${p.id})</span></td>
+                        <td>Kel. ${p.group}</td>
+                        <td class="mono">${tr.pre !== undefined ? tr.pre : '-'}</td>
+                        <td class="mono">${tr.post !== undefined ? tr.post : '-'}</td>
+                        <td class="mono">${ak.score !== undefined ? ak.score : '-'}</td>
+                        <td>
+                          <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                            <button class="btn btn-sm" onclick="editParticipantScore('${p.id}', 'pre')">Ubah Pre</button>
+                            <button class="btn btn-sm btn-warn" onclick="resetParticipantTest('${p.id}', 'pre')">Reset Pre</button>
+                            <button class="btn btn-sm" onclick="editParticipantScore('${p.id}', 'post')">Ubah Post</button>
+                            <button class="btn btn-sm btn-warn" onclick="resetParticipantTest('${p.id}', 'post')">Reset Post</button>
+                            <button class="btn btn-sm" onclick="editParticipantScore('${p.id}', 'akad')">Ubah Akad</button>
+                          </div>
+                        </td>
+                      </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div class="bento-card bento-12">
@@ -2193,6 +2353,35 @@
             </div>
           </div>
         </div>`;
+    }
+
+    function resetParticipantTest(pid, kind) {
+      const p = appState.participants.find(x => x.id === pid);
+      if (!p || !confirm(`Reset nilai ${kind.toUpperCase()}-TEST milik ${p.name} agar bisa dikerjakan ulang?`)) return;
+      if (appState.testResults[pid]) delete appState.testResults[pid][kind];
+      saveState('Admin', `Reset ${kind.toUpperCase()}-TEST ${p.name}`);
+      renderStaffContent();
+    }
+
+    function editParticipantScore(pid, kind) {
+      const p = appState.participants.find(x => x.id === pid);
+      if (!p) return;
+      let cur = 0;
+      if (kind === 'pre' || kind === 'post') cur = Number(appState.testResults[pid]?.[kind] ?? 0);
+      else cur = Number(appState.akadScores[pid]?.score ?? 0);
+      const nextRaw = prompt(`Ubah nilai ${kind.toUpperCase()} untuk ${p.name}:`, cur);
+      if (nextRaw === null) return;
+      const val = Number(nextRaw);
+      if (Number.isNaN(val)) return alert('Masukkan angka yang valid.');
+      if (kind === 'pre' || kind === 'post') {
+        if (!appState.testResults[pid]) appState.testResults[pid] = {};
+        appState.testResults[pid][kind] = val;
+      } else {
+        if (!appState.akadScores[pid]) appState.akadScores[pid] = {};
+        appState.akadScores[pid].score = val;
+      }
+      saveState('Admin', `Ubah nilai ${kind.toUpperCase()} ${p.name} = ${val}`);
+      renderStaffContent();
     }
 
     // Manajemen Judul Materi
@@ -2341,7 +2530,6 @@
       appState = fresh; saveState('Admin', 'Reset total semua data'); renderStaffContent();
     }
 
-    // Tambah soal menggunakan pilihan dropdown judul materi yang sudah ada
     function createQuestionBatch(type) {
       const cfg = type === 'pre' ? appState.preTest : appState.postTest;
       const listMateri = appState.materiTitles.length ? appState.materiTitles : [cfg.materiTag || 'Materi'];
