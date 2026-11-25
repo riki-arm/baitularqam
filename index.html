@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Baitul Arqam PPDA — Sistem Presensi & Evaluasi Terpadu</title>
   <link id="faviconLink" rel="icon" href="" />
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
   <style>
@@ -333,7 +334,8 @@
     .scan-alert-box.status-duplicate { border-color: var(--accent); background: var(--accent-soft); }
     .scan-alert-box.status-error { border-color: var(--danger); background: var(--danger-soft); }
 
-    .face-stage {
+    /* Bingkai Barcode & Face Cam dengan indikator hijau pas */
+    .scanner-stage {
       position: relative;
       width: 100%;
       max-width: 480px;
@@ -341,18 +343,43 @@
       border-radius: 16px;
       overflow: hidden;
       background: #0F172A;
-      border: 1px solid var(--border);
+      border: 3px solid var(--border);
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
     }
-    .face-stage video,
-    .face-stage canvas {
+    .scanner-stage.aligned-green {
+      border-color: #22C55E;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+    }
+    .scanner-stage video,
+    .scanner-stage canvas {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    .face-stage.mirrored video,
-    .face-stage.mirrored canvas { transform: scaleX(-1); }
+    .scanner-stage.mirrored video,
+    .scanner-stage.mirrored canvas { transform: scaleX(-1); }
+
+    .reticle-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 4;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(15, 23, 42, 0.75);
+      color: #FFFFFF;
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      transition: all 0.16s ease;
+    }
+    .scanner-stage.aligned-green .reticle-badge {
+      background: #16A34A;
+      border-color: #86EFAC;
+      color: #FFFFFF;
+    }
 
     .barcode-img-grid {
       display: grid;
@@ -378,24 +405,6 @@
       padding: 6px;
       border-radius: 8px;
       display: block;
-    }
-
-    .checkbox-grid-2col {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
-    @media (max-width: 640px) { .checkbox-grid-2col { grid-template-columns: 1fr; } }
-    .checkbox-item-2col {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      font-size: 13px;
-      cursor: pointer;
     }
 
     .modal-backdrop {
@@ -646,7 +655,7 @@
             <div class="card-header" style="margin-bottom:12px;">
               <div>
                 <h2>Presensi Scan Barcode & Face Recognition</h2>
-                <p style="color:var(--text-muted); font-size:13.5px;">Poin dihitung otomatis berdasarkan jam presensi yang diatur admin (tepat waktu +5, terlambat +2, tidak absen 0).</p>
+                <p style="color:var(--text-muted); font-size:13.5px;">Bingkai & kotak akan berubah menjadi <strong>HIJAU</strong> saat posisi barcode/wajah pas & terbaca.</p>
               </div>
               <div id="scanTopLogoutWrap" class="hidden">
                 <button class="btn btn-sm btn-danger" onclick="logoutScanPortal()">Kunci Portal</button>
@@ -682,18 +691,27 @@
             <div id="barcodeScannerPanel">
               <div class="grid-2" style="align-items:start;">
                 <div>
-                  <div id="qrReader" style="width:100%; max-width:420px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:#0F172A; min-height:240px;"></div>
-                  <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                    <button class="btn btn-sm btn-primary" onclick="startCameraScanner()">▶ Aktifkan Kamera</button>
-                    <button class="btn btn-sm" onclick="stopCameraScanner()">⏹ Matikan Kamera</button>
+                  <div id="barcodeStageBox" class="scanner-stage">
+                    <span id="barcodeReticleBadge" class="reticle-badge">Arahkan Barcode ke Kotak</span>
+                    <video id="barcodeVideo" autoplay muted playsinline></video>
+                    <canvas id="barcodeOverlay"></canvas>
+                  </div>
+                  <div id="barcodeCamStatus" style="font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:6px;">Kamera barcode siap dinyalakan.</div>
+                  <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-primary" onclick="startBarcodeCamera()">▶ Aktifkan Kamera Barcode</button>
+                    <button class="btn btn-sm" onclick="stopBarcodeCamera()">⏹ Matikan Kamera</button>
+                    <button class="btn btn-sm" onclick="flipBarcodeCamera()">🔄 Kamera: <span id="barcodeCamFacingLabel">Belakang</span></button>
                   </div>
                 </div>
                 <div>
-                  <label class="field-label">Input / Scan Kode Barcode Manual (Contoh: BA-01)</label>
+                  <label class="field-label">Input / Scan Scanner USB / Manual (Contoh: BA-01)</label>
                   <div style="display:flex; gap:8px;">
                     <input type="text" id="manualBarcodeInput" placeholder="Ketik atau scan kode BA-01..." onkeyup="if(event.key==='Enter') processBarcodeScan(this.value)" />
                     <button class="btn btn-primary" onclick="processBarcodeScan(document.getElementById('manualBarcodeInput').value)">Catat</button>
                   </div>
+                  <p style="font-size:12.5px; color:var(--text-muted); margin-top:8px;">
+                    Tips: Pegang kartu/barcode sekitar 12–25 cm di dalam kotak tengah agar fokus kamera tajam dan bingkai langsung menyala <strong>hijau</strong>.
+                  </p>
                 </div>
               </div>
             </div>
@@ -705,7 +723,8 @@
                 <button class="btn btn-sm" onclick="flipFaceCamera()">🔄 Kamera: <span id="faceCamFacingLabel">Depan</span></button>
                 <span id="faceModelStatus" style="font-size:12.5px; color:var(--text-muted); font-weight:600;"></span>
               </div>
-              <div id="faceStageBox" class="face-stage mirrored">
+              <div id="faceStageBox" class="scanner-stage mirrored">
+                <span id="faceReticleBadge" class="reticle-badge">Mencari Wajah</span>
                 <video id="faceVideo" autoplay muted playsinline></video>
                 <canvas id="faceOverlay"></canvas>
               </div>
@@ -809,14 +828,13 @@
         <label class="field-label">Nama Lengkap</label>
         <input type="text" id="editNameInput" />
       </div>
-      <div id="editExtraFieldWrap" style="margin-bottom:12px;"></div>
-      <div id="editPasswordWrap" style="margin-bottom:16px;">
+      <div style="margin-bottom:16px;">
         <label class="field-label">Password Baru (Kosongkan jika tetap)</label>
         <input type="text" id="editPasswordInput" placeholder="Password baru..." />
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn" onclick="closeModal('profileModal')">Batal</button>
-        <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfileEdit()">Simpan</button>
+        <button class="btn btn-primary" onclick="saveProfileEdit()">Simpan</button>
       </div>
     </div>
   </div>
@@ -831,9 +849,8 @@
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
         <img id="newParticipantPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
         <div style="flex:1; min-width:200px;">
-          <label class="field-label">Unggah Foto Peserta (Auto GDrive & Face ID)</label>
+          <label class="field-label">Unggah Foto Peserta (Auto Face ID)</label>
           <input type="file" id="newParticipantAvatarFile" accept="image/*" onchange="handleNewParticipantAvatarUpload(event)" />
-          <div id="newParticipantUploadStatus" style="font-size:12px; color:var(--primary); font-weight:600; margin-top:4px;"></div>
         </div>
       </div>
       <div style="margin-bottom:12px;">
@@ -857,15 +874,15 @@
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn" onclick="closeModal('addParticipantModal')">Batal</button>
-        <button class="btn btn-primary" id="saveNewParticipantBtn" onclick="saveNewParticipant()">+ Tambahkan Peserta</button>
+        <button class="btn btn-primary" onclick="saveNewParticipant()">+ Tambahkan Peserta</button>
       </div>
     </div>
   </div>
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQCNSVWfZ4XOwMQyea7SyGD1ZDUY6Nhl1dI0q0nJRSK6f3yVhg1JcVlV0cwZIG1XjZxg/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_14';
-    const SESSION_KEY = 'baitul_arqam_ppda_session_v7';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_15';
+    const SESSION_KEY = 'baitul_arqam_ppda_session_v8';
     const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -1041,7 +1058,6 @@
         preTest: {
           open: false,
           token: 'PRE2026',
-          sameAsPost: false,
           materiTag: 'Materi ke-1: Ideologi & Kemuhammadiyahan',
           materiSessionMap: {
             'Materi ke-1: Ideologi & Kemuhammadiyahan': 'h1_m2',
@@ -1055,7 +1071,6 @@
         postTest: {
           open: false,
           token: 'POST2026',
-          sameAsPre: false,
           materiTag: 'Materi ke-8: Komitmen & Pengabdian Pesantren',
           materiSessionMap: {},
           questions: [
@@ -1117,33 +1132,37 @@
     let appState = loadLocalState();
     let sessionMeta = loadSessionMeta();
     let currentUser = resolveSessionUser();
-    let html5QrCode = null;
-    let _tempUploadedAvatar = '';
-    let _tempUploadedFaceDescriptor = null;
-    let _tempNewParticipantAvatar = '';
-    let _tempNewParticipantFaceDescriptor = null;
 
+    // Barcode camera state
+    let barcodeStream = null;
+    let barcodeLoopTimer = null;
+    let barcodeCameraFacing = 'environment';
+    let barcodeDetectorInstance = null;
+    let lastBarcodeCooldown = {};
+    let greenHighlightTimeout = null;
+
+    // Face cam state
     let faceModelsLoaded = false;
     let faceModelsLoading = false;
     let faceStream = null;
     let faceLoopTimer = null;
-    let activeScanMode = 'barcode';
     let faceCameraFacing = 'user';
     let lastFaceCooldownMap = {};
 
+    // Temp profile/participant state
+    let _tempUploadedAvatar = '';
+    let _tempNewParticipantAvatar = '';
+    let _tempNewParticipantFaceDescriptor = null;
+
     function getPresensiSessions() {
-      return appState.presensiSessions && appState.presensiSessions.length
-        ? appState.presensiSessions
-        : DEFAULT_PRESENSI_SESSIONS;
+      return appState.presensiSessions?.length ? appState.presensiSessions : DEFAULT_PRESENSI_SESSIONS;
     }
 
     function parseTimeToMinutes(hhmm) {
       if (!hhmm || typeof hhmm !== 'string') return null;
-      const clean = hhmm.trim().replace('.', ':');
-      const m = clean.match(/^(\d{1,2}):(\d{2})$/);
+      const m = hhmm.trim().replace('.', ':').match(/^(\d{1,2}):(\d{2})$/);
       if (!m) return null;
-      const h = Number(m[1]);
-      const min = Number(m[2]);
+      const h = Number(m[1]), min = Number(m[2]);
       if (h < 0 || h > 23 || min < 0 || min > 59) return null;
       return h * 60 + min;
     }
@@ -1158,19 +1177,12 @@
       const startMin = parseTimeToMinutes(sess.startTime);
       const onTimeEndMin = parseTimeToMinutes(sess.onTimeEnd);
       const lateEndMin = parseTimeToMinutes(sess.lateEnd);
-
       if (nowMin === null || startMin === null || onTimeEndMin === null || lateEndMin === null) {
         return { allowed: true, points: 5, label: 'Tepat Waktu (+5 Poin)' };
       }
-      if (nowMin < startMin) {
-        return { allowed: false, points: 0, label: `Belum Dibuka (Mulai ${sess.startTime})` };
-      }
-      if (nowMin <= onTimeEndMin) {
-        return { allowed: true, points: 5, label: `Tepat Waktu (${sess.startTime}–${sess.onTimeEnd}) → +5 Poin` };
-      }
-      if (nowMin <= lateEndMin) {
-        return { allowed: true, points: 2, label: `Terlambat (lewat ${sess.onTimeEnd} s.d. ${sess.lateEnd}) → +2 Poin` };
-      }
+      if (nowMin < startMin) return { allowed: false, points: 0, label: `Belum Dibuka (Mulai ${sess.startTime})` };
+      if (nowMin <= onTimeEndMin) return { allowed: true, points: 5, label: `Tepat Waktu (${sess.startTime}–${sess.onTimeEnd}) → +5 Poin` };
+      if (nowMin <= lateEndMin) return { allowed: true, points: 2, label: `Terlambat (lewat ${sess.onTimeEnd} s.d. ${sess.lateEnd}) → +2 Poin` };
       return { allowed: false, points: 0, label: `Lewat Batas Akhir (${sess.lateEnd}) → 0 Poin` };
     }
 
@@ -1187,16 +1199,7 @@
         const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
         if (raw) return JSON.parse(raw);
       } catch (e) {}
-      return {
-        topView: 'rundown',
-        staffTab: 'presensi',
-        adminModule: 'overview',
-        role: null,
-        userId: null,
-        scanUnlocked: false,
-        pesertaGroup: '',
-        pesertaId: ''
-      };
+      return { topView: 'rundown', staffTab: 'presensi', adminModule: 'overview', role: null, userId: null, scanUnlocked: false, pesertaGroup: '', pesertaId: '' };
     }
 
     function persistSessionMeta() {
@@ -1207,9 +1210,7 @@
 
     function resolveSessionUser() {
       if (!sessionMeta.role || !sessionMeta.userId) return null;
-      if (sessionMeta.role === 'superadmin' && appState.superadmin.id === sessionMeta.userId) {
-        return { role: 'superadmin', user: appState.superadmin };
-      }
+      if (sessionMeta.role === 'superadmin' && appState.superadmin.id === sessionMeta.userId) return { role: 'superadmin', user: appState.superadmin };
       if (sessionMeta.role === 'admin') {
         const adm = (appState.extraAdmins || []).find(x => x.id === sessionMeta.userId);
         if (adm) return { role: 'admin', user: adm };
@@ -1228,9 +1229,7 @@
     function saveState(actor = 'Sistem', summary = 'Pembaruan data') {
       appState.updatedAt = Date.now();
       renumberGroups(appState.participants || []);
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-      } catch (err) {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
       persistSessionMeta();
       pushToCloud(actor, summary);
     }
@@ -1258,7 +1257,7 @@
           currentUser = resolveSessionUser();
           refreshAllUI();
           setSyncStatus('ok', 'Tersinkronisasi');
-          if (notify) alert('Data terbaru berhasil disinkronkan!');
+          if (notify) alert('Data berhasil disinkronkan!');
         } else {
           setSyncStatus('ok', 'Mode Lokal');
         }
@@ -1294,13 +1293,9 @@
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
+            canvas.width = size; canvas.height = size;
             const ctx = canvas.getContext('2d');
-            if (mimeType === 'image/jpeg') {
-              ctx.fillStyle = '#FFFFFF';
-              ctx.fillRect(0, 0, size, size);
-            }
+            if (mimeType === 'image/jpeg') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, size, size); }
             const side = Math.min(img.width, img.height);
             ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
             resolve(canvas.toDataURL(mimeType, quality));
@@ -1311,23 +1306,6 @@
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-    }
-
-    async function uploadImageToGoogleDrive(base64DataUrl, fileName, mimeType = 'image/jpeg', throwOnError = false) {
-      const url = (appState.webAppUrl || DEFAULT_WEB_APP_URL).trim();
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'upload_image', base64: base64DataUrl, fileName, mimeType })
-        });
-        const json = await res.json();
-        if (json.ok && json.url) return json.url;
-        throw new Error(json.error || 'Respons upload tidak valid');
-      } catch (err) {
-        if (throwOnError) throw err;
-        return base64DataUrl;
-      }
     }
 
     function fallbackInitialsSvg(entity) {
@@ -1344,21 +1322,14 @@
       const logo = appState.committeeLogo || DEFAULT_COMMITTEE_LOGO;
       const headerImg = document.getElementById('headerCommitteeLogo');
       const favLink = document.getElementById('faviconLink');
-      if (headerImg) {
-        headerImg.onerror = () => { headerImg.src = DEFAULT_COMMITTEE_LOGO; };
-        headerImg.src = logo;
-      }
+      if (headerImg) { headerImg.onerror = () => { headerImg.src = DEFAULT_COMMITTEE_LOGO; }; headerImg.src = logo; }
       if (favLink) favLink.href = logo;
-
       const greetEl = document.getElementById('personalizedGreeting');
-      if (currentUser) {
-        greetEl.textContent = `Hai, ${currentUser.user.name} • Mode ${currentUser.role.toUpperCase()}`;
-      } else if (sessionMeta.pesertaId) {
+      if (currentUser) greetEl.textContent = `Hai, ${currentUser.user.name} • Mode ${currentUser.role.toUpperCase()}`;
+      else if (sessionMeta.pesertaId) {
         const p = appState.participants.find(x => x.id === sessionMeta.pesertaId);
         greetEl.textContent = p ? `Halo, ${p.name} (Kel. ${p.group} #${p.groupNo})` : 'Bento Grid • Progres Terbuka';
-      } else {
-        greetEl.textContent = 'Bento Grid • Progres Terbuka';
-      }
+      } else greetEl.textContent = 'Bento Grid • Progres Terbuka';
     }
 
     function toggleTheme() {
@@ -1380,28 +1351,19 @@
     }
 
     function syncRundownDateSelectors() {
-      const d1 = getEventDateInfo(1);
-      const d2 = getEventDateInfo(2);
-      const d3 = getEventDateInfo(3);
+      const d1 = getEventDateInfo(1), d2 = getEventDateInfo(2), d3 = getEventDateInfo(3);
       const subEl = document.getElementById('rundownDateRangeSubtitle');
       if (subEl) subEl.textContent = `Pelaksanaan: ${d1.shortDate} s.d. ${d3.shortDate}`;
       const sel = document.getElementById('rundownDayFilter');
       if (sel) {
         const prev = sel.value || 'all';
-        sel.innerHTML = `
-          <option value="all">Semua Hari (${d1.shortDate} – ${d3.shortDate})</option>
-          <option value="1">Hari Ke-1 (${d1.shortDate})</option>
-          <option value="2">Hari Ke-2 (${d2.shortDate})</option>
-          <option value="3">Hari Ke-3 (${d3.shortDate})</option>`;
+        sel.innerHTML = `<option value="all">Semua Hari (${d1.shortDate} – ${d3.shortDate})</option><option value="1">Hari Ke-1 (${d1.shortDate})</option><option value="2">Hari Ke-2 (${d2.shortDate})</option><option value="3">Hari Ke-3 (${d3.shortDate})</option>`;
         sel.value = prev;
       }
       const scanDaySel = document.getElementById('scanDaySelect');
       if (scanDaySel) {
         const prevScan = scanDaySel.value || '1';
-        scanDaySel.innerHTML = `
-          <option value="1">Hari Ke-1 (${d1.shortDate})</option>
-          <option value="2">Hari Ke-2 (${d2.shortDate})</option>
-          <option value="3">Hari Ke-3 (${d3.shortDate})</option>`;
+        scanDaySel.innerHTML = `<option value="1">Hari Ke-1 (${d1.shortDate})</option><option value="2">Hari Ke-2 (${d2.shortDate})</option><option value="3">Hari Ke-3 (${d3.shortDate})</option>`;
         scanDaySel.value = prevScan;
       }
     }
@@ -1410,18 +1372,15 @@
       syncRundownDateSelectors();
       const dayFilter = document.getElementById('rundownDayFilter')?.value || 'all';
       const rows = (appState.rundown || []).filter(r => dayFilter === 'all' || Number(r.day) === Number(dayFilter));
-      document.getElementById('rundownTableBody').innerHTML = rows.map(r => {
-        const info = getEventDateInfo(r.day);
-        return `
-          <tr>
-            <td><span class="badge badge-info">${info.dayLabel}</span></td>
-            <td class="mono" style="font-weight:700;">${r.time}</td>
-            <td style="font-weight:700;">${r.activity}</td>
-            <td>${r.topic}</td>
-            <td>${r.speaker}</td>
-            <td>${r.mc}</td>
-          </tr>`;
-      }).join('');
+      document.getElementById('rundownTableBody').innerHTML = rows.map(r => `
+        <tr>
+          <td><span class="badge badge-info">${getEventDateInfo(r.day).dayLabel}</span></td>
+          <td class="mono" style="font-weight:700;">${r.time}</td>
+          <td style="font-weight:700;">${r.activity}</td>
+          <td>${r.topic}</td>
+          <td>${r.speaker}</td>
+          <td>${r.mc}</td>
+        </tr>`).join('');
     }
 
     function computeParticipantMetrics(pid) {
@@ -1432,94 +1391,53 @@
         if (s.type === 'materi') presensiMateri += v;
         else presensiIbadah += v;
       });
-
       const pIdx = appState.indexScores[pid] || {};
       let keaktifan = 0, etika = 0, kedisiplinan = 0, empati = 0;
       appState.indexSessions.forEach(s => {
         const r = pIdx[s.id];
-        if (r) {
-          keaktifan += Number(r.keaktifan || 0);
-          etika += Number(r.etika || 0);
-          kedisiplinan += Number(r.kedisiplinan || 0);
-          empati += Number(r.empati || 0);
-        }
+        if (r) { keaktifan += Number(r.keaktifan || 0); etika += Number(r.etika || 0); kedisiplinan += Number(r.kedisiplinan || 0); empati += Number(r.empati || 0); }
       });
-
       const tRes = appState.testResults[pid] || {};
       const preSum = tRes.preByMateri ? Object.values(tRes.preByMateri).reduce((a, b) => a + Number(b || 0), 0) : Number(tRes.pre || 0);
       const postSum = tRes.postByMateri ? Object.values(tRes.postByMateri).reduce((a, b) => a + Number(b || 0), 0) : Number(tRes.post || 0);
       const testScore = preSum + postSum;
-
       const skr = appState.skrining[pid] || {};
       let skriningScore = 0;
-      appState.skriningSections.forEach(sec => {
-        skriningScore += (skr[sec.id]?.items || []).reduce((a, b) => a + Number(b || 0), 0);
-      });
-
+      appState.skriningSections.forEach(sec => { skriningScore += (skr[sec.id]?.items || []).reduce((a, b) => a + Number(b || 0), 0); });
       const akadScore = Number(appState.akadScores[pid]?.score || 0);
       const totalPoint = presensiMateri + presensiIbadah + keaktifan + etika + kedisiplinan + empati + testScore + skriningScore + akadScore;
-
-      return {
-        presensiMateri, presensiIbadah, keaktifan, etika, kedisiplinan, empati,
-        preSum, postSum, testScore, skriningScore, akadScore, totalPoint,
-        level: getLevelLabel(totalPoint), levelRank: getLevelRank(totalPoint)
-      };
+      return { presensiMateri, presensiIbadah, keaktifan, etika, kedisiplinan, empati, preSum, postSum, testScore, skriningScore, akadScore, totalPoint, level: getLevelLabel(totalPoint), levelRank: getLevelRank(totalPoint) };
     }
 
     function getLevelRank(pts) {
-      if (pts >= 430) return 8;
-      if (pts >= 380) return 7;
-      if (pts >= 330) return 6;
-      if (pts >= 280) return 5;
-      if (pts >= 220) return 4;
-      if (pts >= 160) return 3;
-      if (pts >= 90) return 2;
-      return 1;
+      if (pts >= 430) return 8; if (pts >= 380) return 7; if (pts >= 330) return 6; if (pts >= 280) return 5;
+      if (pts >= 220) return 4; if (pts >= 160) return 3; if (pts >= 90) return 2; return 1;
     }
 
     function getLevelLabel(pts) {
-      if (pts >= 430) return 'AL-QAID AL-AAM';
-      if (pts >= 380) return 'AL-JENERAL';
-      if (pts >= 330) return 'AL-UQAID';
-      if (pts >= 280) return 'AL-QAID';
-      if (pts >= 220) return 'AN-NAQIB';
-      if (pts >= 160) return 'AL-FARIS';
-      if (pts >= 90) return 'AL-JUNDI';
-      return 'AL-MUJANNAD';
+      if (pts >= 430) return 'AL-QAID AL-AAM'; if (pts >= 380) return 'AL-JENERAL'; if (pts >= 330) return 'AL-UQAID'; if (pts >= 280) return 'AL-QAID';
+      if (pts >= 220) return 'AN-NAQIB'; if (pts >= 160) return 'AL-FARIS'; if (pts >= 90) return 'AL-JUNDI'; return 'AL-MUJANNAD';
     }
 
     function getPredikatByTarget(avg, minT, maxT) {
       const ratio = ((avg - minT) / Math.max(1, maxT - minT)) * 100;
-      if (ratio >= 90) return 'Istimewa';
-      if (ratio >= 70) return 'Sangat Baik';
-      if (ratio >= 50) return 'Baik';
-      if (ratio >= 25) return 'Cukup Baik';
-      return 'Perlu Ditingkatkan';
+      if (ratio >= 90) return 'Istimewa'; if (ratio >= 70) return 'Sangat Baik'; if (ratio >= 50) return 'Baik'; if (ratio >= 25) return 'Cukup Baik'; return 'Perlu Ditingkatkan';
     }
 
     function getAspectSummaryList() {
       const count = appState.participants.length || 1;
       const totals = { presensiMateri: 0, presensiIbadah: 0, keaktifan: 0, etika: 0, kedisiplinan: 0, empati: 0, testScore: 0, skriningScore: 0, akadScore: 0 };
-      appState.participants.forEach(p => {
-        const m = computeParticipantMetrics(p.id);
-        Object.keys(totals).forEach(k => totals[k] += m[k]);
-      });
+      appState.participants.forEach(p => { const m = computeParticipantMetrics(p.id); Object.keys(totals).forEach(k => totals[k] += m[k]); });
       const defs = [
-        { key: 'presensiMateri', label: 'Presensi Sesi Materi' },
-        { key: 'presensiIbadah', label: 'Presensi Ibadah' },
-        { key: 'keaktifan', label: 'Keaktifan' },
-        { key: 'etika', label: 'Etika' },
-        { key: 'kedisiplinan', label: 'Kedisiplinan' },
-        { key: 'empati', label: 'Empati' },
-        { key: 'testScore', label: 'Pre-Test dan Post-Test' },
-        { key: 'skriningScore', label: 'Skrining' },
-        { key: 'akadScore', label: 'Akad Amanah' }
+        { key: 'presensiMateri', label: 'Presensi Sesi Materi' }, { key: 'presensiIbadah', label: 'Presensi Ibadah' },
+        { key: 'keaktifan', label: 'Keaktifan' }, { key: 'etika', label: 'Etika' },
+        { key: 'kedisiplinan', label: 'Kedisiplinan' }, { key: 'empati', label: 'Empati' },
+        { key: 'testScore', label: 'Pre-Test dan Post-Test' }, { key: 'skriningScore', label: 'Skrining' }, { key: 'akadScore', label: 'Akad Amanah' }
       ];
       return defs.map((d, idx) => {
         const avg = totals[d.key] / count;
         const tgt = appState.aspectTargets[d.key] || { min: 0, max: 100 };
-        const minT = Number(tgt.min || 0);
-        const maxT = Math.max(minT + 1, Number(tgt.max || 100));
+        const minT = Number(tgt.min || 0), maxT = Math.max(minT + 1, Number(tgt.max || 100));
         const pct = Math.min(100, Math.max(0, Math.round((avg / maxT) * 100)));
         return { no: idx + 1, aspek: d.label, avg, minTarget: minT, maxTarget: maxT, pct, remPct: 100 - pct, predikat: getPredikatByTarget(avg, minT, maxT) };
       });
@@ -1530,32 +1448,12 @@
       const totalPtsAll = appState.participants.reduce((acc, p) => acc + computeParticipantMetrics(p.id).totalPoint, 0);
       const avgPts = appState.participants.length ? (totalPtsAll / appState.participants.length).toFixed(1) : '0.0';
       const avgPct = Math.round(list.reduce((a, b) => a + b.pct, 0) / list.length);
-
       document.getElementById('bentoKpiStrip').innerHTML = `
-        <div class="bento-card" style="box-shadow:none; background:var(--surface-subtle);">
-          <div style="font-size:12px; font-weight:700; color:var(--text-muted);">TOTAL PESERTA</div>
-          <div class="mono" style="font-size:24px; font-weight:800;">${appState.participants.length} Orang</div>
-        </div>
-        <div class="bento-card" style="box-shadow:none; background:var(--surface-subtle);">
-          <div style="font-size:12px; font-weight:700; color:var(--text-muted);">RATA-RATA 9 ASPEK</div>
-          <div class="mono" style="font-size:24px; font-weight:800; color:var(--primary);">${avgPct}%</div>
-        </div>
-        <div class="bento-card" style="box-shadow:none; background:var(--surface-subtle);">
-          <div style="font-size:12px; font-weight:700; color:var(--text-muted);">RATA-RATA POIN</div>
-          <div class="mono" style="font-size:24px; font-weight:800; color:var(--accent);">${avgPts} Poin</div>
-        </div>`;
-
+        <div class="bento-card" style="box-shadow:none; background:var(--surface-subtle);"><div style="font-size:12px; font-weight:700; color:var(--text-muted);">TOTAL PESERTA</div><div class="mono" style="font-size:24px; font-weight:800;">${appState.participants.length} Orang</div></div>
+        <div class="bento-card" style="box-shadow:none; background:var(--surface-subtle);"><div style="font-size:12px; font-weight:700; color:var(--text-muted);">RATA-RATA 9 ASPEK</div><div class="mono" style="font-size:24px; font-weight:800; color:var(--primary);">${avgPct}%</div></div>
+        <div class="bento-card" style="box-shadow:none; background:var(--surface-subtle);"><div style="font-size:12px; font-weight:700; color:var(--text-muted);">RATA-RATA POIN</div><div class="mono" style="font-size:24px; font-weight:800; color:var(--accent);">${avgPts} Poin</div></div>`;
       document.getElementById('dashboardTableBody').innerHTML = list.map(r => `
-        <tr>
-          <td class="mono">${r.no}</td>
-          <td style="font-weight:700;">${r.aspek}</td>
-          <td class="mono">${r.avg.toFixed(1)}</td>
-          <td class="mono">${r.minTarget}</td>
-          <td class="mono">${r.maxTarget}</td>
-          <td><span class="badge badge-success">${r.pct}%</span></td>
-          <td><span class="badge badge-warn">${r.remPct}%</span></td>
-          <td><span class="badge badge-info">${r.predikat}</span></td>
-        </tr>`).join('');
+        <tr><td class="mono">${r.no}</td><td style="font-weight:700;">${r.aspek}</td><td class="mono">${r.avg.toFixed(1)}</td><td class="mono">${r.minTarget}</td><td class="mono">${r.maxTarget}</td><td><span class="badge badge-success">${r.pct}%</span></td><td><span class="badge badge-warn">${r.remPct}%</span></td><td><span class="badge badge-info">${r.predikat}</span></td></tr>`).join('');
     }
 
     function renderPublicFinal() {
@@ -1563,80 +1461,31 @@
       let pool = appState.participants.map(p => ({ ...p, m: computeParticipantMetrics(p.id) }));
       if (filterVal !== 'all') pool = pool.filter(x => Number(x.group) === Number(filterVal));
       pool.sort((a, b) => b.m.totalPoint - a.m.totalPoint || b.m.levelRank - a.m.levelRank || a.name.localeCompare(b.name));
-
       document.getElementById('finalTableBody').innerHTML = pool.map((r, i) => {
         const idxSum = r.m.keaktifan + r.m.etika + r.m.kedisiplinan + r.m.empati;
-        return `
-          <tr>
-            <td class="mono" style="font-weight:800;">#${i + 1}</td>
-            <td><div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(r)}" /><div><strong>${r.name}</strong><div style="font-size:12px; color:var(--text-muted);">${r.jabatan}</div></div></div></td>
-            <td>Kel. ${r.group} (#${r.groupNo})</td>
-            <td class="mono">${r.m.presensiMateri}</td>
-            <td class="mono">${r.m.presensiIbadah}</td>
-            <td class="mono">${idxSum}</td>
-            <td class="mono">${r.m.testScore}</td>
-            <td class="mono">${r.m.skriningScore}</td>
-            <td class="mono">${r.m.akadScore}</td>
-            <td class="mono" style="font-weight:800;">${r.m.totalPoint}</td>
-            <td><span class="badge badge-success">${r.m.level}</span></td>
-          </tr>`;
+        return `<tr><td class="mono" style="font-weight:800;">#${i + 1}</td><td><div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(r)}" /><div><strong>${r.name}</strong><div style="font-size:12px; color:var(--text-muted);">${r.jabatan}</div></div></div></td><td>Kel. ${r.group} (#${r.groupNo})</td><td class="mono">${r.m.presensiMateri}</td><td class="mono">${r.m.presensiIbadah}</td><td class="mono">${idxSum}</td><td class="mono">${r.m.testScore}</td><td class="mono">${r.m.skriningScore}</td><td class="mono">${r.m.akadScore}</td><td class="mono" style="font-weight:800;">${r.m.totalPoint}</td><td><span class="badge badge-success">${r.m.level}</span></td></tr>`;
       }).join('');
     }
 
     function downloadExcelHtml(filename, title, headers, rows) {
       const tableHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8" /></head><body><h3>${title}</h3><table border="1"><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${String(c ?? '').replace(/</g, '&lt;')}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`;
       const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      a.click();
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
     }
 
-    function exportRundownExcel() {
-      downloadExcelHtml(
-        'Rundown_Baitul_Arqam_PPDA.xls',
-        'Rundown Acara Baitul Arqam PPDA',
-        ['Hari / Tanggal', 'Waktu', 'Kegiatan', 'Judul Materi', 'Pemateri', 'MC'],
-        (appState.rundown || []).map(r => [getEventDateInfo(r.day).dayLabel, r.time, r.activity, r.topic, r.speaker, r.mc])
-      );
-    }
-
-    function exportDashboardExcel() {
-      downloadExcelHtml(
-        'Dashboard_9_Aspek_PPDA.xls',
-        'Dashboard 9 Aspek Evaluasi',
-        ['No', 'Aspek', 'Rata-rata', 'Target Min', 'Target Maks', 'Capaian (%)', 'Sisa (%)', 'Predikat'],
-        getAspectSummaryList().map(r => [r.no, r.aspek, r.avg.toFixed(1), r.minTarget, r.maxTarget, r.pct, r.remPct, r.predikat])
-      );
-    }
-
+    function exportRundownExcel() { downloadExcelHtml('Rundown_Baitul_Arqam_PPDA.xls', 'Rundown Acara Baitul Arqam PPDA', ['Hari / Tanggal', 'Waktu', 'Kegiatan', 'Judul Materi', 'Pemateri', 'MC'], (appState.rundown || []).map(r => [getEventDateInfo(r.day).dayLabel, r.time, r.activity, r.topic, r.speaker, r.mc])); }
+    function exportDashboardExcel() { downloadExcelHtml('Dashboard_9_Aspek_PPDA.xls', 'Dashboard 9 Aspek Evaluasi', ['No', 'Aspek', 'Rata-rata', 'Target Min', 'Target Maks', 'Capaian (%)', 'Sisa (%)', 'Predikat'], getAspectSummaryList().map(r => [r.no, r.aspek, r.avg.toFixed(1), r.minTarget, r.maxTarget, r.pct, r.remPct, r.predikat])); }
     function exportFinalExcel() {
-      const ranked = appState.participants.map(p => ({ p, m: computeParticipantMetrics(p.id) }))
-        .sort((a, b) => b.m.totalPoint - a.m.totalPoint || b.m.levelRank - a.m.levelRank);
-      downloadExcelHtml(
-        'Klasemen_Final_PPDA.xls',
-        'Klasemen Final Baitul Arqam PPDA',
-        ['Rank', 'ID', 'Nama', 'Kelompok', 'Materi', 'Ibadah', 'Keaktifan', 'Etika', 'Kedisiplinan', 'Empati', 'Tes', 'Skrining', 'Akad', 'Total', 'Level'],
-        ranked.map((row, i) => [i + 1, row.p.id, row.p.name, row.p.group, row.m.presensiMateri, row.m.presensiIbadah, row.m.keaktifan, row.m.etika, row.m.kedisiplinan, row.m.empati, row.m.testScore, row.m.skriningScore, row.m.akadScore, row.m.totalPoint, row.m.level])
-      );
+      const ranked = appState.participants.map(p => ({ p, m: computeParticipantMetrics(p.id) })).sort((a, b) => b.m.totalPoint - a.m.totalPoint || b.m.levelRank - a.m.levelRank);
+      downloadExcelHtml('Klasemen_Final_PPDA.xls', 'Klasemen Final Baitul Arqam PPDA', ['Rank', 'ID', 'Nama', 'Kelompok', 'Materi', 'Ibadah', 'Keaktifan', 'Etika', 'Kedisiplinan', 'Empati', 'Tes', 'Skrining', 'Akad', 'Total', 'Level'], ranked.map((row, i) => [i + 1, row.p.id, row.p.name, row.p.group, row.m.presensiMateri, row.m.presensiIbadah, row.m.keaktifan, row.m.etika, row.m.kedisiplinan, row.m.empati, row.m.testScore, row.m.skriningScore, row.m.akadScore, row.m.totalPoint, row.m.level]));
     }
-
-    function exportAllAdministrationExcel() {
-      exportFinalExcel();
-      setTimeout(exportDashboardExcel, 250);
-    }
+    function exportAllAdministrationExcel() { exportFinalExcel(); setTimeout(exportDashboardExcel, 250); }
 
     function switchTopView(viewName) {
-      if (viewName !== 'scan') {
-        stopCameraScanner();
-        stopFaceRecognition();
-      }
-      sessionMeta.topView = viewName;
-      persistSessionMeta();
+      if (viewName !== 'scan') { stopBarcodeCamera(); stopFaceRecognition(); }
+      sessionMeta.topView = viewName; persistSessionMeta();
       document.querySelectorAll('#mainNavStrip .nav-pill').forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewName));
-      ['rundown', 'dashboard', 'final', 'peserta', 'scan', 'login', 'role_workspace'].forEach(v => {
-        document.getElementById('view-' + v)?.classList.toggle('hidden', v !== viewName);
-      });
+      ['rundown', 'dashboard', 'final', 'peserta', 'scan', 'login', 'role_workspace'].forEach(v => document.getElementById('view-' + v)?.classList.toggle('hidden', v !== viewName));
       if (viewName === 'rundown') renderPublicRundown();
       if (viewName === 'dashboard') renderPublicDashboard();
       if (viewName === 'final') renderPublicFinal();
@@ -1645,9 +1494,7 @@
           document.getElementById('scanLockBox').classList.add('hidden');
           document.getElementById('scanUnlockedArea').classList.remove('hidden');
           document.getElementById('scanTopLogoutWrap').classList.remove('hidden');
-          syncRundownDateSelectors();
-          updateScanSessionOptions();
-          renderBarcodeImageTools();
+          syncRundownDateSelectors(); updateScanSessionOptions(); renderBarcodeImageTools();
         } else {
           document.getElementById('scanLockBox').classList.remove('hidden');
           document.getElementById('scanUnlockedArea').classList.add('hidden');
@@ -1664,13 +1511,8 @@
     function initPesertaDropdowns() {
       const grpSel = document.getElementById('pesertaGroupSelect');
       grpSel.innerHTML = '<option value="">-- Pilih Kelompok Anda --</option>';
-      appState.instructors.forEach(ins => {
-        grpSel.innerHTML += `<option value="${ins.group}">Kelompok ${ins.group} — ${ins.name}</option>`;
-      });
-      if (sessionMeta.pesertaGroup) {
-        grpSel.value = sessionMeta.pesertaGroup;
-        populatePesertaByGroup(true);
-      }
+      appState.instructors.forEach(ins => { grpSel.innerHTML += `<option value="${ins.group}">Kelompok ${ins.group} — ${ins.name}</option>`; });
+      if (sessionMeta.pesertaGroup) { grpSel.value = sessionMeta.pesertaGroup; populatePesertaByGroup(true); }
     }
 
     function populatePesertaByGroup(restoreSelection = false) {
@@ -1682,28 +1524,20 @@
       nameSel.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
       document.getElementById('pesertaWorkspace').classList.add('hidden');
       if (!grp) return;
-      appState.participants.filter(p => p.group === grp).forEach(p => {
-        nameSel.innerHTML += `<option value="${p.id}">${p.groupNo}. ${p.name} (${p.jabatan})</option>`;
-      });
-      if (restoreSelection && sessionMeta.pesertaId) {
-        nameSel.value = sessionMeta.pesertaId;
-        selectPesertaPortal();
-      }
+      appState.participants.filter(p => p.group === grp).forEach(p => { nameSel.innerHTML += `<option value="${p.id}">${p.groupNo}. ${p.name} (${p.jabatan})</option>`; });
+      if (restoreSelection && sessionMeta.pesertaId) { nameSel.value = sessionMeta.pesertaId; selectPesertaPortal(); }
     }
 
     function selectPesertaPortal() {
       const pid = document.getElementById('pesertaNameSelect').value;
-      sessionMeta.pesertaId = pid || '';
-      persistSessionMeta();
-      applyBranding();
+      sessionMeta.pesertaId = pid || ''; persistSessionMeta(); applyBranding();
       if (!pid) { document.getElementById('pesertaWorkspace').classList.add('hidden'); return; }
       const p = appState.participants.find(x => x.id === pid);
       const ins = appState.instructors.find(x => x.group === p.group);
       document.getElementById('pPortalAvatar').src = avatarSrc(p);
       document.getElementById('pPortalName').textContent = `${p.name} (${p.id})`;
       document.getElementById('pPortalMeta').textContent = `${p.jabatan} • Kelompok ${p.group} No. ${p.groupNo} (${ins ? ins.name : '-'})`;
-      renderPesertaBiodataForm(p);
-      renderPesertaTests(pid);
+      renderPesertaBiodataForm(p); renderPesertaTests(pid);
       document.getElementById('pesertaWorkspace').classList.remove('hidden');
     }
 
@@ -1729,9 +1563,7 @@
 
     function savePesertaBiodata(pid) {
       const ans = {};
-      appState.biodataFields.forEach(f => {
-        ans[f.id] = document.getElementById('bio_' + f.id)?.value || '';
-      });
+      appState.biodataFields.forEach(f => { ans[f.id] = document.getElementById('bio_' + f.id)?.value || ''; });
       appState.biodataAnswers[pid] = ans;
       const p = appState.participants.find(x => x.id === pid);
       saveState(p.name, 'Simpan biodata peserta');
@@ -1740,7 +1572,7 @@
 
     function getTestQuestionsForMateri(type, materiName) {
       const cfg = type === 'pre' ? appState.preTest : appState.postTest;
-      const rawList = (cfg.questions || []);
+      const rawList = cfg.questions || [];
       const filtered = rawList.filter(q => (q.materi || cfg.materiTag) === materiName);
       return filtered.length > 0 ? filtered : rawList;
     }
@@ -1843,30 +1675,27 @@
       alert(`Jawaban tersimpan! Skor benar: ${correctCount}.${presensiMsg}`);
     }
 
-    // SCAN BARCODE & FACE CAM
+    // =========================================================================
+    // SCAN BARCODE (NATIVE BARCODEDETECTOR + JSQR + BINGKAI HIJAU "PAS")
+    // =========================================================================
     function unlockScanPortal() {
       if (document.getElementById('scanPasswordInput').value !== appState.scanPassword) return alert('Password panitia salah!');
-      sessionMeta.scanUnlocked = true;
-      persistSessionMeta();
+      sessionMeta.scanUnlocked = true; persistSessionMeta();
       document.getElementById('scanPasswordInput').value = '';
       switchTopView('scan');
     }
 
     function logoutScanPortal() {
-      stopCameraScanner();
-      stopFaceRecognition();
-      sessionMeta.scanUnlocked = false;
-      persistSessionMeta();
+      stopBarcodeCamera(); stopFaceRecognition();
+      sessionMeta.scanUnlocked = false; persistSessionMeta();
       switchTopView('scan');
     }
 
     function updateScanSessionOptions() {
       const day = Number(document.getElementById('scanDaySelect').value);
       const sel = document.getElementById('scanSessionSelect');
-      sel.innerHTML = getPresensiSessions()
-        .filter(s => s.day === day)
-        .map(s => `<option value="${s.id}">[${s.type.toUpperCase()}] ${s.title} (${s.startTime}–${s.lateEnd})</option>`)
-        .join('');
+      sel.innerHTML = getPresensiSessions().filter(s => s.day === day)
+        .map(s => `<option value="${s.id}">[${s.type.toUpperCase()}] ${s.title} (${s.startTime}–${s.lateEnd})</option>`).join('');
       renderScanSessionRuleBanner();
     }
 
@@ -1889,37 +1718,171 @@
     }
 
     function setScanMode(mode) {
-      activeScanMode = mode;
       document.getElementById('btnModeBarcode').className = mode === 'barcode' ? 'btn btn-sm btn-primary' : 'btn btn-sm';
       document.getElementById('btnModeFace').className = mode === 'face' ? 'btn btn-sm btn-primary' : 'btn btn-sm';
       document.getElementById('barcodeScannerPanel').classList.toggle('hidden', mode !== 'barcode');
       document.getElementById('faceScannerPanel').classList.toggle('hidden', mode !== 'face');
-      if (mode === 'barcode') stopFaceRecognition();
-      else { stopCameraScanner(); startFaceRecognition(); }
+      if (mode === 'barcode') { stopFaceRecognition(); startBarcodeCamera(); }
+      else { stopBarcodeCamera(); startFaceRecognition(); }
     }
 
-    function startCameraScanner() {
-      stopFaceRecognition();
-      if (html5QrCode) return;
-      html5QrCode = new Html5Qrcode('qrReader');
-      html5QrCode.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 220, height: 220 } },
-        decoded => processBarcodeScan(decoded)
-      ).catch(err => renderScanAlert('error', 'Kamera Gagal Dibuka', String(err)));
-    }
-
-    function stopCameraScanner() {
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => { html5QrCode = null; }).catch(() => { html5QrCode = null; });
+    function setBarcodeAlignedGreen(isAligned, textLabel = 'Posisi Barcode Pas ✓') {
+      const box = document.getElementById('barcodeStageBox');
+      const badge = document.getElementById('barcodeReticleBadge');
+      if (!box || !badge) return;
+      if (isAligned) {
+        box.classList.add('aligned-green');
+        badge.textContent = textLabel;
+        if (greenHighlightTimeout) clearTimeout(greenHighlightTimeout);
+        greenHighlightTimeout = setTimeout(() => {
+          box.classList.remove('aligned-green');
+          badge.textContent = 'Arahkan Barcode ke Kotak';
+        }, 1200);
+      } else {
+        box.classList.remove('aligned-green');
+        badge.textContent = 'Arahkan Barcode ke Kotak';
       }
     }
 
+    function drawBarcodeReticle(ctx, w, h, cornerPoints = null, isGreen = false) {
+      ctx.clearRect(0, 0, w, h);
+      const padX = Math.round(w * 0.22);
+      const padY = Math.round(h * 0.18);
+      const rw = w - padX * 2;
+      const rh = h - padY * 2;
+      const strokeColor = isGreen ? '#22C55E' : 'rgba(255, 255, 255, 0.65)';
+
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = isGreen ? 4 : 2;
+      ctx.strokeRect(padX, padY, rw, rh);
+
+      if (Array.isArray(cornerPoints) && cornerPoints.length >= 2) {
+        ctx.strokeStyle = '#22C55E';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(cornerPoints[0].x, cornerPoints[0].y);
+        for (let i = 1; i < cornerPoints.length; i++) ctx.lineTo(cornerPoints[i].x, cornerPoints[i].y);
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+
+    function flipBarcodeCamera() {
+      barcodeCameraFacing = barcodeCameraFacing === 'environment' ? 'user' : 'environment';
+      document.getElementById('barcodeCamFacingLabel').textContent = barcodeCameraFacing === 'environment' ? 'Belakang' : 'Depan';
+      if (barcodeStream) { stopBarcodeCamera(); startBarcodeCamera(); }
+    }
+
+    async function startBarcodeCamera() {
+      stopFaceRecognition();
+      const video = document.getElementById('barcodeVideo');
+      const overlay = document.getElementById('barcodeOverlay');
+      const statusEl = document.getElementById('barcodeCamStatus');
+      if (!video || !overlay) return;
+
+      if (barcodeStream) {
+        if (statusEl) statusEl.textContent = 'Kamera barcode sudah aktif.';
+        return;
+      }
+
+      if ('BarcodeDetector' in window && !barcodeDetectorInstance) {
+        try {
+          barcodeDetectorInstance = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'code_39', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'data_matrix'] });
+        } catch (e) {
+          barcodeDetectorInstance = null;
+        }
+      }
+
+      try {
+        barcodeStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: barcodeCameraFacing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        video.srcObject = barcodeStream;
+        await video.play();
+        if (statusEl) statusEl.textContent = 'Kamera aktif — arahkan barcode ke kotak tengah.';
+
+        const workCanvas = document.createElement('canvas');
+        const workCtx = workCanvas.getContext('2d', { willReadFrequently: true });
+
+        if (barcodeLoopTimer) clearInterval(barcodeLoopTimer);
+        barcodeLoopTimer = setInterval(async () => {
+          if (!barcodeStream || video.paused || video.ended) return;
+          const vw = video.videoWidth || 640;
+          const vh = video.videoHeight || 480;
+          if (!vw || !vh) return;
+
+          overlay.width = vw;
+          overlay.height = vh;
+          const ctx = overlay.getContext('2d');
+
+          workCanvas.width = vw;
+          workCanvas.height = vh;
+          workCtx.drawImage(video, 0, 0, vw, vh);
+
+          let foundCode = '';
+          let pts = null;
+
+          // 1. Coba Native BarcodeDetector dulu (mendukung QR + 1D barcode seperti Code128/EAN)
+          if (barcodeDetectorInstance) {
+            try {
+              const codes = await barcodeDetectorInstance.detect(workCanvas);
+              if (codes && codes.length > 0) {
+                foundCode = (codes[0].rawValue || '').trim();
+                if (codes[0].cornerPoints && codes[0].cornerPoints.length) pts = codes[0].cornerPoints;
+              }
+            } catch (e) {}
+          }
+
+          // 2. Fallback ke jsQR untuk QR code
+          if (!foundCode && window.jsQR) {
+            const imgData = workCtx.getImageData(0, 0, vw, vh);
+            const qrRes = jsQR(imgData.data, vw, vh, { inversionAttempts: 'attemptBoth' });
+            if (qrRes && qrRes.data) {
+              foundCode = qrRes.data.trim();
+              if (qrRes.location) {
+                pts = [
+                  qrRes.location.topLeftCorner,
+                  qrRes.location.topRightCorner,
+                  qrRes.location.bottomRightCorner,
+                  qrRes.location.bottomLeftCorner
+                ];
+              }
+            }
+          }
+
+          if (foundCode) {
+            drawBarcodeReticle(ctx, vw, vh, pts, true);
+            setBarcodeAlignedGreen(true, `Terbaca: ${foundCode} ✓`);
+            const key = `${foundCode.toUpperCase()}_${document.getElementById('scanSessionSelect')?.value || ''}`;
+            const now = Date.now();
+            if (now - (lastBarcodeCooldown[key] || 0) > 2500) {
+              lastBarcodeCooldown[key] = now;
+              processBarcodeScan(foundCode, true);
+            }
+          } else {
+            drawBarcodeReticle(ctx, vw, vh, null, false);
+          }
+        }, 160);
+      } catch (err) {
+        if (statusEl) statusEl.textContent = 'Gagal membuka kamera: ' + err.message;
+        renderScanAlert('error', 'Kamera Barcode Gagal Dibuka', 'Pastikan izin kamera diizinkan atau gunakan input barcode manual.');
+      }
+    }
+
+    function stopBarcodeCamera() {
+      if (barcodeLoopTimer) { clearInterval(barcodeLoopTimer); barcodeLoopTimer = null; }
+      if (barcodeStream) { barcodeStream.getTracks().forEach(t => t.stop()); barcodeStream = null; }
+      const video = document.getElementById('barcodeVideo');
+      if (video) video.srcObject = null;
+      setBarcodeAlignedGreen(false);
+    }
+
+    // FACE CAM
     async function ensureFaceModelsLoaded() {
       if (faceModelsLoaded) return true;
       if (!window.faceapi) return false;
-      if (faceModelsLoading) {
-        while (faceModelsLoading) await new Promise(r => setTimeout(r, 150));
-        return faceModelsLoaded;
-      }
+      if (faceModelsLoading) { while (faceModelsLoading) await new Promise(r => setTimeout(r, 150)); return faceModelsLoaded; }
       faceModelsLoading = true;
       try {
         await Promise.all([
@@ -1927,36 +1890,28 @@
           faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL),
           faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
         ]);
-        faceModelsLoaded = true;
-        return true;
-      } catch (e) {
-        return false;
-      } finally {
-        faceModelsLoading = false;
-      }
+        faceModelsLoaded = true; return true;
+      } catch (e) { return false; } finally { faceModelsLoading = false; }
     }
 
     async function extractFaceDescriptorFromDataUrl(dataUrl) {
       const ok = await ensureFaceModelsLoaded();
       if (!ok || !dataUrl) return null;
       return new Promise(resolve => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
+        const img = new Image(); img.crossOrigin = 'anonymous';
         img.onload = async () => {
           try {
             const det = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.45 })).withFaceLandmarks().withFaceDescriptor();
             resolve(det?.descriptor ? Array.from(det.descriptor) : null);
           } catch (e) { resolve(null); }
         };
-        img.onerror = () => resolve(null);
-        img.src = dataUrl;
+        img.onerror = () => resolve(null); img.src = dataUrl;
       });
     }
 
     function computeEuclideanDistance(a, b) {
       if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return 999;
-      let s = 0;
-      for (let i = 0; i < a.length; i++) s += (Number(a[i]) - Number(b[i])) ** 2;
+      let s = 0; for (let i = 0; i < a.length; i++) s += (Number(a[i]) - Number(b[i])) ** 2;
       return Math.sqrt(s);
     }
 
@@ -1968,71 +1923,55 @@
     }
 
     async function startFaceRecognition() {
-      const video = document.getElementById('faceVideo');
-      const overlay = document.getElementById('faceOverlay');
-      const statusEl = document.getElementById('faceModelStatus');
+      const video = document.getElementById('faceVideo'), overlay = document.getElementById('faceOverlay'), statusEl = document.getElementById('faceModelStatus');
       const loaded = await ensureFaceModelsLoaded();
       if (!loaded) return renderScanAlert('error', 'Face Cam Belum Siap', 'Model wajah tidak dapat dimuat.');
       for (const p of appState.participants) {
-        if (p.avatar && !Array.isArray(p.faceDescriptor)) {
-          const d = await extractFaceDescriptorFromDataUrl(p.avatar);
-          if (d) p.faceDescriptor = d;
-        }
+        if (p.avatar && !Array.isArray(p.faceDescriptor)) { const d = await extractFaceDescriptorFromDataUrl(p.avatar); if (d) p.faceDescriptor = d; }
       }
       if (faceStream) return;
       try {
         faceStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: faceCameraFacing } }, audio: false });
-        video.srcObject = faceStream;
-        await video.play();
+        video.srcObject = faceStream; await video.play();
         if (statusEl) statusEl.textContent = 'Face Cam aktif.';
         faceLoopTimer = setInterval(async () => {
-          if (!faceStream || video.paused || activeScanMode !== 'face') return;
+          if (!faceStream || video.paused) return;
           const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.45 })).withFaceLandmarks().withFaceDescriptor();
           const ctx = overlay.getContext('2d');
-          overlay.width = video.videoWidth || 640;
-          overlay.height = video.videoHeight || 480;
+          overlay.width = video.videoWidth || 640; overlay.height = video.videoHeight || 480;
           ctx.clearRect(0, 0, overlay.width, overlay.height);
-          if (!det) return;
-          ctx.strokeStyle = '#22C55E';
-          ctx.lineWidth = 3;
+          const stage = document.getElementById('faceStageBox');
+          const badge = document.getElementById('faceReticleBadge');
+          if (!det) { stage?.classList.remove('aligned-green'); if (badge) badge.textContent = 'Mencari Wajah'; return; }
+          stage?.classList.add('aligned-green');
+          if (badge) badge.textContent = 'Wajah Terdeteksi ✓';
+          ctx.strokeStyle = '#22C55E'; ctx.lineWidth = 3;
           ctx.strokeRect(det.detection.box.x, det.detection.box.y, det.detection.box.width, det.detection.box.height);
           const cands = appState.participants.filter(p => Array.isArray(p.faceDescriptor));
           let best = null, bestDist = 999;
-          for (const c of cands) {
-            const dist = computeEuclideanDistance(Array.from(det.descriptor), c.faceDescriptor);
-            if (dist < bestDist) { bestDist = dist; best = c; }
-          }
+          for (const c of cands) { const dist = computeEuclideanDistance(Array.from(det.descriptor), c.faceDescriptor); if (dist < bestDist) { bestDist = dist; best = c; } }
           if (best && bestDist <= 0.56) {
             const key = `${best.id}_${document.getElementById('scanSessionSelect')?.value || ''}`;
             if (Date.now() - (lastFaceCooldownMap[key] || 0) < 3500) return;
             lastFaceCooldownMap[key] = Date.now();
             recordAttendanceForParticipant(best, `Face Cam (${Math.round((1 - bestDist) * 100)}%)`);
           }
-        }, 900);
-      } catch (e) {
-        renderScanAlert('error', 'Gagal Membuka Kamera', e.message);
-      }
+        }, 800);
+      } catch (e) { renderScanAlert('error', 'Gagal Membuka Kamera', e.message); }
     }
 
     function stopFaceRecognition() {
       if (faceLoopTimer) { clearInterval(faceLoopTimer); faceLoopTimer = null; }
       if (faceStream) { faceStream.getTracks().forEach(t => t.stop()); faceStream = null; }
-      const video = document.getElementById('faceVideo');
-      if (video) video.srcObject = null;
+      const video = document.getElementById('faceVideo'); if (video) video.srcObject = null;
+      document.getElementById('faceStageBox')?.classList.remove('aligned-green');
     }
 
     function renderScanAlert(type, title, detailHtml, participant = null) {
       const fb = document.getElementById('scanFeedbackBox');
       if (!fb) return;
       fb.className = 'scan-alert-box ' + (type === 'success' ? 'status-success' : type === 'duplicate' ? 'status-duplicate' : 'status-error');
-      fb.innerHTML = `
-        <div style="display:flex; align-items:flex-start; gap:12px;">
-          ${participant ? `<img class="avatar avatar-lg" src="${avatarSrc(participant)}" />` : ''}
-          <div>
-            <h4>${title}</h4>
-            <div style="font-size:13.5px; margin-top:4px;">${detailHtml}</div>
-          </div>
-        </div>`;
+      fb.innerHTML = `<div style="display:flex; align-items:flex-start; gap:12px;">${participant ? `<img class="avatar avatar-lg" src="${avatarSrc(participant)}" />` : ''}<div><h4>${title}</h4><div style="font-size:13.5px; margin-top:4px;">${detailHtml}</div></div></div>`;
     }
 
     function recordAttendanceForParticipant(participant, methodLabel) {
@@ -2047,20 +1986,14 @@
 
       const modeVal = document.getElementById('scanStatusSelect').value;
       const nowClock = getCurrentClockHHMM();
-      let pts = 5;
-      let note = `Jam ${nowClock}`;
+      let pts = 5, note = `Jam ${nowClock}`;
 
       if (modeVal === 'auto') {
         const check = evaluateSessionTimeScore(sess, nowClock);
-        if (!check.allowed) {
-          renderScanAlert('error', `Scan Ditolak: ${participant.name}`, `${check.label}.`, participant);
-          return;
-        }
-        pts = check.points;
-        note = `${check.label} (${nowClock})`;
+        if (!check.allowed) { renderScanAlert('error', `Scan Ditolak: ${participant.name}`, `${check.label}.`, participant); return; }
+        pts = check.points; note = `${check.label} (${nowClock})`;
       } else {
-        pts = Number(modeVal);
-        note = `Input panitia (+${pts} poin)`;
+        pts = Number(modeVal); note = `Input panitia (+${pts} poin)`;
       }
 
       appState.presensi[participant.id][sessId] = pts;
@@ -2069,20 +2002,23 @@
       saveState('Panitia Scan', `Presensi ${participant.name} (+${pts}) via ${methodLabel}`);
     }
 
-    function processBarcodeScan(rawCode) {
+    function processBarcodeScan(rawCode, fromCamera = false) {
       const code = (rawCode || '').trim().toUpperCase();
       const p = appState.participants.find(x => x.id === code);
-      if (!p) return renderScanAlert('error', 'Kode Tidak Dikenali', `Kode <strong>${code}</strong> tidak terdaftar.`);
+      if (!p) {
+        if (!fromCamera) renderScanAlert('error', 'Kode Tidak Dikenali', `Kode <strong>${code}</strong> tidak terdaftar.`);
+        return;
+      }
+      if (!fromCamera) setBarcodeAlignedGreen(true, `${p.name} ✓`);
       document.getElementById('manualBarcodeInput').value = '';
       recordAttendanceForParticipant(p, 'Barcode');
     }
 
+    // QR GENERATOR POLOS (.PNG)
     function drawQrMatrixToCanvas(canvas, text, size = 240) {
-      canvas.width = size;
-      canvas.height = size;
+      canvas.width = size; canvas.height = size;
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, size, size);
       const n = 21, pad = 16, cell = Math.floor((size - pad * 2) / n), offset = Math.floor((size - cell * n) / 2);
       const grid = Array.from({ length: n }, () => Array(n).fill(false));
       const reserved = Array.from({ length: n }, () => Array(n).fill(false));
@@ -2100,8 +2036,7 @@
       const bits = [];
       let hash = 2166136261;
       for (let i = 0; i < text.length; i++) {
-        const code = text.charCodeAt(i);
-        hash ^= code; hash = Math.imul(hash, 16777619);
+        const code = text.charCodeAt(i); hash ^= code; hash = Math.imul(hash, 16777619);
         for (let b = 7; b >= 0; b--) bits.push((code >> b) & 1);
       }
       for (let k = 0; k < 220; k++) bits.push(((hash >>> (k % 24)) ^ (k * 13)) & 1);
@@ -2120,8 +2055,7 @@
     }
 
     function renderBarcodeImageTools() {
-      const sel = document.getElementById('singleBarcodeSelect');
-      const grid = document.getElementById('barcodeImageGrid');
+      const sel = document.getElementById('singleBarcodeSelect'), grid = document.getElementById('barcodeImageGrid');
       if (!sel || !grid) return;
       sel.innerHTML = appState.participants.map(p => `<option value="${p.id}">${p.name} (${p.id})</option>`).join('');
       grid.innerHTML = appState.participants.map(p => `
@@ -2141,25 +2075,15 @@
     function downloadBarcodeById(pid) {
       const p = appState.participants.find(x => x.id === pid);
       if (!p) return;
-      const a = document.createElement('a');
-      a.href = buildPureBarcodeDataUrl(p);
-      a.download = `${sanitizeFilename(p.name)}.png`;
-      a.click();
+      const a = document.createElement('a'); a.href = buildPureBarcodeDataUrl(p); a.download = `${sanitizeFilename(p.name)}.png`; a.click();
     }
     function downloadSingleBarcode() { downloadBarcodeById(document.getElementById('singleBarcodeSelect').value); }
     function toggleSelectAllBarcodeCheckboxes(checked) { document.querySelectorAll('.barcode-select-chk').forEach(c => { c.checked = checked; }); }
     function getCheckedBarcodeIds() { return Array.from(document.querySelectorAll('.barcode-select-chk:checked')).map(c => c.value); }
-    function downloadSelectedBarcodes() {
-      const ids = getCheckedBarcodeIds();
-      if (!ids.length) return alert('Pilih minimal 1 peserta.');
-      ids.forEach((id, idx) => setTimeout(() => downloadBarcodeById(id), idx * 120));
-    }
-    function downloadAllBarcodes() {
-      appState.participants.forEach((p, idx) => setTimeout(() => downloadBarcodeById(p.id), idx * 120));
-    }
+    function downloadSelectedBarcodes() { const ids = getCheckedBarcodeIds(); if (!ids.length) return alert('Pilih minimal 1 peserta.'); ids.forEach((id, idx) => setTimeout(() => downloadBarcodeById(id), idx * 120)); }
+    function downloadAllBarcodes() { appState.participants.forEach((p, idx) => setTimeout(() => downloadBarcodeById(p.id), idx * 120)); }
     function printBarcodeByIds(ids) {
-      const list = appState.participants.filter(p => ids.includes(p.id));
-      if (!list.length) return;
+      const list = appState.participants.filter(p => ids.includes(p.id)); if (!list.length) return;
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById('barcodePrintGrid').innerHTML = list.map(p => `<div class="barcode-img-card"><img class="pure-barcode" src="${buildPureBarcodeDataUrl(p)}" alt="" /></div>`).join('');
       document.getElementById('barcodePrintArea').classList.remove('hidden');
@@ -2172,14 +2096,8 @@
     // LOGIN & RUANG TUGAS STAF
     function initStaffDropdown() {
       const sel = document.getElementById('staffAccountSelect');
-      const adminsList = [
-        `<option value="superadmin:${appState.superadmin.id}">${appState.superadmin.name} (Superadmin)</option>`,
-        ...(appState.extraAdmins || []).map(a => `<option value="admin:${a.id}">${a.name} (Admin)</option>`)
-      ].join('');
-      sel.innerHTML = `
-        <optgroup label="Superadmin & Admin">${adminsList}</optgroup>
-        <optgroup label="Instruktur">${appState.instructors.map(i => `<option value="instructor:${i.id}">Kel. ${i.group} — ${i.name}</option>`).join('')}</optgroup>
-        <optgroup label="Penilai Akad">${appState.akadAssessors.map(a => `<option value="akad:${a.id}">${a.name}</option>`).join('')}</optgroup>`;
+      const adminsList = [`<option value="superadmin:${appState.superadmin.id}">${appState.superadmin.name} (Superadmin)</option>`, ...(appState.extraAdmins || []).map(a => `<option value="admin:${a.id}">${a.name} (Admin)</option>`)].join('');
+      sel.innerHTML = `<optgroup label="Superadmin & Admin">${adminsList}</optgroup><optgroup label="Instruktur">${appState.instructors.map(i => `<option value="instructor:${i.id}">Kel. ${i.group} — ${i.name}</option>`).join('')}</optgroup><optgroup label="Penilai Akad">${appState.akadAssessors.map(a => `<option value="akad:${a.id}">${a.name}</option>`).join('')}</optgroup>`;
     }
 
     function loginStaff() {
@@ -2191,55 +2109,28 @@
       if (role === 'instructor') acc = appState.instructors.find(x => x.id === id && x.password === pass);
       if (role === 'akad') acc = appState.akadAssessors.find(x => x.id === id && x.password === pass);
       if (!acc) return alert('Password salah!');
-      currentUser = { role, user: acc };
-      sessionMeta.role = role; sessionMeta.userId = acc.id; sessionMeta.topView = 'role_workspace';
+      currentUser = { role, user: acc }; sessionMeta.role = role; sessionMeta.userId = acc.id; sessionMeta.topView = 'role_workspace';
       sessionMeta.staffTab = (role === 'superadmin' || role === 'admin') ? 'presensi' : (role === 'instructor' ? 'index' : 'akad');
-      persistSessionMeta();
-      document.getElementById('staffPasswordInput').value = '';
-      syncAuthBar();
-      switchTopView('role_workspace');
+      persistSessionMeta(); document.getElementById('staffPasswordInput').value = ''; syncAuthBar(); switchTopView('role_workspace');
     }
 
-    function logoutStaff() {
-      currentUser = null; sessionMeta.role = null; sessionMeta.userId = null; sessionMeta.topView = 'rundown';
-      persistSessionMeta(); syncAuthBar(); switchTopView('rundown');
-    }
+    function logoutStaff() { currentUser = null; sessionMeta.role = null; sessionMeta.userId = null; sessionMeta.topView = 'rundown'; persistSessionMeta(); syncAuthBar(); switchTopView('rundown'); }
 
     function syncAuthBar() {
-      const rolePill = document.getElementById('navRolePill');
-      const loginPill = document.getElementById('navLoginPill');
-      const bar = document.getElementById('loggedUserBar');
+      const rolePill = document.getElementById('navRolePill'), loginPill = document.getElementById('navLoginPill'), bar = document.getElementById('loggedUserBar');
       if (currentUser) {
-        rolePill.classList.remove('hidden');
-        loginPill.classList.add('hidden');
-        bar.classList.remove('hidden');
+        rolePill.classList.remove('hidden'); loginPill.classList.add('hidden'); bar.classList.remove('hidden');
         document.getElementById('topUserAvatar').src = avatarSrc(currentUser.user);
         document.getElementById('topUserName').textContent = currentUser.user.name;
-      } else {
-        rolePill.classList.add('hidden');
-        loginPill.classList.remove('hidden');
-        bar.classList.add('hidden');
-      }
+      } else { rolePill.classList.add('hidden'); loginPill.classList.remove('hidden'); bar.classList.add('hidden'); }
       applyBranding();
     }
 
     function renderStaffSubTabs() {
-      const sub = document.getElementById('staffSubTabs');
-      const role = currentUser.role;
-      let tabs = [];
-      if (role === 'superadmin' || role === 'admin') {
-        tabs = [
-          { id: 'presensi', label: 'Presensi Kehadiran & Ibadah' },
-          { id: 'admin', label: 'Pengaturan Admin' },
-          { id: 'index', label: 'Index' },
-          { id: 'skrining', label: 'Skrining' },
-          { id: 'akad', label: 'Akad Amanah' }
-        ];
-      } else if (role === 'instructor') {
-        tabs = [{ id: 'index', label: `Index Kel. ${currentUser.user.group}` }, { id: 'skrining', label: `Skrining Kel. ${currentUser.user.group}` }];
-      } else {
-        tabs = [{ id: 'akad', label: 'Akad Amanah' }];
-      }
+      const sub = document.getElementById('staffSubTabs'), role = currentUser.role;
+      let tabs = (role === 'superadmin' || role === 'admin')
+        ? [{ id: 'presensi', label: 'Presensi Kehadiran & Ibadah' }, { id: 'admin', label: 'Pengaturan Admin' }, { id: 'index', label: 'Index' }, { id: 'skrining', label: 'Skrining' }, { id: 'akad', label: 'Akad Amanah' }]
+        : (role === 'instructor' ? [{ id: 'index', label: `Index Kel. ${currentUser.user.group}` }, { id: 'skrining', label: `Skrining Kel. ${currentUser.user.group}` }] : [{ id: 'akad', label: 'Akad Amanah' }]);
       if (!tabs.some(t => t.id === sessionMeta.staffTab)) sessionMeta.staffTab = tabs[0].id;
       sub.innerHTML = tabs.map(t => `<button class="nav-pill ${t.id === sessionMeta.staffTab ? 'active' : ''}" onclick="sessionMeta.staffTab='${t.id}'; persistSessionMeta(); renderStaffSubTabs();">${t.label}</button>`).join('');
       renderStaffContent();
@@ -2254,7 +2145,6 @@
       else if (sessionMeta.staffTab === 'akad') renderAkadView(area);
     }
 
-    // TAB PRESENSI: ATUR JAM +5 / +2 / 0 & TAUTAN PRE-TEST/POST-TEST
     function renderPresensiView(area) {
       const sessions = getPresensiSessions();
       const activeSessId = window._selectedPresensiSession || sessions[0].id;
@@ -2265,21 +2155,12 @@
       area.innerHTML = `
         <div class="bento-card">
           <div class="card-header">
-            <div>
-              <h2>Pengaturan Jadwal & Penilaian Presensi Kehadiran & Ibadah</h2>
-              <p style="color:var(--text-muted); font-size:13.5px;">Atur jam tepat waktu (+5 poin), terlambat (+2 poin), tidak absen (0 poin), serta tautan Pre-Test otomatis (+5 poin).</p>
-            </div>
+            <div><h2>Pengaturan Jadwal & Penilaian Presensi Kehadiran & Ibadah</h2><p style="color:var(--text-muted); font-size:13.5px;">Atur jam tepat waktu (+5 poin), terlambat (+2 poin), tidak absen (0 poin), serta tautan Pre-Test otomatis (+5 poin).</p></div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <select style="width:170px;" onchange="window._presensiGroupFilter=this.value; renderStaffContent();">
-                <option value="all" ${grpFilter === 'all' ? 'selected' : ''}>Semua Kelompok</option>
-                ${[1,2,3,4,5,6].map(g => `<option value="${g}" ${Number(grpFilter) === g ? 'selected' : ''}>Kelompok ${g}</option>`).join('')}
-              </select>
-              <select style="width:320px;" onchange="window._selectedPresensiSession=this.value; renderStaffContent();">
-                ${sessions.map(s => `<option value="${s.id}" ${s.id === activeSess.id ? 'selected' : ''}>Hari ${s.day} • [${s.type.toUpperCase()}] ${s.title}</option>`).join('')}
-              </select>
+              <select style="width:170px;" onchange="window._presensiGroupFilter=this.value; renderStaffContent();"><option value="all" ${grpFilter === 'all' ? 'selected' : ''}>Semua Kelompok</option>${[1,2,3,4,5,6].map(g => `<option value="${g}" ${Number(grpFilter) === g ? 'selected' : ''}>Kelompok ${g}</option>`).join('')}</select>
+              <select style="width:320px;" onchange="window._selectedPresensiSession=this.value; renderStaffContent();">${sessions.map(s => `<option value="${s.id}" ${s.id === activeSess.id ? 'selected' : ''}>Hari ${s.day} • [${s.type.toUpperCase()}] ${s.title}</option>`).join('')}</select>
             </div>
           </div>
-
           <div class="bento-card" style="background:var(--surface-subtle); box-shadow:none; margin-bottom:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
               <strong>Sesi: Hari ${activeSess.day} — [${activeSess.type.toUpperCase()}] ${activeSess.title}</strong>
@@ -2294,42 +2175,16 @@
               <div><label class="field-label">Batas Terlambat (+2)</label><input type="time" id="presLateEndInput" value="${activeSess.lateEnd || '08:30'}" /></div>
               <div><button class="btn btn-primary" style="width:100%;" onclick="savePresensiSessionTiming('${activeSess.id}')">Simpan Jam</button></div>
             </div>
-            ${activeSess.type === 'materi' ? `
-              <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);">
-                <label class="field-label">Otomatis +5 Poin Presensi Kehadiran Saat Peserta Mengerjakan Pre-Test Materi:</label>
-                <select onchange="linkPresensiSessionToMateri('${activeSess.id}', this.value)">
-                  <option value="">-- Tidak Ditautkan ke Pre-Test --</option>
-                  ${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${activeSess.linkedPreMateri === m ? 'selected' : ''}>${m}</option>`).join('')}
-                </select>
-              </div>` : ''}
+            ${activeSess.type === 'materi' ? `<div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);"><label class="field-label">Otomatis +5 Poin Presensi Kehadiran Saat Peserta Mengerjakan Pre-Test Materi:</label><select onchange="linkPresensiSessionToMateri('${activeSess.id}', this.value)"><option value="">-- Tidak Ditautkan ke Pre-Test --</option>${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${activeSess.linkedPreMateri === m ? 'selected' : ''}>${m}</option>`).join('')}</select></div>` : ''}
           </div>
-
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr><th>No</th><th>Peserta</th><th>Kel.</th><th>Total Materi</th><th>Total Ibadah</th><th>Nilai Sesi Ini</th><th>Edit Cepat</th></tr>
-              </thead>
+              <thead><tr><th>No</th><th>Peserta</th><th>Kel.</th><th>Total Materi</th><th>Total Ibadah</th><th>Nilai Sesi Ini</th><th>Edit Cepat</th></tr></thead>
               <tbody>
                 ${list.map((p, idx) => {
                   const m = computeParticipantMetrics(p.id);
                   const val = Number(appState.presensi[p.id]?.[activeSess.id] ?? 0);
-                  return `
-                    <tr>
-                      <td class="mono">${idx + 1}</td>
-                      <td><strong>${p.name}</strong> <span class="mono" style="font-size:12px; color:var(--text-muted);">(${p.id})</span></td>
-                      <td>Kel. ${p.group}</td>
-                      <td class="mono">${m.presensiMateri}</td>
-                      <td class="mono">${m.presensiIbadah}</td>
-                      <td class="mono" style="font-weight:800; color:var(--primary);">${val}</td>
-                      <td>
-                        <div style="display:flex; gap:5px; align-items:center;">
-                          <button class="btn btn-sm ${val === 5 ? 'btn-primary' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 5)">5</button>
-                          <button class="btn btn-sm ${val === 2 ? 'btn-primary' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 2)">2</button>
-                          <button class="btn btn-sm ${val === 0 ? 'btn-warn' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 0)">0</button>
-                          <input type="number" value="${val}" style="width:72px; min-height:34px; padding:4px 8px;" onchange="setPresensiScore('${p.id}', '${activeSess.id}', Number(this.value || 0))" />
-                        </div>
-                      </td>
-                    </tr>`;
+                  return `<tr><td class="mono">${idx + 1}</td><td><strong>${p.name}</strong> <span class="mono" style="font-size:12px; color:var(--text-muted);">(${p.id})</span></td><td>Kel. ${p.group}</td><td class="mono">${m.presensiMateri}</td><td class="mono">${m.presensiIbadah}</td><td class="mono" style="font-weight:800; color:var(--primary);">${val}</td><td><div style="display:flex; gap:5px; align-items:center;"><button class="btn btn-sm ${val === 5 ? 'btn-primary' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 5)">5</button><button class="btn btn-sm ${val === 2 ? 'btn-primary' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 2)">2</button><button class="btn btn-sm ${val === 0 ? 'btn-warn' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 0)">0</button><input type="number" value="${val}" style="width:72px; min-height:34px; padding:4px 8px;" onchange="setPresensiScore('${p.id}', '${activeSess.id}', Number(this.value || 0))" /></div></td></tr>`;
                 }).join('')}
               </tbody>
             </table>
@@ -2338,8 +2193,7 @@
     }
 
     function savePresensiSessionTiming(sessId) {
-      const sess = getPresensiSessions().find(s => s.id === sessId);
-      if (!sess) return;
+      const sess = getPresensiSessions().find(s => s.id === sessId); if (!sess) return;
       sess.startTime = document.getElementById('presStartTimeInput').value || sess.startTime;
       sess.onTimeEnd = document.getElementById('presOnTimeEndInput').value || sess.onTimeEnd;
       sess.lateEnd = document.getElementById('presLateEndInput').value || sess.lateEnd;
@@ -2350,8 +2204,7 @@
 
     function linkPresensiSessionToMateri(sessId, materiTitle) {
       getPresensiSessions().forEach(s => { if (materiTitle && s.linkedPreMateri === materiTitle && s.id !== sessId) s.linkedPreMateri = ''; });
-      const target = getPresensiSessions().find(s => s.id === sessId);
-      if (target) target.linkedPreMateri = materiTitle;
+      const target = getPresensiSessions().find(s => s.id === sessId); if (target) target.linkedPreMateri = materiTitle;
       if (!appState.preTest.materiSessionMap) appState.preTest.materiSessionMap = {};
       if (materiTitle) appState.preTest.materiSessionMap[materiTitle] = sessId;
       saveState(currentUser.user.name, `Tautkan presensi ${sessId} ke ${materiTitle || 'Nonaktif'}`);
@@ -2368,35 +2221,21 @@
     function bulkSetPresensiSession(sessId, val) {
       const grpFilter = window._presensiGroupFilter || 'all';
       const list = grpFilter === 'all' ? appState.participants : appState.participants.filter(p => Number(p.group) === Number(grpFilter));
-      list.forEach(p => {
-        if (!appState.presensi[p.id]) appState.presensi[p.id] = {};
-        appState.presensi[p.id][sessId] = Number(val);
-      });
+      list.forEach(p => { if (!appState.presensi[p.id]) appState.presensi[p.id] = {}; appState.presensi[p.id][sessId] = Number(val); });
       saveState(currentUser.user.name, `Bulk presensi ${sessId} = ${val}`);
       renderStaffContent();
     }
 
-    // ADMIN CONTROL
     function renderAdminControlView(area) {
       const mod = sessionMeta.adminModule || 'overview';
       let bodyHtml = '';
-
       if (mod === 'overview') {
         bodyHtml = `
           <div class="bento-grid">
             <div class="bento-card bento-6">
               <h3>Password Scan & Ekspor Data</h3>
-              <div style="margin:12px 0;">
-                <label class="field-label">Password Portal Scan & Barcode</label>
-                <div style="display:flex; gap:8px;">
-                  <input type="text" id="adminScanPassInput" value="${appState.scanPassword}" />
-                  <button class="btn btn-primary" onclick="appState.scanPassword=document.getElementById('adminScanPassInput').value.trim(); saveState('Admin','Update scan pass'); alert('Tersimpan');">Simpan</button>
-                </div>
-              </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
-                <button class="btn btn-primary" onclick="exportAllAdministrationExcel()">📊 Unduh Excel Lengkap</button>
-                <button class="btn btn-warn" onclick="window.print()">📄 Cetak PDF Landscape</button>
-              </div>
+              <div style="margin:12px 0;"><label class="field-label">Password Portal Scan & Barcode</label><div style="display:flex; gap:8px;"><input type="text" id="adminScanPassInput" value="${appState.scanPassword}" /><button class="btn btn-primary" onclick="appState.scanPassword=document.getElementById('adminScanPassInput').value.trim(); saveState('Admin','Update scan pass'); alert('Tersimpan');">Simpan</button></div></div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;"><button class="btn btn-primary" onclick="exportAllAdministrationExcel()">📊 Unduh Excel Lengkap</button><button class="btn btn-warn" onclick="window.print()">📄 Cetak PDF Landscape</button></div>
             </div>
             <div class="bento-card bento-6">
               <h3>Tambah Peserta Baru</h3>
@@ -2408,49 +2247,19 @@
         bodyHtml = `
           <div class="bento-grid">
             ${['pre', 'post'].map(type => {
-              const isPre = type === 'pre';
-              const cfg = isPre ? appState.preTest : appState.postTest;
-              const activeMateri = cfg.materiTag || appState.materiTitles[0] || '';
-              const linkedSessId = cfg.materiSessionMap?.[activeMateri] || '';
+              const isPre = type === 'pre', cfg = isPre ? appState.preTest : appState.postTest;
+              const activeMateri = cfg.materiTag || appState.materiTitles[0] || '', linkedSessId = cfg.materiSessionMap?.[activeMateri] || '';
               return `
                 <div class="bento-card bento-6">
-                  <div class="card-header">
-                    <h3>${isPre ? 'PRE-TEST' : 'POST-TEST'}</h3>
-                    <button class="btn btn-sm ${cfg.open ? 'btn-primary' : ''}" onclick="${isPre ? 'appState.preTest.open=!appState.preTest.open' : 'appState.postTest.open=!appState.postTest.open'}; saveState('Admin','Toggle tes'); renderStaffContent();">${cfg.open ? '✅ DIBUKA' : '🔒 DITUTUP'}</button>
-                  </div>
-                  <div style="margin-bottom:10px;">
-                    <label class="field-label">Token Ujian</label>
-                    <input type="text" value="${cfg.token || ''}" onchange="${isPre ? 'appState.preTest.token' : 'appState.postTest.token'}=this.value.trim(); saveState('Admin','Ubah token');" />
-                  </div>
-                  <div style="margin-bottom:10px;">
-                    <label class="field-label">Materi Aktif</label>
-                    <select onchange="${isPre ? 'appState.preTest.materiTag' : 'appState.postTest.materiTag'}=this.value; saveState('Admin','Pilih materi tes'); renderStaffContent();">
-                      ${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${m === activeMateri ? 'selected' : ''}>${m}</option>`).join('')}
-                    </select>
-                  </div>
-                  <div>
-                    <label class="field-label">Otomatis +5 Poin Presensi Kehadiran Sesi:</label>
-                    <select onchange="if(!${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}) ${isPre ? 'appState.preTest.materiSessionMap={}' : 'appState.postTest.materiSessionMap={}'}; ${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}['${activeMateri.replace(/'/g, "\\'")}']=this.value; saveState('Admin','Tautkan sesi tes'); renderStaffContent();">
-                      <option value="">-- Nonaktif --</option>
-                      ${getPresensiSessions().filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${linkedSessId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}
-                    </select>
-                  </div>
+                  <div class="card-header"><h3>${isPre ? 'PRE-TEST' : 'POST-TEST'}</h3><button class="btn btn-sm ${cfg.open ? 'btn-primary' : ''}" onclick="${isPre ? 'appState.preTest.open=!appState.preTest.open' : 'appState.postTest.open=!appState.postTest.open'}; saveState('Admin','Toggle tes'); renderStaffContent();">${cfg.open ? '✅ DIBUKA' : '🔒 DITUTUP'}</button></div>
+                  <div style="margin-bottom:10px;"><label class="field-label">Token Ujian</label><input type="text" value="${cfg.token || ''}" onchange="${isPre ? 'appState.preTest.token' : 'appState.postTest.token'}=this.value.trim(); saveState('Admin','Ubah token');" /></div>
+                  <div style="margin-bottom:10px;"><label class="field-label">Materi Aktif</label><select onchange="${isPre ? 'appState.preTest.materiTag' : 'appState.postTest.materiTag'}=this.value; saveState('Admin','Pilih materi tes'); renderStaffContent();">${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${m === activeMateri ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
+                  <div><label class="field-label">Otomatis +5 Poin Presensi Kehadiran Sesi:</label><select onchange="if(!${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}) ${isPre ? 'appState.preTest.materiSessionMap={}' : 'appState.postTest.materiSessionMap={}'}; ${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}['${activeMateri.replace(/'/g, "\\'")}']=this.value; saveState('Admin','Tautkan sesi tes'); renderStaffContent();"><option value="">-- Nonaktif --</option>${getPresensiSessions().filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${linkedSessId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}</select></div>
                 </div>`;
             }).join('')}
           </div>`;
       }
-
-      area.innerHTML = `
-        <div class="bento-card" style="margin-bottom:16px;">
-          <div class="card-header" style="margin-bottom:0;">
-            <div><h2>Panel Admin</h2></div>
-            <select style="width:240px;" onchange="sessionMeta.adminModule=this.value; persistSessionMeta(); renderStaffContent();">
-              <option value="overview" ${mod === 'overview' ? 'selected' : ''}>1. Umum & Ekspor</option>
-              <option value="tests" ${mod === 'tests' ? 'selected' : ''}>2. Pre-Test & Post-Test</option>
-            </select>
-          </div>
-        </div>
-        ${bodyHtml}`;
+      area.innerHTML = `<div class="bento-card" style="margin-bottom:16px;"><div class="card-header" style="margin-bottom:0;"><div><h2>Panel Admin</h2></div><select style="width:240px;" onchange="sessionMeta.adminModule=this.value; persistSessionMeta(); renderStaffContent();"><option value="overview" ${mod === 'overview' ? 'selected' : ''}>1. Umum & Ekspor</option><option value="tests" ${mod === 'tests' ? 'selected' : ''}>2. Pre-Test & Post-Test</option></select></div></div>${bodyHtml}`;
     }
 
     function openAddParticipantModal() {
@@ -2462,8 +2271,7 @@
     }
 
     async function handleNewParticipantAvatarUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+      const file = e.target.files[0]; if (!file) return;
       _tempNewParticipantAvatar = await compressImageFile(file, 260, 'image/jpeg', 0.85);
       document.getElementById('newParticipantPreviewAvatar').src = _tempNewParticipantAvatar;
       _tempNewParticipantFaceDescriptor = await extractFaceDescriptorFromDataUrl(_tempNewParticipantAvatar);
@@ -2475,61 +2283,32 @@
       const group = Number(document.getElementById('newParticipantGroupSelect').value || 1);
       if (!name) return alert('Nama wajib diisi.');
       const id = 'BA-' + String(appState.participants.length + 1).padStart(2, '0');
-      appState.participants.push({
-        id, no: appState.participants.length + 1, groupNo: 1, name, jabatan, group,
-        avatar: _tempNewParticipantAvatar || '', faceDescriptor: _tempNewParticipantFaceDescriptor || null
-      });
+      appState.participants.push({ id, no: appState.participants.length + 1, groupNo: 1, name, jabatan, group, avatar: _tempNewParticipantAvatar || '', faceDescriptor: _tempNewParticipantFaceDescriptor || null });
       _tempNewParticipantAvatar = ''; _tempNewParticipantFaceDescriptor = null;
-      renumberGroups(appState.participants);
-      saveState('Admin', `Tambah peserta ${name}`);
-      closeModal('addParticipantModal');
-      refreshAllUI();
+      renumberGroups(appState.participants); saveState('Admin', `Tambah peserta ${name}`); closeModal('addParticipantModal'); refreshAllUI();
     }
 
     function renderIndexView(area) {
       const grp = currentUser.role === 'instructor' ? currentUser.user.group : 1;
-      const members = appState.participants.filter(p => p.group === grp);
-      const sess = appState.indexSessions[0];
-      area.innerHTML = `
-        <div class="bento-card">
-          <h2>Index — Kelompok ${grp} (${sess.title})</h2>
-          <div class="vertical-stack" style="margin-top:14px;">
-            ${members.map(m => {
-              const row = appState.indexScores[m.id]?.[sess.id] || {};
-              return `<div class="item-card-vertical"><strong>${m.groupNo}. ${m.name}</strong>
-                ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(f => `<div class="aspect-block"><span class="aspect-title" style="text-transform:capitalize;">${f}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(row[f]) === v ? 'selected' : ''}" onclick="if(!appState.indexScores['${m.id}']) appState.indexScores['${m.id}']={}; if(!appState.indexScores['${m.id}']['${sess.id}']) appState.indexScores['${m.id}']['${sess.id}']={}; appState.indexScores['${m.id}']['${sess.id}']['${f}']=${v}; saveState(currentUser.user.name,'Index'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}
-              </div>`;
-            }).join('')}
-          </div>
-        </div>`;
+      const members = appState.participants.filter(p => p.group === grp), sess = appState.indexSessions[0];
+      area.innerHTML = `<div class="bento-card"><h2>Index — Kelompok ${grp} (${sess.title})</h2><div class="vertical-stack" style="margin-top:14px;">${members.map(m => {
+        const row = appState.indexScores[m.id]?.[sess.id] || {};
+        return `<div class="item-card-vertical"><strong>${m.groupNo}. ${m.name}</strong>${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(f => `<div class="aspect-block"><span class="aspect-title" style="text-transform:capitalize;">${f}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(row[f]) === v ? 'selected' : ''}" onclick="if(!appState.indexScores['${m.id}']) appState.indexScores['${m.id}']={}; if(!appState.indexScores['${m.id}']['${sess.id}']) appState.indexScores['${m.id}']['${sess.id}']={}; appState.indexScores['${m.id}']['${sess.id}']['${f}']=${v}; saveState(currentUser.user.name,'Index'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}</div>`;
+      }).join('')}</div></div>`;
     }
 
     function renderSkriningView(area) {
       const grp = currentUser.role === 'instructor' ? currentUser.user.group : 1;
-      const members = appState.participants.filter(p => p.group === grp);
-      const p = members[0];
-      const sec = appState.skriningSections[0];
+      const members = appState.participants.filter(p => p.group === grp), p = members[0], sec = appState.skriningSections[0];
       const rec = p ? (appState.skrining[p.id]?.[sec.id] || { items: [] }) : { items: [] };
-      area.innerHTML = `
-        <div class="bento-card">
-          <h2>Skrining — ${p ? p.name : ''} (${sec.title})</h2>
-          <div class="vertical-stack" style="margin-top:14px;">
-            ${sec.items.map((it, idx) => `<div class="item-card-vertical"><span class="aspect-title">${idx + 1}. ${it}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(rec.items[idx]) === v ? 'selected' : ''}" onclick="if(!appState.skrining['${p.id}']) appState.skrining['${p.id}']={}; if(!appState.skrining['${p.id}']['${sec.id}']) appState.skrining['${p.id}']['${sec.id}']={items:[]}; appState.skrining['${p.id}']['${sec.id}'].items[${idx}]=${v}; saveState(currentUser.user.name,'Skrining'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}
-          </div>
-        </div>`;
+      area.innerHTML = `<div class="bento-card"><h2>Skrining — ${p ? p.name : ''} (${sec.title})</h2><div class="vertical-stack" style="margin-top:14px;">${sec.items.map((it, idx) => `<div class="item-card-vertical"><span class="aspect-title">${idx + 1}. ${it}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(rec.items[idx]) === v ? 'selected' : ''}" onclick="if(!appState.skrining['${p.id}']) appState.skrining['${p.id}']={}; if(!appState.skrining['${p.id}']['${sec.id}']) appState.skrining['${p.id}']['${sec.id}']={items:[]}; appState.skrining['${p.id}']['${sec.id}'].items[${idx}]=${v}; saveState(currentUser.user.name,'Skrining'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}</div></div>`;
     }
 
     function renderAkadView(area) {
-      area.innerHTML = `
-        <div class="bento-card">
-          <h2>Wawancara Akad Amanah</h2>
-          <div class="vertical-stack" style="margin-top:14px;">
-            ${appState.participants.map(p => {
-              const cur = Number(appState.akadScores[p.id]?.score || 0);
-              return `<div class="item-card-vertical"><strong>${p.name}</strong><div class="score-group" style="margin-top:8px;">${[1,2,3,4,5].map(v => `<button class="score-btn ${cur === v ? 'selected' : ''}" onclick="appState.akadScores['${p.id}']={score:${v}}; saveState(currentUser.user.name,'Akad'); renderStaffContent();">${v}</button>`).join('')}</div></div>`;
-            }).join('')}
-          </div>
-        </div>`;
+      area.innerHTML = `<div class="bento-card"><h2>Wawancara Akad Amanah</h2><div class="vertical-stack" style="margin-top:14px;">${appState.participants.map(p => {
+        const cur = Number(appState.akadScores[p.id]?.score || 0);
+        return `<div class="item-card-vertical"><strong>${p.name}</strong><div class="score-group" style="margin-top:8px;">${[1,2,3,4,5].map(v => `<button class="score-btn ${cur === v ? 'selected' : ''}" onclick="appState.akadScores['${p.id}']={score:${v}}; saveState(currentUser.user.name,'Akad'); renderStaffContent();">${v}</button>`).join('')}</div></div>`;
+      }).join('')}</div></div>`;
     }
 
     function openEditProfileModal() {
@@ -2541,39 +2320,26 @@
     }
 
     async function handleAvatarUpload(e, previewId) {
-      const file = e.target.files[0];
-      if (!file) return;
+      const file = e.target.files[0]; if (!file) return;
       _tempUploadedAvatar = await compressImageFile(file, 260, 'image/jpeg', 0.85);
       document.getElementById(previewId).src = _tempUploadedAvatar;
     }
 
     function saveProfileEdit() {
-      const name = document.getElementById('editNameInput').value.trim();
-      const pass = document.getElementById('editPasswordInput').value.trim();
+      const name = document.getElementById('editNameInput').value.trim(), pass = document.getElementById('editPasswordInput').value.trim();
       if (name) currentUser.user.name = name;
       if (pass) currentUser.user.password = pass;
       if (_tempUploadedAvatar) currentUser.user.avatar = _tempUploadedAvatar;
       _tempUploadedAvatar = '';
-      saveState(currentUser.user.name, 'Update profil');
-      closeModal('profileModal');
-      refreshAllUI();
+      saveState(currentUser.user.name, 'Update profil'); closeModal('profileModal'); refreshAllUI();
     }
 
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
     function refreshAllUI() {
-      applyBranding();
-      initStaffDropdown();
-      initPesertaDropdowns();
-      syncAuthBar();
-      renderPublicRundown();
-      renderPublicDashboard();
-      renderPublicFinal();
-      if (sessionMeta.topView === 'scan' && sessionMeta.scanUnlocked) {
-        syncRundownDateSelectors();
-        updateScanSessionOptions();
-        renderBarcodeImageTools();
-      }
+      applyBranding(); initStaffDropdown(); initPesertaDropdowns(); syncAuthBar();
+      renderPublicRundown(); renderPublicDashboard(); renderPublicFinal();
+      if (sessionMeta.topView === 'scan' && sessionMeta.scanUnlocked) { syncRundownDateSelectors(); updateScanSessionOptions(); renderBarcodeImageTools(); }
       if (sessionMeta.topView === 'role_workspace' && currentUser) renderStaffSubTabs();
     }
 
