@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <style>
     :root {
       --bg: #F3F6F4;
@@ -28,6 +29,15 @@
       --danger-soft: rgba(185, 28, 28, 0.12);
       --info: #1D4ED8;
       --info-soft: rgba(29, 78, 216, 0.12);
+      --scan-ok-bg: #DCFCE7;
+      --scan-ok-border: #16A34A;
+      --scan-ok-text: #14532D;
+      --scan-dup-bg: #FFEDD5;
+      --scan-dup-border: #EA580C;
+      --scan-dup-text: #7C2D12;
+      --scan-err-bg: #FEE2E2;
+      --scan-err-border: #DC2626;
+      --scan-err-text: #7F1D1D;
       --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
       --shadow-md: 0 14px 30px -12px rgba(15, 81, 50, 0.12);
       --radius-xl: 22px;
@@ -54,6 +64,15 @@
       --danger-soft: rgba(248, 113, 113, 0.15);
       --info: #60A5FA;
       --info-soft: rgba(96, 165, 250, 0.15);
+      --scan-ok-bg: rgba(22, 163, 74, 0.22);
+      --scan-ok-border: #22C55E;
+      --scan-ok-text: #BBF7D0;
+      --scan-dup-bg: rgba(234, 88, 12, 0.24);
+      --scan-dup-border: #FB923C;
+      --scan-dup-text: #FED7AA;
+      --scan-err-bg: rgba(220, 38, 38, 0.24);
+      --scan-err-border: #F87171;
+      --scan-err-text: #FECACA;
       --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
       --shadow-md: 0 16px 34px -12px rgba(0, 0, 0, 0.65);
     }
@@ -200,6 +219,53 @@
     .badge-danger { background: var(--danger-soft); color: var(--danger); }
     .badge-info { background: var(--info-soft); color: var(--info); }
 
+    .scan-alert-box {
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 2px solid var(--border);
+      background: var(--surface-subtle);
+      transition: all 0.2s ease;
+    }
+    .scan-alert-box.status-success {
+      background: var(--scan-ok-bg);
+      border-color: var(--scan-ok-border);
+      color: var(--scan-ok-text);
+    }
+    .scan-alert-box.status-duplicate {
+      background: var(--scan-dup-bg);
+      border-color: var(--scan-dup-border);
+      color: var(--scan-dup-text);
+    }
+    .scan-alert-box.status-error {
+      background: var(--scan-err-bg);
+      border-color: var(--scan-err-border);
+      color: var(--scan-err-text);
+    }
+
+    .face-stage {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      background: #0B1120;
+      min-height: 240px;
+    }
+    .face-stage video {
+      width: 100%;
+      height: auto;
+      display: block;
+      transform: scaleX(-1);
+    }
+    .face-stage canvas.face-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      transform: scaleX(-1);
+    }
+
     .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-solid); }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
@@ -328,7 +394,7 @@
       <img id="headerCommitteeLogo" class="brand-logo-img" src="" alt="Logo Panitia Baitul Arqam PPDA" />
       <div class="brand-meta">
         <div class="brand-title" style="font-size: 17px; font-weight: 800;">Baitul Arqam PPDA</div>
-        <span id="personalizedGreeting">Bento Grid • Progres Terbuka</span>
+        <span id="personalizedGreeting">Progres Terbuka</span>
       </div>
     </div>
 
@@ -398,7 +464,7 @@
       <div class="bento-card bento-12">
         <div class="card-header">
           <div>
-            <h2>Dashboard Progres 9 Aspek (Bento Overview)</h2>
+            <h2>Dashboard Progres 9 Aspek</h2>
             <p style="color:var(--text-muted); font-size:14px;">Pantauan capaian seluruh peserta berdasarkan target Min–Maks tiap aspek.</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;" class="no-print">
@@ -516,13 +582,13 @@
       </div>
     </section>
 
-    <!-- SCAN & BARCODE POLOS -->
+    <!-- SCAN BARCODE + FACE RECOGNITION -->
     <section id="view-scan" class="bento-grid hidden">
       <div class="bento-card bento-12">
         <div class="card-header">
           <div>
-            <h2>Scan & Unduh Barcode Peserta</h2>
-            <p style="color:var(--text-muted); font-size:14.5px;">Scan presensi sesi sekaligus unduh gambar barcode polos (tanpa tulisan apa pun; nama file = nama peserta).</p>
+            <h2>Scan Barcode & Face Recognition Peserta</h2>
+            <p style="color:var(--text-muted); font-size:14.5px;">Scan presensi menggunakan Barcode atau pengenalan wajah (Face Recognition) dengan notifikasi warna otomatis.</p>
           </div>
           <div id="scanTopLogoutWrap" class="hidden">
             <button class="btn btn-sm btn-danger" onclick="logoutScanPortal()">🚪 Logout Panitia Scan</button>
@@ -556,23 +622,49 @@
             </div>
           </div>
 
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+            <button class="btn btn-sm btn-primary" id="btnModeBarcode" onclick="setScanMode('barcode')">🔳 Mode Scan Barcode</button>
+            <button class="btn btn-sm" id="btnModeFace" onclick="setScanMode('face')">🙂 Mode Face Recognition</button>
+          </div>
+
           <div class="grid-2" style="margin-bottom:20px;">
-            <div>
+            <!-- PANEL KAMERA BARCODE -->
+            <div id="barcodeScannerPanel">
               <div id="qrReader" style="width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--border);"></div>
               <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                <button class="btn btn-primary btn-sm" onclick="startCameraScanner()">📷 Kamera HP</button>
-                <button class="btn btn-sm" onclick="stopCameraScanner()">⏹ Matikan</button>
+                <button class="btn btn-primary btn-sm" onclick="startCameraScanner()">📷 Kamera Barcode</button>
+                <button class="btn btn-sm" onclick="stopCameraScanner()">⏹ Matikan Kamera</button>
               </div>
             </div>
 
+            <!-- PANEL KAMERA FACE RECOGNITION -->
+            <div id="faceScannerPanel" class="hidden">
+              <div class="face-stage">
+                <video id="faceVideo" autoplay muted playsinline></video>
+                <canvas id="faceOverlay" class="face-overlay"></canvas>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center;">
+                <button class="btn btn-primary btn-sm" onclick="startFaceRecognition()">🙂 Aktifkan Face Recognition</button>
+                <button class="btn btn-sm" onclick="stopFaceRecognition()">⏹ Matikan Face Cam</button>
+                <span id="faceModelStatus" style="font-size:12.5px; color:var(--text-muted); font-weight:600;"></span>
+              </div>
+            </div>
+
+            <!-- INPUT MANUAL & KOTAK NOTIFIKASI WARNA (HIJAU / MERAH / ORANYE) -->
             <div>
-              <label class="field-label">Input Manual / Scanner (BA-01 s.d. BA-99)</label>
+              <label class="field-label">Input Manual / Scanner Barcode (BA-01 s.d. BA-99)</label>
               <div style="display:flex; gap:8px; margin-bottom:14px;">
                 <input type="text" id="manualBarcodeInput" placeholder="Contoh: BA-01" onkeyup="if(event.key==='Enter') processBarcodeScan(this.value)" />
                 <button class="btn btn-primary" onclick="processBarcodeScan(document.getElementById('manualBarcodeInput').value)">Catat</button>
               </div>
-              <div id="scanFeedbackBox" class="bento-card" style="background:var(--surface-subtle); box-shadow:none;">
-                <p style="font-size:14px; color:var(--text-muted);">Belum ada pemindaian pada sesi ini.</p>
+
+              <div id="scanFeedbackBox" class="scan-alert-box">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                  <span class="badge badge-success">Hijau = Berhasil Masuk</span>
+                  <span class="badge badge-warn">Oranye = Sudah Di-scan</span>
+                  <span class="badge badge-danger">Merah = Gagal / Tidak Cocok</span>
+                </div>
+                <p style="font-size:14px;">Menunggu scan barcode atau wajah peserta pada sesi yang dipilih.</p>
               </div>
             </div>
           </div>
@@ -661,7 +753,7 @@
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
         <img id="editPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
         <div style="flex:1; min-width:200px;">
-          <label class="field-label">Unggah Foto Baru (Otomatis ke Google Drive)</label>
+          <label class="field-label">Unggah Foto Baru (Otomatis ke Google Drive & Face ID)</label>
           <input type="file" id="editAvatarFileInput" accept="image/*" onchange="handleAvatarUpload(event, 'editPreviewAvatar')" />
           <div id="editUploadStatus" style="font-size:12px; color:var(--primary); font-weight:600; margin-top:4px;"></div>
         </div>
@@ -692,7 +784,7 @@
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
         <img id="newParticipantPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
         <div style="flex:1; min-width:200px;">
-          <label class="field-label">Unggah Foto Peserta (Opsional • Auto GDrive)</label>
+          <label class="field-label">Unggah Foto Peserta (Auto GDrive & Face ID)</label>
           <input type="file" id="newParticipantAvatarFile" accept="image/*" onchange="handleNewParticipantAvatarUpload(event)" />
           <div id="newParticipantUploadStatus" style="font-size:12px; color:var(--primary); font-weight:600; margin-top:4px;"></div>
         </div>
@@ -727,6 +819,7 @@
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-PhKppMosc19DPB7h_d8YL5IKCPegqQaLZKGIKeg9dR5h9b_jboMIakEeo2fd-gGY/exec';
     const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_11';
     const SESSION_KEY = 'baitul_arqam_ppda_session_v4';
+    const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
@@ -883,7 +976,8 @@
           name: item[0],
           jabatan: item[1],
           group: (idx % 6) + 1,
-          avatar: ''
+          avatar: '',
+          faceDescriptor: null
         };
       });
       renumberGroups(participants);
@@ -1044,7 +1138,17 @@
     let currentUser = resolveSessionUser();
     let html5QrCode = null;
     let _tempUploadedAvatar = '';
+    let _tempUploadedFaceDescriptor = null;
     let _tempNewParticipantAvatar = '';
+    let _tempNewParticipantFaceDescriptor = null;
+
+    // Face recognition state
+    let faceModelsLoaded = false;
+    let faceModelsLoading = false;
+    let faceStream = null;
+    let faceLoopTimer = null;
+    let activeScanMode = 'barcode';
+    let lastFaceCooldownMap = {};
 
     function loadLocalState() {
       try {
@@ -1110,9 +1214,234 @@
     }
 
     // =========================================================================
+    // FACE-API.JS HELPER (EKSTRAKSI WAJAH & PENCOCOKAN)
+    // =========================================================================
+    async function ensureFaceModelsLoaded() {
+      if (faceModelsLoaded) return true;
+      if (!window.faceapi) return false;
+      if (faceModelsLoading) {
+        while (faceModelsLoading) {
+          await new Promise(r => setTimeout(r, 150));
+        }
+        return faceModelsLoaded;
+      }
+      faceModelsLoading = true;
+      const statusEl = document.getElementById('faceModelStatus');
+      if (statusEl) statusEl.textContent = 'Memuat model Face Recognition...';
+      try {
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
+        ]);
+        faceModelsLoaded = true;
+        if (statusEl) statusEl.textContent = 'Model Face Recognition siap.';
+        return true;
+      } catch (err) {
+        console.warn('Gagal memuat model face-api:', err);
+        if (statusEl) statusEl.textContent = 'Model wajah gagal dimuat (cek koneksi internet).';
+        return false;
+      } finally {
+        faceModelsLoading = false;
+      }
+    }
+
+    async function extractFaceDescriptorFromDataUrl(dataUrl) {
+      const ok = await ensureFaceModelsLoaded();
+      if (!ok || !dataUrl) return null;
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = async () => {
+          try {
+            const det = await faceapi
+              .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.45 }))
+              .withFaceLandmarks()
+              .withFaceDescriptor();
+            if (det && det.descriptor) {
+              resolve(Array.from(det.descriptor));
+            } else {
+              resolve(null);
+            }
+          } catch (e) {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      });
+    }
+
+    function computeEuclideanDistance(arrA, arrB) {
+      if (!Array.isArray(arrA) || !Array.isArray(arrB) || arrA.length !== arrB.length) return 999;
+      let sum = 0;
+      for (let i = 0; i < arrA.length; i++) {
+        const diff = Number(arrA[i]) - Number(arrB[i]);
+        sum += diff * diff;
+      }
+      return Math.sqrt(sum);
+    }
+
+    function setScanMode(mode) {
+      activeScanMode = mode;
+      document.getElementById('btnModeBarcode').className = mode === 'barcode' ? 'btn btn-sm btn-primary' : 'btn btn-sm';
+      document.getElementById('btnModeFace').className = mode === 'face' ? 'btn btn-sm btn-primary' : 'btn btn-sm';
+      document.getElementById('barcodeScannerPanel').classList.toggle('hidden', mode !== 'barcode');
+      document.getElementById('faceScannerPanel').classList.toggle('hidden', mode !== 'face');
+
+      if (mode === 'barcode') {
+        stopFaceRecognition();
+      } else {
+        stopCameraScanner();
+        startFaceRecognition();
+      }
+    }
+
+    async function startFaceRecognition() {
+      const video = document.getElementById('faceVideo');
+      const overlay = document.getElementById('faceOverlay');
+      const statusEl = document.getElementById('faceModelStatus');
+      if (!video || !overlay) return;
+
+      const loaded = await ensureFaceModelsLoaded();
+      if (!loaded) {
+        renderScanAlert('error', 'Face Recognition Belum Siap', 'Model wajah tidak dapat dimuat. Pastikan koneksi internet aktif lalu coba lagi.');
+        return;
+      }
+
+      // Siapkan descriptor untuk peserta berfoto yang belum punya descriptor tersimpan
+      for (const p of appState.participants) {
+        if (p.avatar && (!Array.isArray(p.faceDescriptor) || p.faceDescriptor.length === 0)) {
+          const desc = await extractFaceDescriptorFromDataUrl(p.avatar);
+          if (desc) p.faceDescriptor = desc;
+        }
+      }
+
+      if (faceStream) {
+        if (statusEl) statusEl.textContent = 'Face Recognition sedang memindai wajah...';
+        return;
+      }
+
+      try {
+        faceStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: false
+        });
+        video.srcObject = faceStream;
+        await video.play();
+        if (statusEl) statusEl.textContent = 'Kamera aktif — arahkan wajah peserta ke kamera.';
+
+        if (faceLoopTimer) clearInterval(faceLoopTimer);
+        faceLoopTimer = setInterval(async () => {
+          if (!faceStream || video.paused || video.ended || activeScanMode !== 'face') return;
+          if (!window.faceapi || !faceModelsLoaded) return;
+
+          try {
+            const det = await faceapi
+              .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.45 }))
+              .withFaceLandmarks()
+              .withFaceDescriptor();
+
+            const ctx = overlay.getContext('2d');
+            overlay.width = video.videoWidth || 640;
+            overlay.height = video.videoHeight || 480;
+            ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+            if (!det) return;
+
+            const box = det.detection.box;
+            ctx.strokeStyle = '#22C55E';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+            const candidates = appState.participants.filter(p => Array.isArray(p.faceDescriptor) && p.faceDescriptor.length > 0);
+            if (!candidates.length) {
+              renderScanAlert('error', 'Belum Ada Foto Referensi Wajah', 'Belum ada data foto wajah peserta yang terdaftar untuk dicocokkan.');
+              return;
+            }
+
+            let bestMatch = null;
+            let bestDist = 999;
+            for (const cand of candidates) {
+              const dist = computeEuclideanDistance(Array.from(det.descriptor), cand.faceDescriptor);
+              if (dist < bestDist) {
+                bestDist = dist;
+                bestMatch = cand;
+              }
+            }
+
+            const THRESHOLD = 0.56;
+            if (bestMatch && bestDist <= THRESHOLD) {
+              const now = Date.now();
+              const cooldownKey = `${bestMatch.id}_${document.getElementById('scanSessionSelect')?.value || ''}`;
+              if (now - (lastFaceCooldownMap[cooldownKey] || 0) < 3500) return;
+              lastFaceCooldownMap[cooldownKey] = now;
+
+              const matchPct = Math.max(0, Math.min(100, Math.round((1 - bestDist) * 100)));
+              recordAttendanceForParticipant(bestMatch, `Face Recognition (${matchPct}%)`);
+            } else {
+              const now = Date.now();
+              if (now - (lastFaceCooldownMap['_unmatched'] || 0) > 3000) {
+                lastFaceCooldownMap['_unmatched'] = now;
+                renderScanAlert('error', 'Wajah Tidak Cocok / Tidak Terdaftar', 'Wajah yang terdeteksi tidak cocok dengan foto peserta mana pun yang tersimpan.');
+              }
+            }
+          } catch (e) {
+            // Abaikan error frame tunggal
+          }
+        }, 900);
+      } catch (err) {
+        renderScanAlert('error', 'Gagal Membuka Kamera Wajah', 'Izin kamera ditolak atau perangkat tidak memiliki kamera: ' + err.message);
+      }
+    }
+
+    function stopFaceRecognition() {
+      if (faceLoopTimer) {
+        clearInterval(faceLoopTimer);
+        faceLoopTimer = null;
+      }
+      if (faceStream) {
+        faceStream.getTracks().forEach(t => t.stop());
+        faceStream = null;
+      }
+      const video = document.getElementById('faceVideo');
+      if (video) video.srcObject = null;
+      const overlay = document.getElementById('faceOverlay');
+      if (overlay) {
+        const ctx = overlay.getContext('2d');
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+      }
+      const statusEl = document.getElementById('faceModelStatus');
+      if (statusEl) statusEl.textContent = 'Face Cam dimatikan.';
+    }
+
+    function renderScanAlert(type, title, detailHtml, participant = null) {
+      const fb = document.getElementById('scanFeedbackBox');
+      if (!fb) return;
+      fb.className = 'scan-alert-box ' + (
+        type === 'success' ? 'status-success' :
+        type === 'duplicate' ? 'status-duplicate' :
+        'status-error'
+      );
+      const badgeClass = type === 'success' ? 'badge-success' : type === 'duplicate' ? 'badge-warn' : 'badge-danger';
+      const badgeLabel = type === 'success' ? 'BERHASIL (HIJAU)' : type === 'duplicate' ? 'SUDAH DI-SCAN (ORANYE)' : 'GAGAL (MERAH)';
+
+      fb.innerHTML = `
+        <div style="display:flex; align-items:flex-start; gap:12px;">
+          ${participant ? `<img class="avatar avatar-lg" src="${avatarSrc(participant)}" onerror="this.src=fallbackInitialsSvg({name:'${participant.name.replace(/'/g, '')}'})" />` : ''}
+          <div style="flex:1;">
+            <span class="badge ${badgeClass}">${badgeLabel}</span>
+            <h4 style="margin-top:6px;">${title}</h4>
+            <div style="font-size:14px; margin-top:4px;">${detailHtml}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
     // UPLOAD GAMBAR LANGSUNG KE FOLDER GOOGLE DRIVE & VERIFIKASI RESPON
     // =========================================================================
-    function compressImageFile(file, size = 240, mimeType = 'image/jpeg', quality = 0.85) {
+    function compressImageFile(file, size = 260, mimeType = 'image/jpeg', quality = 0.85) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = ev => {
@@ -1441,6 +1770,8 @@
     function printBarcodeByIds(ids) {
       const list = appState.participants.filter(p => ids.includes(p.id));
       if (!list.length) return alert('Tidak ada peserta dipilih untuk dicetak.');
+      stopCameraScanner();
+      stopFaceRecognition();
       document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       const area = document.getElementById('barcodePrintArea');
       const grid = document.getElementById('barcodePrintGrid');
@@ -1653,6 +1984,10 @@
     }
 
     function switchTopView(viewName) {
+      if (viewName !== 'scan') {
+        stopCameraScanner();
+        stopFaceRecognition();
+      }
       sessionMeta.topView = viewName;
       persistSessionMeta();
       document.querySelectorAll('#mainNavStrip .nav-pill').forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewName));
@@ -1671,6 +2006,7 @@
           syncRundownDateSelectors();
           updateScanSessionOptions();
           renderBarcodeImageTools();
+          ensureFaceModelsLoaded();
         } else {
           document.getElementById('scanLockBox').classList.remove('hidden');
           document.getElementById('scanUnlockedArea').classList.add('hidden');
@@ -1917,7 +2253,7 @@
         <div class="bento-card" style="background:var(--surface-subtle); box-shadow:none;">
           <h3 style="margin-bottom:14px;">Biodata Peserta Baitul Arqam Pegawai</h3>
           <div style="margin-bottom:14px;">
-            <label class="field-label">Upload Foto Peserta (Otomatis Tersimpan di Google Drive)</label>
+            <label class="field-label">Upload Foto Peserta (Otomatis ke Google Drive & Face Recognition)</label>
             <input type="file" accept="image/*" onchange="handleBiodataPhotoUpload(event, '${p.id}')" />
             <div id="bioUploadStatus_${p.id}" style="font-size:12px; color:var(--primary); font-weight:600; margin-top:4px;"></div>
           </div>
@@ -1956,10 +2292,15 @@
       const p = appState.participants.find(x => x.id === pid);
       if (!p) return;
       const statusEl = document.getElementById('bioUploadStatus_' + pid);
-      if (statusEl) statusEl.textContent = 'Mengompres & mengunggah foto ke Google Drive...';
+      if (statusEl) {
+        statusEl.style.color = 'var(--primary)';
+        statusEl.textContent = 'Mengompres, mendaftarkan wajah & mengunggah ke Google Drive...';
+      }
       try {
         const compressed = await compressImageFile(file, 260, 'image/jpeg', 0.85);
         document.getElementById('pPortalAvatar').src = compressed;
+        const descriptor = await extractFaceDescriptorFromDataUrl(compressed);
+        if (descriptor) p.faceDescriptor = descriptor;
         const gdriveUrl = await uploadImageToGoogleDrive(
           compressed,
           `peserta_${p.id}_${sanitizeFilename(p.name)}.jpg`,
@@ -1968,7 +2309,11 @@
         );
         p.avatar = gdriveUrl;
         document.getElementById('pPortalAvatar').src = gdriveUrl;
-        if (statusEl) statusEl.textContent = 'Foto berhasil tersimpan di Google Drive!';
+        if (statusEl) {
+          statusEl.textContent = descriptor
+            ? 'Foto tersimpan di GDrive & wajah terdaftar untuk Face Recognition!'
+            : 'Foto tersimpan di GDrive (pastikan wajah tampak jelas untuk Face Recognition).';
+        }
         saveState(p.name, 'Upload foto biodata peserta ke GDrive');
       } catch (err) {
         if (statusEl) {
@@ -2101,7 +2446,7 @@
     }
 
     // =========================================================================
-    // SCAN QR, LOGOUT PANITIA SCAN, LOGIN & RUANG TUGAS
+    // SCAN QR, FACE RECOGNITION, NOTIFIKASI 3 WARNA & LOGOUT PANITIA
     // =========================================================================
     function unlockScanPortal() {
       if (document.getElementById('scanPasswordInput').value !== appState.scanPassword) return alert('Password panitia salah!');
@@ -2114,10 +2459,12 @@
       syncRundownDateSelectors();
       updateScanSessionOptions();
       renderBarcodeImageTools();
+      ensureFaceModelsLoaded();
     }
 
     function logoutScanPortal() {
       stopCameraScanner();
+      stopFaceRecognition();
       sessionMeta.scanUnlocked = false;
       persistSessionMeta();
       document.getElementById('scanUnlockedArea').classList.add('hidden');
@@ -2132,31 +2479,68 @@
     }
 
     function startCameraScanner() {
+      stopFaceRecognition();
       if (html5QrCode) return;
       html5QrCode = new Html5Qrcode('qrReader');
       html5QrCode.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 220, height: 220 } },
         decoded => processBarcodeScan(decoded)
-      ).catch(err => alert('Kamera tidak tersedia: ' + err));
+      ).catch(err => {
+        renderScanAlert('error', 'Kamera Barcode Gagal Dibuka', 'Kamera tidak tersedia atau izin ditolak: ' + err);
+      });
     }
 
     function stopCameraScanner() {
-      if (html5QrCode) html5QrCode.stop().then(() => { html5QrCode = null; });
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => { html5QrCode = null; }).catch(() => { html5QrCode = null; });
+      }
+    }
+
+    function recordAttendanceForParticipant(participant, methodLabel) {
+      const sessId = document.getElementById('scanSessionSelect').value;
+      const sess = PRESENSI_SESSIONS.find(s => s.id === sessId);
+      if (!sess) {
+        renderScanAlert('error', 'Sesi Belum Dipilih', 'Silakan pilih sesi materi atau ibadah terlebih dahulu.');
+        return;
+      }
+
+      if (!appState.presensi[participant.id]) appState.presensi[participant.id] = {};
+      if (appState.presensi[participant.id][sessId] !== undefined) {
+        const existingPts = appState.presensi[participant.id][sessId];
+        renderScanAlert(
+          'duplicate',
+          `${participant.name} Sudah Di-scan`,
+          `Peserta ini sudah tercatat pada sesi <strong>${sess.title}</strong> (${existingPts} poin via ${methodLabel}). Data tidak digandakan.`,
+          participant
+        );
+        return;
+      }
+
+      let pts = Number(document.getElementById('scanStatusSelect').value);
+      if (sess.type === 'ibadah' && pts === 2) pts = 5;
+      appState.presensi[participant.id][sessId] = pts;
+
+      renderScanAlert(
+        'success',
+        `Berhasil Masuk: ${participant.name} (+${pts} Poin)`,
+        `Metode: <strong>${methodLabel}</strong> • ID: <span class="mono">${participant.id}</span> • Sesi: <strong>${sess.title}</strong>`,
+        participant
+      );
+      saveState('Panitia Scan', `Presensi ${participant.name} (+${pts}) via ${methodLabel}`);
     }
 
     function processBarcodeScan(rawCode) {
       const code = (rawCode || '').trim().toUpperCase();
+      if (!code) {
+        renderScanAlert('error', 'Kode Barcode Kosong', 'Masukkan atau scan kode peserta (contoh: BA-01).');
+        return;
+      }
       const p = appState.participants.find(x => x.id === code);
-      const fb = document.getElementById('scanFeedbackBox');
-      if (!p) { fb.innerHTML = `<span class="badge badge-danger">ID Tidak Dikenal: ${code}</span>`; return; }
-      const sessId = document.getElementById('scanSessionSelect').value;
-      const sess = PRESENSI_SESSIONS.find(s => s.id === sessId);
-      let pts = Number(document.getElementById('scanStatusSelect').value);
-      if (sess.type === 'ibadah' && pts === 2) pts = 5;
-      if (!appState.presensi[p.id]) appState.presensi[p.id] = {};
-      appState.presensi[p.id][sessId] = pts;
+      if (!p) {
+        renderScanAlert('error', 'Barcode Tidak Dikenali', `Kode <strong>${code}</strong> tidak terdaftar sebagai peserta.`);
+        return;
+      }
       document.getElementById('manualBarcodeInput').value = '';
-      fb.innerHTML = `<div style="display:flex; align-items:center; gap:12px;"><img class="avatar avatar-lg" src="${avatarSrc(p)}" /><div><span class="badge badge-success">Tercatat +${pts} Poin</span><h4 style="margin-top:4px;">${p.name} (${p.id})</h4><p style="font-size:14px; color:var(--text-muted);">${sess.title}</p></div></div>`;
-      saveState('Panitia Scan', `Presensi ${p.name} (+${pts})`);
+      recordAttendanceForParticipant(p, 'Barcode');
     }
 
     function initStaffDropdown() {
@@ -2857,6 +3241,7 @@
 
     function openAddParticipantModal() {
       _tempNewParticipantAvatar = '';
+      _tempNewParticipantFaceDescriptor = null;
       document.getElementById('newParticipantNameInput').value = '';
       document.getElementById('newParticipantJabatanInput').value = 'Peserta Uji Coba';
       document.getElementById('newParticipantGroupSelect').value = '1';
@@ -2876,13 +3261,14 @@
 
       if (statusEl) {
         statusEl.style.color = 'var(--primary)';
-        statusEl.textContent = 'Mengunggah foto ke folder Foto GDrive...';
+        statusEl.textContent = 'Mendaftarkan wajah & mengunggah foto ke folder Foto GDrive...';
       }
       if (saveBtn) saveBtn.disabled = true;
 
       try {
         const compressed = await compressImageFile(file, 260, 'image/jpeg', 0.85);
         document.getElementById('newParticipantPreviewAvatar').src = compressed;
+        _tempNewParticipantFaceDescriptor = await extractFaceDescriptorFromDataUrl(compressed);
         const gdriveUrl = await uploadImageToGoogleDrive(
           compressed,
           `peserta_${nextId}_${sanitizeFilename(nameVal)}.jpg`,
@@ -2891,7 +3277,11 @@
         );
         _tempNewParticipantAvatar = gdriveUrl;
         document.getElementById('newParticipantPreviewAvatar').src = gdriveUrl;
-        if (statusEl) statusEl.textContent = 'Foto berhasil tersimpan di Google Drive!';
+        if (statusEl) {
+          statusEl.textContent = _tempNewParticipantFaceDescriptor
+            ? 'Foto tersimpan di GDrive & wajah siap untuk Face Recognition!'
+            : 'Foto tersimpan di Google Drive!';
+        }
       } catch (err) {
         if (statusEl) {
           statusEl.style.color = 'var(--danger)';
@@ -2916,7 +3306,8 @@
         name: name,
         jabatan: jabatan,
         group: group,
-        avatar: _tempNewParticipantAvatar || ''
+        avatar: _tempNewParticipantAvatar || '',
+        faceDescriptor: _tempNewParticipantFaceDescriptor || null
       });
       renumberGroups(appState.participants);
       saveState(currentUser ? currentUser.user.name : 'Admin', `Tambah peserta: ${name} (${newId})`);
@@ -3294,7 +3685,9 @@
       else if (type === 'akad') entity = appState.akadAssessors.find(x => x.id === id);
       else if (type === 'participant') { entity = appState.participants.find(x => x.id === id); passWrap.classList.add('hidden'); extraWrap.innerHTML = `<label class="field-label">Jabatan</label><input type="text" id="editJabatanInput" value="${entity.jabatan}" />`; }
       document.getElementById('editNameInput').value = entity.name; document.getElementById('editPasswordInput').value = '';
-      document.getElementById('editPreviewAvatar').src = avatarSrc(entity); _tempUploadedAvatar = entity.avatar || '';
+      document.getElementById('editPreviewAvatar').src = avatarSrc(entity);
+      _tempUploadedAvatar = entity.avatar || '';
+      _tempUploadedFaceDescriptor = entity.faceDescriptor || null;
       document.getElementById('profileModal').classList.add('open');
     }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -3310,13 +3703,16 @@
 
       if (statusEl) {
         statusEl.style.color = 'var(--primary)';
-        statusEl.textContent = 'Mengunggah foto ke folder Foto GDrive...';
+        statusEl.textContent = 'Mendaftarkan wajah & mengunggah foto ke folder Foto GDrive...';
       }
       if (saveBtn) saveBtn.disabled = true;
 
       try {
         const compressed = await compressImageFile(file, 260, 'image/jpeg', 0.85);
         document.getElementById(previewId).src = compressed;
+        if (type === 'participant') {
+          _tempUploadedFaceDescriptor = await extractFaceDescriptorFromDataUrl(compressed);
+        }
         const gdriveUrl = await uploadImageToGoogleDrive(
           compressed,
           `${type}_${id}_${sanitizeFilename(nameVal)}.jpg`,
@@ -3344,7 +3740,12 @@
       else if (type === 'admin') entity = (appState.extraAdmins || []).find(x => x.id === id);
       else if (type === 'instructor') entity = appState.instructors.find(x => x.id === id);
       else if (type === 'akad') entity = appState.akadAssessors.find(x => x.id === id);
-      else if (type === 'participant') { entity = appState.participants.find(x => x.id === id); const jab = document.getElementById('editJabatanInput'); if (jab) entity.jabatan = jab.value.trim(); }
+      else if (type === 'participant') {
+        entity = appState.participants.find(x => x.id === id);
+        const jab = document.getElementById('editJabatanInput');
+        if (jab) entity.jabatan = jab.value.trim();
+        if (_tempUploadedFaceDescriptor) entity.faceDescriptor = _tempUploadedFaceDescriptor;
+      }
       if (entity && newName) { entity.name = newName; if (newPass && type !== 'participant') entity.password = newPass; entity.avatar = _tempUploadedAvatar; }
       saveState(currentUser ? currentUser.user.name : 'Sistem', `Edit profil ${newName}`);
       closeModal('profileModal'); syncAuthBar(); refreshAllUI();
