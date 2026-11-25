@@ -566,7 +566,7 @@
             </div>
 
             <div>
-              <label class="field-label">Input Manual / Scanner (BA-01 s.d. BA-66)</label>
+              <label class="field-label">Input Manual / Scanner (BA-01 s.d. BA-99)</label>
               <div style="display:flex; gap:8px; margin-bottom:14px;">
                 <input type="text" id="manualBarcodeInput" placeholder="Contoh: BA-01" onkeyup="if(event.key==='Enter') processBarcodeScan(this.value)" />
                 <button class="btn btn-primary" onclick="processBarcodeScan(document.getElementById('manualBarcodeInput').value)">Catat</button>
@@ -682,9 +682,50 @@
     </div>
   </div>
 
+  <!-- MODAL TAMBAH PESERTA BARU -->
+  <div id="addParticipantModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="card-header">
+        <h3>Tambah Peserta Baru</h3>
+        <button class="btn btn-sm" onclick="closeModal('addParticipantModal')">✕</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
+        <img id="newParticipantPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
+        <div style="flex:1; min-width:200px;">
+          <label class="field-label">Unggah Foto Peserta (Opsional • Auto GDrive)</label>
+          <input type="file" id="newParticipantAvatarFile" accept="image/*" onchange="handleNewParticipantAvatarUpload(event)" />
+          <div id="newParticipantUploadStatus" style="font-size:12px; color:var(--primary); font-weight:600; margin-top:4px;"></div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="field-label">Nama Lengkap Peserta</label>
+        <input type="text" id="newParticipantNameInput" placeholder="Contoh: Ahmad Fauzi, S.Pd." />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="field-label">Jabatan / Unit Tugas</label>
+        <input type="text" id="newParticipantJabatanInput" placeholder="Contoh: Guru / Musyrif / Staf" />
+      </div>
+      <div style="margin-bottom:16px;">
+        <label class="field-label">Kelompok</label>
+        <select id="newParticipantGroupSelect">
+          <option value="1">Kelompok 1</option>
+          <option value="2">Kelompok 2</option>
+          <option value="3">Kelompok 3</option>
+          <option value="4">Kelompok 4</option>
+          <option value="5">Kelompok 5</option>
+          <option value="6">Kelompok 6</option>
+        </select>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn" onclick="closeModal('addParticipantModal')">Batal</button>
+        <button class="btn btn-primary" id="saveNewParticipantBtn" onclick="saveNewParticipant()">+ Tambahkan Peserta</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-PhKppMosc19DPB7h_d8YL5IKCPegqQaLZKGIKeg9dR5h9b_jboMIakEeo2fd-gGY/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_10';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_11';
     const SESSION_KEY = 'baitul_arqam_ppda_session_v4';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -823,7 +864,8 @@
 
     function renumberGroups(participants) {
       const counters = {};
-      participants.forEach(p => {
+      participants.forEach((p, idx) => {
+        p.no = idx + 1;
         const g = Number(p.group || 1);
         counters[g] = (counters[g] || 0) + 1;
         p.groupNo = counters[g];
@@ -1002,6 +1044,7 @@
     let currentUser = resolveSessionUser();
     let html5QrCode = null;
     let _tempUploadedAvatar = '';
+    let _tempNewParticipantAvatar = '';
 
     function loadLocalState() {
       try {
@@ -1067,7 +1110,7 @@
     }
 
     // =========================================================================
-    // UPLOAD GAMBAR LANGSUNG KE FOLDER GOOGLE DRIVE & DAPATKAN URL PUBLIK
+    // UPLOAD GAMBAR LANGSUNG KE FOLDER GOOGLE DRIVE & VERIFIKASI RESPON
     // =========================================================================
     function compressImageFile(file, size = 240, mimeType = 'image/jpeg', quality = 0.85) {
       return new Promise((resolve, reject) => {
@@ -1095,8 +1138,8 @@
       });
     }
 
-    async function uploadImageToGoogleDrive(base64DataUrl, fileName, mimeType = 'image/jpeg') {
-      const url = appState.webAppUrl || DEFAULT_WEB_APP_URL;
+    async function uploadImageToGoogleDrive(base64DataUrl, fileName, mimeType = 'image/jpeg', throwOnError = false) {
+      const url = (appState.webAppUrl || DEFAULT_WEB_APP_URL).trim();
       setSyncStatus('syncing', 'Mengunggah ke GDrive...');
       try {
         const res = await fetch(url, {
@@ -1109,16 +1152,44 @@
             mimeType: mimeType
           })
         });
-        const json = await res.json();
+        const rawText = await res.text();
+        let json = null;
+        try {
+          json = JSON.parse(rawText);
+        } catch (parseErr) {
+          throw new Error('Apps Script belum di-deploy versi terbaru (New version) atau izin DriveApp belum disetujui.');
+        }
         if (json.ok && json.url) {
           setSyncStatus('ok', 'Tersimpan di GDrive');
           return json.url;
         }
         throw new Error(json.error || 'Respons upload tidak valid');
       } catch (err) {
-        setSyncStatus('error', 'Fallback Lokal');
+        setSyncStatus('error', 'Gagal Upload GDrive');
         console.error('Upload GDrive gagal:', err);
+        if (throwOnError) throw err;
+        alert('Upload ke folder Google Drive belum berhasil: ' + err.message + '\n\nPastikan Anda sudah menjalankan testDriveAccess() dan melakukan Deploy > New version di Google Apps Script.');
         return base64DataUrl;
+      }
+    }
+
+    async function testGoogleDriveUploadConnection() {
+      const statusEl = document.getElementById('gdriveTestStatus');
+      if (statusEl) statusEl.textContent = 'Menguji unggah file tes ke folder Foto GDrive...';
+      try {
+        const tinyPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+        const uploadedUrl = await uploadImageToGoogleDrive(tinyPng, 'tes_koneksi_gdrive.png', 'image/png', true);
+        if (statusEl) {
+          statusEl.style.color = 'var(--primary)';
+          statusEl.textContent = 'BERHASIL! File tes tersimpan di Google Drive: ' + uploadedUrl;
+        }
+        alert('Koneksi & Izin Google Drive BERHASIL! File tes_koneksi_gdrive.png sudah masuk ke folder Foto Anda.');
+      } catch (err) {
+        if (statusEl) {
+          statusEl.style.color = 'var(--danger)';
+          statusEl.textContent = 'GAGAL: ' + err.message;
+        }
+        alert('Tes Google Drive GAGAL:\n' + err.message);
       }
     }
 
@@ -1212,7 +1283,7 @@
     }
 
     // =========================================================================
-    // BARCODE POLOS (TANPA TULISAN APA PUN DI DALAM GAMBAR)
+    // BARCODE POLOS
     // =========================================================================
     function sanitizeFilename(name) {
       return (name || 'Peserta').replace(/[\\/:*?"<>|]+/g, '_').trim();
@@ -1892,14 +1963,18 @@
         const gdriveUrl = await uploadImageToGoogleDrive(
           compressed,
           `peserta_${p.id}_${sanitizeFilename(p.name)}.jpg`,
-          'image/jpeg'
+          'image/jpeg',
+          true
         );
         p.avatar = gdriveUrl;
         document.getElementById('pPortalAvatar').src = gdriveUrl;
         if (statusEl) statusEl.textContent = 'Foto berhasil tersimpan di Google Drive!';
         saveState(p.name, 'Upload foto biodata peserta ke GDrive');
       } catch (err) {
-        if (statusEl) statusEl.textContent = 'Gagal mengunggah foto: ' + err.message;
+        if (statusEl) {
+          statusEl.style.color = 'var(--danger)';
+          statusEl.textContent = 'Gagal upload GDrive: ' + err.message;
+        }
       }
     }
 
@@ -2385,6 +2460,16 @@
                 <div id="logoUploadStatus" style="font-size:12px; color:var(--primary); font-weight:600; margin-top:4px;"></div>
               </div>
               <div style="margin-top:12px;"><label class="field-label">Password Portal Scan & Barcode</label><div style="display:flex; gap:8px;"><input type="text" id="adminScanPassInput" value="${appState.scanPassword}" /><button class="btn btn-primary" onclick="updateScanPassword()">Simpan Pass</button></div></div>
+
+              <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border);">
+                <label class="field-label">URL Web App Google Apps Script & Tes Upload Folder Foto</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                  <input type="text" id="adminWebAppUrlInput" value="${appState.webAppUrl || DEFAULT_WEB_APP_URL}" />
+                  <button class="btn btn-sm" onclick="updateWebAppUrl()">Simpan URL</button>
+                  <button class="btn btn-sm btn-primary" onclick="testGoogleDriveUploadConnection()">🧪 Tes Upload GDrive</button>
+                </div>
+                <div id="gdriveTestStatus" style="font-size:12.5px; font-weight:600;"></div>
+              </div>
             </div>
 
             <div class="bento-card bento-6">
@@ -2708,13 +2793,20 @@
             </div>
 
             <div class="bento-card bento-12">
-              <div class="card-header"><h3>Daftar Peserta (${appState.participants.length} Orang — Urut 1..N per Kelompok)</h3></div>
+              <div class="card-header">
+                <div>
+                  <h3>Daftar Peserta (${appState.participants.length} Orang — Urut 1..N per Kelompok)</h3>
+                  <p style="font-size:13px; color:var(--text-muted);">Anda dapat menambah peserta baru untuk uji coba tes atau peserta susulan.</p>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="openAddParticipantModal()">+ Tambah Peserta</button>
+              </div>
               <div class="table-wrap">
                 <table>
-                  <thead><tr><th>Kel.</th><th>No. Kel</th><th>Foto & Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
+                  <thead><tr><th>ID</th><th>Kel.</th><th>No. Kel</th><th>Foto & Nama</th><th>Jabatan</th><th>Aksi</th></tr></thead>
                   <tbody>
                     ${appState.participants.map(p => `
                       <tr>
+                        <td class="mono" style="font-size:12.5px;">${p.id}</td>
                         <td><select style="width:125px;" onchange="changeParticipantGroup('${p.id}', Number(this.value))">${[1,2,3,4,5,6].map(g => `<option value="${g}" ${p.group === g ? 'selected' : ''}>Kel. ${g}</option>`).join('')}</select></td>
                         <td class="mono" style="font-weight:800;">${p.groupNo}</td>
                         <td><div style="display:flex; align-items:center; gap:8px;"><img class="avatar" src="${avatarSrc(p)}" /><strong>${p.name}</strong></div></td>
@@ -2748,6 +2840,97 @@
           </div>
         </div>
         ${bodyHtml}`;
+    }
+
+    // =========================================================================
+    // TAMBAH PESERTA BARU (UNTUK TEST & PESERTA SUSULAN)
+    // =========================================================================
+    function generateNextParticipantId() {
+      let maxNum = 0;
+      (appState.participants || []).forEach(p => {
+        const m = String(p.id || '').match(/^BA-(\d+)$/i);
+        if (m) maxNum = Math.max(maxNum, Number(m[1]));
+      });
+      const next = maxNum + 1;
+      return 'BA-' + String(next).padStart(2, '0');
+    }
+
+    function openAddParticipantModal() {
+      _tempNewParticipantAvatar = '';
+      document.getElementById('newParticipantNameInput').value = '';
+      document.getElementById('newParticipantJabatanInput').value = 'Peserta Uji Coba';
+      document.getElementById('newParticipantGroupSelect').value = '1';
+      document.getElementById('newParticipantAvatarFile').value = '';
+      document.getElementById('newParticipantUploadStatus').textContent = '';
+      document.getElementById('newParticipantPreviewAvatar').src = fallbackInitialsSvg({ name: 'BA' });
+      document.getElementById('addParticipantModal').classList.add('open');
+    }
+
+    async function handleNewParticipantAvatarUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const nameVal = document.getElementById('newParticipantNameInput').value.trim() || 'peserta_baru';
+      const nextId = generateNextParticipantId();
+      const statusEl = document.getElementById('newParticipantUploadStatus');
+      const saveBtn = document.getElementById('saveNewParticipantBtn');
+
+      if (statusEl) {
+        statusEl.style.color = 'var(--primary)';
+        statusEl.textContent = 'Mengunggah foto ke folder Foto GDrive...';
+      }
+      if (saveBtn) saveBtn.disabled = true;
+
+      try {
+        const compressed = await compressImageFile(file, 260, 'image/jpeg', 0.85);
+        document.getElementById('newParticipantPreviewAvatar').src = compressed;
+        const gdriveUrl = await uploadImageToGoogleDrive(
+          compressed,
+          `peserta_${nextId}_${sanitizeFilename(nameVal)}.jpg`,
+          'image/jpeg',
+          true
+        );
+        _tempNewParticipantAvatar = gdriveUrl;
+        document.getElementById('newParticipantPreviewAvatar').src = gdriveUrl;
+        if (statusEl) statusEl.textContent = 'Foto berhasil tersimpan di Google Drive!';
+      } catch (err) {
+        if (statusEl) {
+          statusEl.style.color = 'var(--danger)';
+          statusEl.textContent = 'Gagal upload GDrive: ' + err.message;
+        }
+      } finally {
+        if (saveBtn) saveBtn.disabled = false;
+      }
+    }
+
+    function saveNewParticipant() {
+      const name = document.getElementById('newParticipantNameInput').value.trim();
+      const jabatan = document.getElementById('newParticipantJabatanInput').value.trim() || 'Peserta';
+      const group = Number(document.getElementById('newParticipantGroupSelect').value || 1);
+      if (!name) return alert('Nama lengkap peserta wajib diisi.');
+
+      const newId = generateNextParticipantId();
+      appState.participants.push({
+        id: newId,
+        no: appState.participants.length + 1,
+        groupNo: 1,
+        name: name,
+        jabatan: jabatan,
+        group: group,
+        avatar: _tempNewParticipantAvatar || ''
+      });
+      renumberGroups(appState.participants);
+      saveState(currentUser ? currentUser.user.name : 'Admin', `Tambah peserta: ${name} (${newId})`);
+      closeModal('addParticipantModal');
+      refreshAllUI();
+      alert(`Peserta "${name}" (${newId}) berhasil ditambahkan ke Kelompok ${group}!`);
+    }
+
+    function updateWebAppUrl() {
+      const val = (document.getElementById('adminWebAppUrlInput')?.value || '').trim();
+      if (!val) return alert('URL Web App tidak boleh kosong.');
+      appState.webAppUrl = val;
+      saveState(currentUser ? currentUser.user.name : 'Admin', 'Update URL Web App Apps Script');
+      alert('URL Web App berhasil disimpan!');
     }
 
     function addExtraAdmin() {
@@ -2977,13 +3160,17 @@
       const file = e.target.files[0];
       if (!file) return;
       const statusEl = document.getElementById('logoUploadStatus');
-      if (statusEl) statusEl.textContent = 'Mengunggah logo panitia ke Google Drive...';
+      if (statusEl) {
+        statusEl.style.color = 'var(--primary)';
+        statusEl.textContent = 'Mengunggah logo panitia ke Google Drive...';
+      }
       try {
         const compressedPng = await compressImageFile(file, 200, 'image/png', 0.92);
         const gdriveUrl = await uploadImageToGoogleDrive(
           compressedPng,
           'logo_panitia_baitul_arqam_ppda.png',
-          'image/png'
+          'image/png',
+          true
         );
         appState.committeeLogo = gdriveUrl;
         applyBranding();
@@ -2991,7 +3178,10 @@
         saveState(currentUser ? currentUser.user.name : 'Admin', 'Update logo panitia di Google Drive');
         alert('Logo panitia dan favicon berhasil disimpan ke Google Drive!');
       } catch (err) {
-        if (statusEl) statusEl.textContent = 'Gagal mengunggah logo: ' + err.message;
+        if (statusEl) {
+          statusEl.style.color = 'var(--danger)';
+          statusEl.textContent = 'Gagal mengunggah logo ke GDrive: ' + err.message;
+        }
       }
     }
 
@@ -3118,7 +3308,10 @@
       const statusEl = document.getElementById('editUploadStatus');
       const saveBtn = document.getElementById('saveProfileBtn');
 
-      if (statusEl) statusEl.textContent = 'Mengunggah foto ke folder Foto GDrive...';
+      if (statusEl) {
+        statusEl.style.color = 'var(--primary)';
+        statusEl.textContent = 'Mengunggah foto ke folder Foto GDrive...';
+      }
       if (saveBtn) saveBtn.disabled = true;
 
       try {
@@ -3127,13 +3320,17 @@
         const gdriveUrl = await uploadImageToGoogleDrive(
           compressed,
           `${type}_${id}_${sanitizeFilename(nameVal)}.jpg`,
-          'image/jpeg'
+          'image/jpeg',
+          true
         );
         _tempUploadedAvatar = gdriveUrl;
         document.getElementById(previewId).src = gdriveUrl;
         if (statusEl) statusEl.textContent = 'Berhasil tersimpan di Google Drive! Klik Simpan.';
       } catch (err) {
-        if (statusEl) statusEl.textContent = 'Gagal upload GDrive: ' + err.message;
+        if (statusEl) {
+          statusEl.style.color = 'var(--danger)';
+          statusEl.textContent = 'Gagal upload GDrive: ' + err.message;
+        }
       } finally {
         if (saveBtn) saveBtn.disabled = false;
       }
