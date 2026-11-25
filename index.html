@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baitul Arqam PPDA</title>
+  <title>Baitul Arqam PPDA — Bento Grid Perkaderan</title>
   <link id="faviconLink" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F5132'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23FBBF24' stroke-width='3'/%3E%3Ctext x='32' y='39' text-anchor='middle' fill='%23FFFFFF' font-family='sans-serif' font-weight='800' font-size='22'%3EBA%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -394,7 +394,7 @@
       <img id="headerCommitteeLogo" class="brand-logo-img" src="" alt="Logo Panitia Baitul Arqam PPDA" />
       <div class="brand-meta">
         <div class="brand-title" style="font-size: 17px; font-weight: 800;">Baitul Arqam PPDA</div>
-        <span id="personalizedGreeting">Progres Terbuka</span>
+        <span id="personalizedGreeting">Bento Grid • Progres Terbuka</span>
       </div>
     </div>
 
@@ -464,7 +464,7 @@
       <div class="bento-card bento-12">
         <div class="card-header">
           <div>
-            <h2>Dashboard Progres 9 Aspek</h2>
+            <h2>Dashboard Progres 9 Aspek (Bento Overview)</h2>
             <p style="color:var(--text-muted); font-size:14px;">Pantauan capaian seluruh peserta berdasarkan target Min–Maks tiap aspek.</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;" class="no-print">
@@ -816,9 +816,9 @@
   </div>
 
   <script>
-    const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw7gL0JCVrPQGUSg2cdRBB0wp7qtnMvO50rcqWmFdp-WnhyWy7-uk91FO8ZKtpLFAqT/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_11';
-    const SESSION_KEY = 'baitul_arqam_ppda_session_v4';
+    const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQCNSVWfZ4XOwMQyea7SyGD1ZDUY6Nhl1dI0q0nJRSK6f3yVhg1JcVlV0cwZIG1XjZxg/exec';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_12';
+    const SESSION_KEY = 'baitul_arqam_ppda_session_v5';
     const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -1309,7 +1309,6 @@
         return;
       }
 
-      // Siapkan descriptor untuk peserta berfoto yang belum punya descriptor tersimpan
       for (const p of appState.participants) {
         if (p.avatar && (!Array.isArray(p.faceDescriptor) || p.faceDescriptor.length === 0)) {
           const desc = await extractFaceDescriptorFromDataUrl(p.avatar);
@@ -1386,9 +1385,7 @@
                 renderScanAlert('error', 'Wajah Tidak Cocok / Tidak Terdaftar', 'Wajah yang terdeteksi tidak cocok dengan foto peserta mana pun yang tersimpan.');
               }
             }
-          } catch (e) {
-            // Abaikan error frame tunggal
-          }
+          } catch (e) {}
         }, 900);
       } catch (err) {
         renderScanAlert('error', 'Gagal Membuka Kamera Wajah', 'Izin kamera ditolak atau perangkat tidak memiliki kamera: ' + err.message);
@@ -1486,7 +1483,7 @@
         try {
           json = JSON.parse(rawText);
         } catch (parseErr) {
-          throw new Error('Apps Script belum di-deploy versi terbaru (New version) atau izin DriveApp belum disetujui.');
+          throw new Error('Apps Script belum di-deploy versi terbaru atau izin DriveApp belum disetujui.');
         }
         if (json.ok && json.url) {
           setSyncStatus('ok', 'Tersimpan di GDrive');
@@ -1497,7 +1494,7 @@
         setSyncStatus('error', 'Gagal Upload GDrive');
         console.error('Upload GDrive gagal:', err);
         if (throwOnError) throw err;
-        alert('Upload ke folder Google Drive belum berhasil: ' + err.message + '\n\nPastikan Anda sudah menjalankan testDriveAccess() dan melakukan Deploy > New version di Google Apps Script.');
+        alert('Upload ke folder Google Drive belum berhasil: ' + err.message);
         return base64DataUrl;
       }
     }
