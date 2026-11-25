@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Baitul Arqam PPDA — Sistem Presensi & Evaluasi Terpadu</title>
   <link id="faviconLink" rel="icon" href="" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
   <style>
     :root {
@@ -334,7 +334,6 @@
     .scan-alert-box.status-duplicate { border-color: var(--accent); background: var(--accent-soft); }
     .scan-alert-box.status-error { border-color: var(--danger); background: var(--danger-soft); }
 
-    /* Bingkai Barcode & Face Cam dengan indikator hijau pas */
     .scanner-stage {
       position: relative;
       width: 100%;
@@ -344,11 +343,11 @@
       overflow: hidden;
       background: #0F172A;
       border: 3px solid var(--border);
-      transition: border-color 0.16s ease, box-shadow 0.16s ease;
+      transition: border-color 0.14s ease, box-shadow 0.14s ease;
     }
     .scanner-stage.aligned-green {
       border-color: #22C55E;
-      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.28);
     }
     .scanner-stage video,
     .scanner-stage canvas {
@@ -373,7 +372,7 @@
       background: rgba(15, 23, 42, 0.75);
       color: #FFFFFF;
       border: 1.5px solid rgba(255, 255, 255, 0.35);
-      transition: all 0.16s ease;
+      transition: all 0.14s ease;
     }
     .scanner-stage.aligned-green .reticle-badge {
       background: #16A34A;
@@ -655,7 +654,7 @@
             <div class="card-header" style="margin-bottom:12px;">
               <div>
                 <h2>Presensi Scan Barcode & Face Recognition</h2>
-                <p style="color:var(--text-muted); font-size:13.5px;">Bingkai & kotak akan berubah menjadi <strong>HIJAU</strong> saat posisi barcode/wajah pas & terbaca.</p>
+                <p style="color:var(--text-muted); font-size:13.5px;">Bingkai & kotak akan berubah menjadi <strong>HIJAU</strong> saat barcode/wajah terdeteksi.</p>
               </div>
               <div id="scanTopLogoutWrap" class="hidden">
                 <button class="btn btn-sm btn-danger" onclick="logoutScanPortal()">Kunci Portal</button>
@@ -709,9 +708,6 @@
                     <input type="text" id="manualBarcodeInput" placeholder="Ketik atau scan kode BA-01..." onkeyup="if(event.key==='Enter') processBarcodeScan(this.value)" />
                     <button class="btn btn-primary" onclick="processBarcodeScan(document.getElementById('manualBarcodeInput').value)">Catat</button>
                   </div>
-                  <p style="font-size:12.5px; color:var(--text-muted); margin-top:8px;">
-                    Tips: Pegang kartu/barcode sekitar 12–25 cm di dalam kotak tengah agar fokus kamera tajam dan bingkai langsung menyala <strong>hijau</strong>.
-                  </p>
                 </div>
               </div>
             </div>
@@ -739,7 +735,7 @@
             <div class="card-header">
               <div>
                 <h3>Koleksi Barcode Polos Peserta (.PNG)</h3>
-                <p style="color:var(--text-muted); font-size:13px;">Gambar barcode polos tanpa tulisan apa pun; saat diunduh otomatis dinamai sesuai nama orangnya.</p>
+                <p style="color:var(--text-muted); font-size:13px;">Gambar barcode QR standar polos tanpa tulisan apa pun; saat diunduh otomatis dinamai sesuai nama orangnya.</p>
               </div>
               <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <button class="btn btn-sm btn-primary" onclick="downloadSelectedBarcodes()">⬇ Unduh Terpilih</button>
@@ -821,7 +817,6 @@
         <div style="flex:1; min-width:200px;">
           <label class="field-label">Unggah Foto Baru (Otomatis ke Google Drive & Face ID)</label>
           <input type="file" id="editAvatarFileInput" accept="image/*" onchange="handleAvatarUpload(event, 'editPreviewAvatar')" />
-          <div id="editUploadStatus" style="font-size:12px; color:var(--primary); font-weight:600; margin-top:4px;"></div>
         </div>
       </div>
       <div style="margin-bottom:12px;">
@@ -881,8 +876,8 @@
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQCNSVWfZ4XOwMQyea7SyGD1ZDUY6Nhl1dI0q0nJRSK6f3yVhg1JcVlV0cwZIG1XjZxg/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_15';
-    const SESSION_KEY = 'baitul_arqam_ppda_session_v8';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_16';
+    const SESSION_KEY = 'baitul_arqam_ppda_session_v9';
     const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -1018,10 +1013,6 @@
         akadAssessors: JSON.parse(JSON.stringify(DEFAULT_AKAD_ASSESSORS)),
         rundown: JSON.parse(JSON.stringify(DEFAULT_RUNDOWN)),
         presensiSessions: JSON.parse(JSON.stringify(DEFAULT_PRESENSI_SESSIONS)),
-        akadQuestions: [
-          'Sejauh mana kesiapan Anda menjaga komitmen bermuhammadiyah dan mengabdi di Pondok Pesantren Darul Arqam?',
-          'Komitmen nyata apa yang siap Anda jalankan pasca kegiatan Baitul Arqam ini?'
-        ],
         materiTitles: [
           'Materi ke-1: Ideologi & Kemuhammadiyahan',
           'Materi ke-2: Keislaman & Fikih Ibadah',
@@ -1133,7 +1124,6 @@
     let sessionMeta = loadSessionMeta();
     let currentUser = resolveSessionUser();
 
-    // Barcode camera state
     let barcodeStream = null;
     let barcodeLoopTimer = null;
     let barcodeCameraFacing = 'environment';
@@ -1141,7 +1131,6 @@
     let lastBarcodeCooldown = {};
     let greenHighlightTimeout = null;
 
-    // Face cam state
     let faceModelsLoaded = false;
     let faceModelsLoading = false;
     let faceStream = null;
@@ -1149,7 +1138,6 @@
     let faceCameraFacing = 'user';
     let lastFaceCooldownMap = {};
 
-    // Temp profile/participant state
     let _tempUploadedAvatar = '';
     let _tempNewParticipantAvatar = '';
     let _tempNewParticipantFaceDescriptor = null;
@@ -1676,7 +1664,7 @@
     }
 
     // =========================================================================
-    // SCAN BARCODE (NATIVE BARCODEDETECTOR + JSQR + BINGKAI HIJAU "PAS")
+    // SCAN BARCODE STANDAR QR (QRCODE-GENERATOR + JSQR + BARCODEDETECTOR)
     // =========================================================================
     function unlockScanPortal() {
       if (document.getElementById('scanPasswordInput').value !== appState.scanPassword) return alert('Password panitia salah!');
@@ -1726,7 +1714,7 @@
       else { stopBarcodeCamera(); startFaceRecognition(); }
     }
 
-    function setBarcodeAlignedGreen(isAligned, textLabel = 'Posisi Barcode Pas ✓') {
+    function setBarcodeAlignedGreen(isAligned, textLabel = 'Barcode Terdeteksi ✓') {
       const box = document.getElementById('barcodeStageBox');
       const badge = document.getElementById('barcodeReticleBadge');
       if (!box || !badge) return;
@@ -1746,15 +1734,10 @@
 
     function drawBarcodeReticle(ctx, w, h, cornerPoints = null, isGreen = false) {
       ctx.clearRect(0, 0, w, h);
-      const padX = Math.round(w * 0.22);
-      const padY = Math.round(h * 0.18);
-      const rw = w - padX * 2;
-      const rh = h - padY * 2;
-      const strokeColor = isGreen ? '#22C55E' : 'rgba(255, 255, 255, 0.65)';
-
-      ctx.strokeStyle = strokeColor;
+      const padX = Math.round(w * 0.22), padY = Math.round(h * 0.18);
+      ctx.strokeStyle = isGreen ? '#22C55E' : 'rgba(255, 255, 255, 0.65)';
       ctx.lineWidth = isGreen ? 4 : 2;
-      ctx.strokeRect(padX, padY, rw, rh);
+      ctx.strokeRect(padX, padY, w - padX * 2, h - padY * 2);
 
       if (Array.isArray(cornerPoints) && cornerPoints.length >= 2) {
         ctx.strokeStyle = '#22C55E';
@@ -1775,22 +1758,12 @@
 
     async function startBarcodeCamera() {
       stopFaceRecognition();
-      const video = document.getElementById('barcodeVideo');
-      const overlay = document.getElementById('barcodeOverlay');
-      const statusEl = document.getElementById('barcodeCamStatus');
+      const video = document.getElementById('barcodeVideo'), overlay = document.getElementById('barcodeOverlay'), statusEl = document.getElementById('barcodeCamStatus');
       if (!video || !overlay) return;
-
-      if (barcodeStream) {
-        if (statusEl) statusEl.textContent = 'Kamera barcode sudah aktif.';
-        return;
-      }
+      if (barcodeStream) { if (statusEl) statusEl.textContent = 'Kamera barcode sudah aktif.'; return; }
 
       if ('BarcodeDetector' in window && !barcodeDetectorInstance) {
-        try {
-          barcodeDetectorInstance = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'code_39', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'data_matrix'] });
-        } catch (e) {
-          barcodeDetectorInstance = null;
-        }
+        try { barcodeDetectorInstance = new BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13', 'ean_8'] }); } catch (e) { barcodeDetectorInstance = null; }
       }
 
       try {
@@ -1800,7 +1773,7 @@
         });
         video.srcObject = barcodeStream;
         await video.play();
-        if (statusEl) statusEl.textContent = 'Kamera aktif — arahkan barcode ke kotak tengah.';
+        if (statusEl) statusEl.textContent = 'Kamera barcode aktif — arahkan ke kotak tengah.';
 
         const workCanvas = document.createElement('canvas');
         const workCtx = workCanvas.getContext('2d', { willReadFrequently: true });
@@ -1808,47 +1781,33 @@
         if (barcodeLoopTimer) clearInterval(barcodeLoopTimer);
         barcodeLoopTimer = setInterval(async () => {
           if (!barcodeStream || video.paused || video.ended) return;
-          const vw = video.videoWidth || 640;
-          const vh = video.videoHeight || 480;
+          const vw = video.videoWidth || 640, vh = video.videoHeight || 480;
           if (!vw || !vh) return;
-
-          overlay.width = vw;
-          overlay.height = vh;
+          overlay.width = vw; overlay.height = vh;
           const ctx = overlay.getContext('2d');
 
-          workCanvas.width = vw;
-          workCanvas.height = vh;
+          workCanvas.width = vw; workCanvas.height = vh;
           workCtx.drawImage(video, 0, 0, vw, vh);
 
-          let foundCode = '';
-          let pts = null;
+          let foundCode = '', pts = null;
 
-          // 1. Coba Native BarcodeDetector dulu (mendukung QR + 1D barcode seperti Code128/EAN)
-          if (barcodeDetectorInstance) {
-            try {
-              const codes = await barcodeDetectorInstance.detect(workCanvas);
-              if (codes && codes.length > 0) {
-                foundCode = (codes[0].rawValue || '').trim();
-                if (codes[0].cornerPoints && codes[0].cornerPoints.length) pts = codes[0].cornerPoints;
-              }
-            } catch (e) {}
-          }
-
-          // 2. Fallback ke jsQR untuk QR code
-          if (!foundCode && window.jsQR) {
+          if (window.jsQR) {
             const imgData = workCtx.getImageData(0, 0, vw, vh);
             const qrRes = jsQR(imgData.data, vw, vh, { inversionAttempts: 'attemptBoth' });
             if (qrRes && qrRes.data) {
               foundCode = qrRes.data.trim();
-              if (qrRes.location) {
-                pts = [
-                  qrRes.location.topLeftCorner,
-                  qrRes.location.topRightCorner,
-                  qrRes.location.bottomRightCorner,
-                  qrRes.location.bottomLeftCorner
-                ];
-              }
+              if (qrRes.location) pts = [qrRes.location.topLeftCorner, qrRes.location.topRightCorner, qrRes.location.bottomRightCorner, qrRes.location.bottomLeftCorner];
             }
+          }
+
+          if (!foundCode && barcodeDetectorInstance) {
+            try {
+              const codes = await barcodeDetectorInstance.detect(workCanvas);
+              if (codes && codes.length > 0) {
+                foundCode = (codes[0].rawValue || '').trim();
+                if (codes[0].cornerPoints?.length) pts = codes[0].cornerPoints;
+              }
+            } catch (e) {}
           }
 
           if (foundCode) {
@@ -1856,14 +1815,14 @@
             setBarcodeAlignedGreen(true, `Terbaca: ${foundCode} ✓`);
             const key = `${foundCode.toUpperCase()}_${document.getElementById('scanSessionSelect')?.value || ''}`;
             const now = Date.now();
-            if (now - (lastBarcodeCooldown[key] || 0) > 2500) {
+            if (now - (lastBarcodeCooldown[key] || 0) > 2200) {
               lastBarcodeCooldown[key] = now;
               processBarcodeScan(foundCode, true);
             }
           } else {
             drawBarcodeReticle(ctx, vw, vh, null, false);
           }
-        }, 160);
+        }, 120);
       } catch (err) {
         if (statusEl) statusEl.textContent = 'Gagal membuka kamera: ' + err.message;
         renderScanAlert('error', 'Kamera Barcode Gagal Dibuka', 'Pastikan izin kamera diizinkan atau gunakan input barcode manual.');
@@ -1873,8 +1832,7 @@
     function stopBarcodeCamera() {
       if (barcodeLoopTimer) { clearInterval(barcodeLoopTimer); barcodeLoopTimer = null; }
       if (barcodeStream) { barcodeStream.getTracks().forEach(t => t.stop()); barcodeStream = null; }
-      const video = document.getElementById('barcodeVideo');
-      if (video) video.srcObject = null;
+      const video = document.getElementById('barcodeVideo'); if (video) video.srcObject = null;
       setBarcodeAlignedGreen(false);
     }
 
@@ -1940,8 +1898,7 @@
           const ctx = overlay.getContext('2d');
           overlay.width = video.videoWidth || 640; overlay.height = video.videoHeight || 480;
           ctx.clearRect(0, 0, overlay.width, overlay.height);
-          const stage = document.getElementById('faceStageBox');
-          const badge = document.getElementById('faceReticleBadge');
+          const stage = document.getElementById('faceStageBox'), badge = document.getElementById('faceReticleBadge');
           if (!det) { stage?.classList.remove('aligned-green'); if (badge) badge.textContent = 'Mencari Wajah'; return; }
           stage?.classList.add('aligned-green');
           if (badge) badge.textContent = 'Wajah Terdeteksi ✓';
@@ -2014,43 +1971,32 @@
       recordAttendanceForParticipant(p, 'Barcode');
     }
 
-    // QR GENERATOR POLOS (.PNG)
-    function drawQrMatrixToCanvas(canvas, text, size = 240) {
-      canvas.width = size; canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, size, size);
-      const n = 21, pad = 16, cell = Math.floor((size - pad * 2) / n), offset = Math.floor((size - cell * n) / 2);
-      const grid = Array.from({ length: n }, () => Array(n).fill(false));
-      const reserved = Array.from({ length: n }, () => Array(n).fill(false));
-      const placeFinder = (r0, c0) => {
-        for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
-          const rr = r0 + r, cc = c0 + c;
-          if (rr >= 0 && rr < n && cc >= 0 && cc < n) {
-            reserved[rr][cc] = true;
-            grid[rr][cc] = r >= 0 && r <= 6 && c >= 0 && c <= 6 && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
-          }
-        }
-      };
-      placeFinder(0, 0); placeFinder(0, n - 7); placeFinder(n - 7, 0);
-      for (let i = 8; i < n - 8; i++) { grid[6][i] = i % 2 === 0; reserved[6][i] = true; grid[i][6] = i % 2 === 0; reserved[i][6] = true; }
-      const bits = [];
-      let hash = 2166136261;
-      for (let i = 0; i < text.length; i++) {
-        const code = text.charCodeAt(i); hash ^= code; hash = Math.imul(hash, 16777619);
-        for (let b = 7; b >= 0; b--) bits.push((code >> b) & 1);
-      }
-      for (let k = 0; k < 220; k++) bits.push(((hash >>> (k % 24)) ^ (k * 13)) & 1);
-      let bIdx = 0;
-      for (let r = n - 1; r >= 0; r--) for (let c = n - 1; c >= 0; c--) {
-        if (!reserved[r][c]) { grid[r][c] = ((bits[bIdx % bits.length] ^ ((r + c) % 2 === 0 ? 1 : 0))) === 1; bIdx++; }
-      }
-      ctx.fillStyle = '#000000';
-      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (grid[r][c]) ctx.fillRect(offset + c * cell, offset + r * cell, cell, cell);
-    }
-
+    // GENERATOR QR CODE STANDAR ASLI (QRCODE-GENERATOR)
     function buildPureBarcodeDataUrl(participant) {
       const canvas = document.createElement('canvas');
-      drawQrMatrixToCanvas(canvas, participant.id, 260);
+      const size = 260;
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, size, size);
+
+      if (typeof window.qrcode === 'function') {
+        const qr = qrcode(0, 'M');
+        qr.addData(participant.id);
+        qr.make();
+        const count = qr.getModuleCount();
+        const pad = 16;
+        const cell = Math.floor((size - pad * 2) / count);
+        const offset = Math.floor((size - cell * count) / 2);
+        ctx.fillStyle = '#000000';
+        for (let r = 0; r < count; r++) {
+          for (let c = 0; c < count; c++) {
+            if (qr.isDark(r, c)) {
+              ctx.fillRect(offset + c * cell, offset + r * cell, cell, cell);
+            }
+          }
+        }
+      }
       return canvas.toDataURL('image/png');
     }
 
