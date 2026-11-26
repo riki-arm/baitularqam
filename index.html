@@ -420,7 +420,7 @@
     .modal-backdrop.open { display: flex; }
     .modal-box {
       width: 100%;
-      max-width: 560px;
+      max-width: 580px;
       max-height: 90vh;
       overflow-y: auto;
       background: var(--surface);
@@ -811,7 +811,7 @@
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
         <img id="editPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
         <div style="flex:1; min-width:200px;">
-          <label class="field-label">Unggah Foto Baru (Otomatis ke Google Drive & Face ID)</label>
+          <label class="field-label">Unggah Foto Baru (Otomatis ke Face ID)</label>
           <input type="file" id="editAvatarFileInput" accept="image/*" onchange="handleAvatarUpload(event, 'editPreviewAvatar')" />
         </div>
       </div>
@@ -830,31 +830,32 @@
     </div>
   </div>
 
-  <!-- MODAL TAMBAH PESERTA BARU -->
-  <div id="addParticipantModal" class="modal-backdrop">
+  <!-- MODAL TAMBAH / EDIT PESERTA -->
+  <div id="participantModal" class="modal-backdrop">
     <div class="modal-box">
       <div class="card-header">
-        <h3>Tambah Peserta Baru</h3>
-        <button class="btn btn-sm" onclick="closeModal('addParticipantModal')">✕</button>
+        <h3 id="participantModalTitle">Tambah Peserta Baru</h3>
+        <button class="btn btn-sm" onclick="closeModal('participantModal')">✕</button>
       </div>
+      <input type="hidden" id="participantEditId" />
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
-        <img id="newParticipantPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
+        <img id="participantPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
         <div style="flex:1; min-width:200px;">
-          <label class="field-label">Unggah Foto Peserta (Auto Face ID)</label>
-          <input type="file" id="newParticipantAvatarFile" accept="image/*" onchange="handleNewParticipantAvatarUpload(event)" />
+          <label class="field-label">Foto Peserta (Auto Face ID)</label>
+          <input type="file" id="participantAvatarFile" accept="image/*" onchange="handleParticipantAvatarUpload(event)" />
         </div>
       </div>
       <div style="margin-bottom:12px;">
         <label class="field-label">Nama Lengkap Peserta</label>
-        <input type="text" id="newParticipantNameInput" placeholder="Contoh: Ahmad Fauzi, S.Pd." />
+        <input type="text" id="participantNameInput" placeholder="Contoh: Ahmad Fauzi, S.Pd." />
       </div>
       <div style="margin-bottom:12px;">
         <label class="field-label">Jabatan / Unit Tugas</label>
-        <input type="text" id="newParticipantJabatanInput" placeholder="Contoh: Guru / Musyrif / Staf" />
+        <input type="text" id="participantJabatanInput" placeholder="Contoh: Guru / Musyrif / Staf" />
       </div>
       <div style="margin-bottom:16px;">
         <label class="field-label">Kelompok</label>
-        <select id="newParticipantGroupSelect">
+        <select id="participantGroupSelect">
           <option value="1">Kelompok 1</option>
           <option value="2">Kelompok 2</option>
           <option value="3">Kelompok 3</option>
@@ -864,16 +865,63 @@
         </select>
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
-        <button class="btn" onclick="closeModal('addParticipantModal')">Batal</button>
-        <button class="btn btn-primary" onclick="saveNewParticipant()">+ Tambahkan Peserta</button>
+        <button class="btn" onclick="closeModal('participantModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveParticipantCrud()">Simpan Peserta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TAMBAH / EDIT RUNDOWN -->
+  <div id="rundownModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="card-header">
+        <h3 id="rundownModalTitle">Tambah Rundown</h3>
+        <button class="btn btn-sm" onclick="closeModal('rundownModal')">✕</button>
+      </div>
+      <input type="hidden" id="rundownEditId" />
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div>
+          <label class="field-label">Hari Ke-</label>
+          <select id="rdDayInput">
+            <option value="1">Hari Ke-1</option>
+            <option value="2">Hari Ke-2</option>
+            <option value="3">Hari Ke-3</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Waktu</label>
+          <input type="text" id="rdTimeInput" placeholder="08.00 – 09.30" />
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="field-label">Kegiatan</label>
+        <input type="text" id="rdActivityInput" placeholder="Sesi Materi / Ibadah / Outbound" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="field-label">Judul Materi</label>
+        <input type="text" id="rdTopicInput" placeholder="Judul materi atau agenda" />
+      </div>
+      <div class="grid-2" style="margin-bottom:16px;">
+        <div>
+          <label class="field-label">Pemateri</label>
+          <input type="text" id="rdSpeakerInput" placeholder="Nama pemateri" />
+        </div>
+        <div>
+          <label class="field-label">MC / Moderator</label>
+          <input type="text" id="rdMcInput" placeholder="MC Resmi" />
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn" onclick="closeModal('rundownModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveRundownCrud()">Simpan Rundown</button>
       </div>
     </div>
   </div>
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQCNSVWfZ4XOwMQyea7SyGD1ZDUY6Nhl1dI0q0nJRSK6f3yVhg1JcVlV0cwZIG1XjZxg/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_17';
-    const SESSION_KEY = 'baitul_arqam_ppda_session_v10';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_18';
+    const SESSION_KEY = 'baitul_arqam_ppda_session_v11';
     const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -1083,6 +1131,8 @@
         eventStartDate: parsed.eventStartDate || base.eventStartDate,
         superadmin: { ...base.superadmin, ...(parsed.superadmin || {}) },
         extraAdmins: Array.isArray(parsed.extraAdmins) ? parsed.extraAdmins : [],
+        instructors: Array.isArray(parsed.instructors) && parsed.instructors.length ? parsed.instructors : base.instructors,
+        akadAssessors: Array.isArray(parsed.akadAssessors) && parsed.akadAssessors.length ? parsed.akadAssessors : base.akadAssessors,
         rundown: parsed.rundown?.length ? parsed.rundown : base.rundown,
         presensiSessions,
         materiTitles: parsed.materiTitles?.length ? parsed.materiTitles : base.materiTitles,
@@ -1098,8 +1148,7 @@
           ...base.postTest,
           ...(parsed.postTest || {}),
           materiSessionMap: { ...base.postTest.materiSessionMap, ...(parsed.postTest?.materiSessionMap || {}) }
-        },
-        akadAssessors: parsed.akadAssessors?.length ? parsed.akadAssessors : base.akadAssessors
+        }
       };
       renumberGroups(merged.participants || []);
       return merged;
@@ -1124,8 +1173,12 @@
     let lastFaceCooldownMap = {};
 
     let _tempUploadedAvatar = '';
-    let _tempNewParticipantAvatar = '';
-    let _tempNewParticipantFaceDescriptor = null;
+    let _tempParticipantAvatar = '';
+    let _tempParticipantFaceDescriptor = null;
+
+    function isAdminRole() {
+      return currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin');
+    }
 
     function getPresensiSessions() {
       return appState.presensiSessions?.length ? appState.presensiSessions : DEFAULT_PRESENSI_SESSIONS;
@@ -1172,7 +1225,7 @@
         const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
         if (raw) return JSON.parse(raw);
       } catch (e) {}
-      return { topView: 'rundown', staffTab: 'presensi', adminModule: 'overview', role: null, userId: null, scanUnlocked: false, pesertaGroup: '', pesertaId: '' };
+      return { topView: 'rundown', staffTab: 'presensi', adminModule: 'participants', role: null, userId: null, scanUnlocked: false, pesertaGroup: '', pesertaId: '' };
     }
 
     function persistSessionMeta() {
@@ -2053,8 +2106,8 @@
 
     function renderStaffSubTabs() {
       const sub = document.getElementById('staffSubTabs'), role = currentUser.role;
-      let tabs = (role === 'superadmin' || role === 'admin')
-        ? [{ id: 'presensi', label: 'Presensi Kehadiran & Ibadah' }, { id: 'admin', label: 'Pengaturan Admin' }, { id: 'index', label: 'Index' }, { id: 'skrining', label: 'Skrining' }, { id: 'akad', label: 'Akad Amanah' }]
+      let tabs = isAdminRole()
+        ? [{ id: 'presensi', label: 'Presensi Kehadiran & Ibadah' }, { id: 'admin', label: 'CRUD & Pengaturan Admin' }, { id: 'index', label: 'Index' }, { id: 'skrining', label: 'Skrining' }, { id: 'akad', label: 'Akad Amanah' }]
         : (role === 'instructor' ? [{ id: 'index', label: `Index Kel. ${currentUser.user.group}` }, { id: 'skrining', label: `Skrining Kel. ${currentUser.user.group}` }] : [{ id: 'akad', label: 'Akad Amanah' }]);
       if (!tabs.some(t => t.id === sessionMeta.staffTab)) sessionMeta.staffTab = tabs[0].id;
       sub.innerHTML = tabs.map(t => `<button class="nav-pill ${t.id === sessionMeta.staffTab ? 'active' : ''}" onclick="sessionMeta.staffTab='${t.id}'; persistSessionMeta(); renderStaffSubTabs();">${t.label}</button>`).join('');
@@ -2089,9 +2142,10 @@
           <div class="bento-card" style="background:var(--surface-subtle); box-shadow:none; margin-bottom:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
               <strong>Sesi: Hari ${activeSess.day} — [${activeSess.type.toUpperCase()}] ${activeSess.title}</strong>
-              <div style="display:flex; gap:6px;">
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
                 <button class="btn btn-sm btn-primary" onclick="bulkSetPresensiSession('${activeSess.id}', 5)">Set Hadir (+5)</button>
                 <button class="btn btn-sm btn-warn" onclick="bulkSetPresensiSession('${activeSess.id}', 0)">Reset (0)</button>
+                ${isAdminRole() ? `<button class="btn btn-sm btn-danger" onclick="deletePresensiSession('${activeSess.id}')">Hapus Sesi</button>` : ''}
               </div>
             </div>
             <div class="grid-4" style="align-items:end;">
@@ -2115,6 +2169,15 @@
             </table>
           </div>
         </div>`;
+    }
+
+    function deletePresensiSession(sessId) {
+      if (appState.presensiSessions.length <= 1) return alert('Minimal harus ada 1 sesi presensi.');
+      if (!confirm('Hapus sesi presensi ini?')) return;
+      appState.presensiSessions = appState.presensiSessions.filter(s => s.id !== sessId);
+      window._selectedPresensiSession = appState.presensiSessions[0].id;
+      saveState(currentUser.user.name, `Hapus sesi presensi ${sessId}`);
+      renderStaffContent();
     }
 
     function savePresensiSessionTiming(sessId) {
@@ -2151,10 +2214,146 @@
       renderStaffContent();
     }
 
+    // =========================================================================
+    // CRUD PENUH UNTUK ADMIN & SUPERADMIN
+    // =========================================================================
     function renderAdminControlView(area) {
-      const mod = sessionMeta.adminModule || 'overview';
+      const mod = sessionMeta.adminModule || 'participants';
       let bodyHtml = '';
-      if (mod === 'overview') {
+
+      if (mod === 'participants') {
+        bodyHtml = `
+          <div class="bento-card">
+            <div class="card-header">
+              <div><h3>CRUD Data Peserta (${appState.participants.length} Orang)</h3><p style="color:var(--text-muted); font-size:13px;">Tambah, ubah nama/jabatan/kelompok/foto, atau hapus peserta.</p></div>
+              <button class="btn btn-sm btn-primary" onclick="openParticipantModal()">+ Tambah Peserta</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Foto</th><th>Nama</th><th>Jabatan</th><th>Kelompok</th><th>Aksi</th></tr></thead>
+                <tbody>
+                  ${appState.participants.map(p => `
+                    <tr>
+                      <td class="mono">${p.id}</td>
+                      <td><img class="avatar" src="${avatarSrc(p)}" /></td>
+                      <td><strong>${p.name}</strong></td>
+                      <td>${p.jabatan}</td>
+                      <td>Kel. ${p.group} (#${p.groupNo})</td>
+                      <td>
+                        <div style="display:flex; gap:6px;">
+                          <button class="btn btn-sm" onclick="openParticipantModal('${p.id}')">Edit</button>
+                          <button class="btn btn-sm btn-danger" onclick="deleteParticipantCrud('${p.id}')">Hapus</button>
+                        </div>
+                      </td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      } else if (mod === 'rundown') {
+        bodyHtml = `
+          <div class="bento-card">
+            <div class="card-header">
+              <div><h3>CRUD Rundown Acara</h3><p style="color:var(--text-muted); font-size:13px;">Tambah, edit, atau hapus jadwal rundown & tanggal mulai kegiatan.</p></div>
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <label class="field-label" style="margin:0;">Tanggal Hari 1:</label>
+                <input type="date" style="width:170px;" value="${appState.eventStartDate || '2026-12-21'}" onchange="appState.eventStartDate=this.value; saveState('Admin','Ubah tanggal acara'); renderStaffContent();" />
+                <button class="btn btn-sm btn-primary" onclick="openRundownModal()">+ Tambah Rundown</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Hari</th><th>Waktu</th><th>Kegiatan</th><th>Judul Materi</th><th>Pemateri</th><th>MC</th><th>Aksi</th></tr></thead>
+                <tbody>
+                  ${(appState.rundown || []).map(r => `
+                    <tr>
+                      <td>Hari ${r.day}</td>
+                      <td class="mono">${r.time}</td>
+                      <td><strong>${r.activity}</strong></td>
+                      <td>${r.topic}</td>
+                      <td>${r.speaker}</td>
+                      <td>${r.mc}</td>
+                      <td>
+                        <div style="display:flex; gap:6px;">
+                          <button class="btn btn-sm" onclick="openRundownModal('${r.id}')">Edit</button>
+                          <button class="btn btn-sm btn-danger" onclick="deleteRundownCrud('${r.id}')">Hapus</button>
+                        </div>
+                      </td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      } else if (mod === 'tests') {
+        bodyHtml = `
+          <div class="bento-grid">
+            ${['pre', 'post'].map(type => {
+              const isPre = type === 'pre', cfg = isPre ? appState.preTest : appState.postTest;
+              const activeMateri = cfg.materiTag || appState.materiTitles[0] || '', linkedSessId = cfg.materiSessionMap?.[activeMateri] || '';
+              const qs = cfg.questions || [];
+              return `
+                <div class="bento-card bento-6">
+                  <div class="card-header"><h3>${isPre ? 'PRE-TEST' : 'POST-TEST'}</h3><button class="btn btn-sm ${cfg.open ? 'btn-primary' : ''}" onclick="${isPre ? 'appState.preTest.open=!appState.preTest.open' : 'appState.postTest.open=!appState.postTest.open'}; saveState('Admin','Toggle tes'); renderStaffContent();">${cfg.open ? '✅ DIBUKA' : '🔒 DITUTUP'}</button></div>
+                  <div style="margin-bottom:10px;"><label class="field-label">Token Ujian</label><input type="text" value="${cfg.token || ''}" onchange="${isPre ? 'appState.preTest.token' : 'appState.postTest.token'}=this.value.trim(); saveState('Admin','Ubah token');" /></div>
+                  <div style="margin-bottom:10px;"><label class="field-label">Materi Aktif</label><select onchange="${isPre ? 'appState.preTest.materiTag' : 'appState.postTest.materiTag'}=this.value; saveState('Admin','Pilih materi tes'); renderStaffContent();">${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${m === activeMateri ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
+                  <div style="margin-bottom:14px;"><label class="field-label">Otomatis +5 Poin Presensi Kehadiran Sesi:</label><select onchange="if(!${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}) ${isPre ? 'appState.preTest.materiSessionMap={}' : 'appState.postTest.materiSessionMap={}'}; ${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}['${activeMateri.replace(/'/g, "\\'")}']=this.value; saveState('Admin','Tautkan sesi tes'); renderStaffContent();"><option value="">-- Nonaktif --</option>${getPresensiSessions().filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${linkedSessId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}</select></div>
+
+                  <div style="border-top:1px solid var(--border); padding-top:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                      <strong>Bank Soal (${qs.length} Soal)</strong>
+                      <button class="btn btn-sm btn-primary" onclick="addTestQuestionCrud('${type}')">+ Tambah Soal</button>
+                    </div>
+                    <div class="vertical-stack">
+                      ${qs.map((q, idx) => `
+                        <div class="item-card-vertical" style="padding:12px;">
+                          <div style="display:flex; justify-content:space-between; gap:8px; margin-bottom:6px;">
+                            <strong>Soal #${idx + 1} (${q.type === 'mc' ? 'Pilihan Ganda' : 'Isian Singkat'})</strong>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTestQuestionCrud('${type}', '${q.id}')">Hapus</button>
+                          </div>
+                          <input type="text" value="${(q.text || '').replace(/"/g, '&quot;')}" style="margin-bottom:8px;" onchange="updateTestQuestionText('${type}', '${q.id}', this.value)" />
+                          ${q.type === 'mc' ? `
+                            <div class="grid-2" style="gap:6px;">
+                              ${(q.options || []).map((opt, oIdx) => `<input type="text" value="${String(opt || '').replace(/"/g, '&quot;')}" placeholder="Opsi ${String.fromCharCode(65 + oIdx)}" onchange="updateTestQuestionOption('${type}', '${q.id}', ${oIdx}, this.value)" />`).join('')}
+                            </div>
+                            <div style="margin-top:6px;"><label class="field-label" style="display:inline;">Kunci Jawaban:</label> <select style="width:120px; min-height:34px;" onchange="updateTestQuestionAnswer('${type}', '${q.id}', Number(this.value))">${[0,1,2,3].map(o => `<option value="${o}" ${Number(q.answer) === o ? 'selected' : ''}>Opsi ${String.fromCharCode(65 + o)}</option>`).join('')}</select></div>
+                          ` : ''}
+                        </div>`).join('')}
+                    </div>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>`;
+      } else if (mod === 'staff') {
+        bodyHtml = `
+          <div class="bento-grid">
+            <div class="bento-card bento-6">
+              <div class="card-header"><h3>Instruktur Kelompok (6 Kelompok)</h3></div>
+              <div class="vertical-stack">
+                ${appState.instructors.map((ins, idx) => `
+                  <div class="item-card-vertical" style="padding:12px;">
+                    <div class="grid-2" style="gap:8px;">
+                      <div><label class="field-label">Nama Instruktur Kel. ${ins.group}</label><input type="text" value="${ins.name.replace(/"/g, '&quot;')}" onchange="appState.instructors[${idx}].name=this.value.trim(); saveState('Admin','Edit instruktur'); initPesertaDropdowns(); initStaffDropdown();" /></div>
+                      <div><label class="field-label">Password</label><input type="text" value="${ins.password}" onchange="appState.instructors[${idx}].password=this.value.trim(); saveState('Admin','Edit pass instruktur');" /></div>
+                    </div>
+                  </div>`).join('')}
+              </div>
+            </div>
+            <div class="bento-card bento-6">
+              <div class="card-header"><h3>Penilai Akad Amanah</h3><button class="btn btn-sm btn-primary" onclick="addAkadAssessorCrud()">+ Tambah Penilai</button></div>
+              <div class="vertical-stack">
+                ${appState.akadAssessors.map((ak, idx) => `
+                  <div class="item-card-vertical" style="padding:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+                      <strong>Penilai #${idx + 1}</strong>
+                      ${appState.akadAssessors.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteAkadAssessorCrud('${ak.id}')">Hapus</button>` : ''}
+                    </div>
+                    <input type="text" value="${ak.name.replace(/"/g, '&quot;')}" style="margin-bottom:6px;" onchange="appState.akadAssessors[${idx}].name=this.value.trim(); saveState('Admin','Edit penilai akad'); initStaffDropdown();" />
+                    <input type="text" value="${ak.password}" placeholder="Password" onchange="appState.akadAssessors[${idx}].password=this.value.trim(); saveState('Admin','Edit pass penilai akad');" />
+                  </div>`).join('')}
+              </div>
+            </div>
+          </div>`;
+      } else {
         bodyHtml = `
           <div class="bento-grid">
             <div class="bento-card bento-6">
@@ -2176,54 +2375,232 @@
             </div>
 
             <div class="bento-card bento-12">
-              <h3>Tambah Peserta Baru</h3>
-              <p style="font-size:13.5px; color:var(--text-muted); margin:8px 0 12px;">Tambah peserta untuk uji coba atau peserta susulan.</p>
-              <button class="btn btn-primary" onclick="openAddParticipantModal()">+ Tambah Peserta</button>
+              <h3>Target Skor 9 Aspek Evaluasi</h3>
+              <div class="table-wrap" style="margin-top:10px;">
+                <table>
+                  <thead><tr><th>Aspek</th><th>Target Min</th><th>Target Maks</th></tr></thead>
+                  <tbody>
+                    ${Object.entries(appState.aspectTargets).map(([key, tgt]) => `
+                      <tr>
+                        <td><strong>${key}</strong></td>
+                        <td><input type="number" style="width:110px;" value="${tgt.min}" onchange="appState.aspectTargets['${key}'].min=Number(this.value||0); saveState('Admin','Target min'); renderPublicDashboard();" /></td>
+                        <td><input type="number" style="width:110px;" value="${tgt.max}" onchange="appState.aspectTargets['${key}'].max=Number(this.value||100); saveState('Admin','Target max'); renderPublicDashboard();" /></td>
+                      </tr>`).join('')}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>`;
-      } else if (mod === 'tests') {
-        bodyHtml = `
-          <div class="bento-grid">
-            ${['pre', 'post'].map(type => {
-              const isPre = type === 'pre', cfg = isPre ? appState.preTest : appState.postTest;
-              const activeMateri = cfg.materiTag || appState.materiTitles[0] || '', linkedSessId = cfg.materiSessionMap?.[activeMateri] || '';
-              return `
-                <div class="bento-card bento-6">
-                  <div class="card-header"><h3>${isPre ? 'PRE-TEST' : 'POST-TEST'}</h3><button class="btn btn-sm ${cfg.open ? 'btn-primary' : ''}" onclick="${isPre ? 'appState.preTest.open=!appState.preTest.open' : 'appState.postTest.open=!appState.postTest.open'}; saveState('Admin','Toggle tes'); renderStaffContent();">${cfg.open ? '✅ DIBUKA' : '🔒 DITUTUP'}</button></div>
-                  <div style="margin-bottom:10px;"><label class="field-label">Token Ujian</label><input type="text" value="${cfg.token || ''}" onchange="${isPre ? 'appState.preTest.token' : 'appState.postTest.token'}=this.value.trim(); saveState('Admin','Ubah token');" /></div>
-                  <div style="margin-bottom:10px;"><label class="field-label">Materi Aktif</label><select onchange="${isPre ? 'appState.preTest.materiTag' : 'appState.postTest.materiTag'}=this.value; saveState('Admin','Pilih materi tes'); renderStaffContent();">${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${m === activeMateri ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
-                  <div><label class="field-label">Otomatis +5 Poin Presensi Kehadiran Sesi:</label><select onchange="if(!${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}) ${isPre ? 'appState.preTest.materiSessionMap={}' : 'appState.postTest.materiSessionMap={}'}; ${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}['${activeMateri.replace(/'/g, "\\'")}']=this.value; saveState('Admin','Tautkan sesi tes'); renderStaffContent();"><option value="">-- Nonaktif --</option>${getPresensiSessions().filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${linkedSessId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}</select></div>
-                </div>`;
-            }).join('')}
-          </div>`;
       }
-      area.innerHTML = `<div class="bento-card" style="margin-bottom:16px;"><div class="card-header" style="margin-bottom:0;"><div><h2>Panel Admin</h2></div><select style="width:240px;" onchange="sessionMeta.adminModule=this.value; persistSessionMeta(); renderStaffContent();"><option value="overview" ${mod === 'overview' ? 'selected' : ''}>1. Logo, Umum & Ekspor</option><option value="tests" ${mod === 'tests' ? 'selected' : ''}>2. Pre-Test & Post-Test</option></select></div></div>${bodyHtml}`;
+
+      area.innerHTML = `
+        <div class="bento-card" style="margin-bottom:16px;">
+          <div class="card-header" style="margin-bottom:0;">
+            <div><h2>Panel CRUD & Pengaturan Admin</h2><p style="color:var(--text-muted); font-size:13px;">Kelola seluruh data peserta, rundown, bank soal, akun staf, target aspek, dan logo.</p></div>
+            <select style="width:260px;" onchange="sessionMeta.adminModule=this.value; persistSessionMeta(); renderStaffContent();">
+              <option value="participants" ${mod === 'participants' ? 'selected' : ''}>1. CRUD Peserta</option>
+              <option value="rundown" ${mod === 'rundown' ? 'selected' : ''}>2. CRUD Rundown & Tanggal</option>
+              <option value="tests" ${mod === 'tests' ? 'selected' : ''}>3. CRUD Pre-Test & Post-Test</option>
+              <option value="staff" ${mod === 'staff' ? 'selected' : ''}>4. CRUD Instruktur & Penilai Akad</option>
+              <option value="overview" ${mod === 'overview' ? 'selected' : ''}>5. Logo, Target Aspek & Ekspor</option>
+            </select>
+          </div>
+        </div>
+        ${bodyHtml}`;
     }
 
-    function openAddParticipantModal() {
-      document.getElementById('newParticipantNameInput').value = '';
-      document.getElementById('newParticipantJabatanInput').value = 'Peserta';
-      document.getElementById('newParticipantGroupSelect').value = '1';
-      document.getElementById('newParticipantPreviewAvatar').src = fallbackInitialsSvg({ name: 'BA' });
-      document.getElementById('addParticipantModal').classList.add('open');
+    // CRUD PESERTA
+    function openParticipantModal(editId = '') {
+      _tempParticipantAvatar = '';
+      _tempParticipantFaceDescriptor = null;
+      document.getElementById('participantEditId').value = editId || '';
+      if (editId) {
+        const p = appState.participants.find(x => x.id === editId);
+        if (!p) return;
+        document.getElementById('participantModalTitle').textContent = `Edit Peserta (${p.id})`;
+        document.getElementById('participantNameInput').value = p.name;
+        document.getElementById('participantJabatanInput').value = p.jabatan;
+        document.getElementById('participantGroupSelect').value = String(p.group || 1);
+        document.getElementById('participantPreviewAvatar').src = avatarSrc(p);
+      } else {
+        document.getElementById('participantModalTitle').textContent = 'Tambah Peserta Baru';
+        document.getElementById('participantNameInput').value = '';
+        document.getElementById('participantJabatanInput').value = 'Peserta';
+        document.getElementById('participantGroupSelect').value = '1';
+        document.getElementById('participantPreviewAvatar').src = fallbackInitialsSvg({ name: 'BA' });
+      }
+      document.getElementById('participantModal').classList.add('open');
     }
 
-    async function handleNewParticipantAvatarUpload(e) {
-      const file = e.target.files[0]; if (!file) return;
-      _tempNewParticipantAvatar = await compressImageFile(file, 260, 'image/jpeg', 0.85);
-      document.getElementById('newParticipantPreviewAvatar').src = _tempNewParticipantAvatar;
-      _tempNewParticipantFaceDescriptor = await extractFaceDescriptorFromDataUrl(_tempNewParticipantAvatar);
+    async function handleParticipantAvatarUpload(e) {
+      const file = e.target.files?.[0]; if (!file) return;
+      _tempParticipantAvatar = await compressImageFile(file, 260, 'image/jpeg', 0.85);
+      document.getElementById('participantPreviewAvatar').src = _tempParticipantAvatar;
+      _tempParticipantFaceDescriptor = await extractFaceDescriptorFromDataUrl(_tempParticipantAvatar);
     }
 
-    function saveNewParticipant() {
-      const name = document.getElementById('newParticipantNameInput').value.trim();
-      const jabatan = document.getElementById('newParticipantJabatanInput').value.trim() || 'Peserta';
-      const group = Number(document.getElementById('newParticipantGroupSelect').value || 1);
+    function saveParticipantCrud() {
+      const editId = document.getElementById('participantEditId').value;
+      const name = document.getElementById('participantNameInput').value.trim();
+      const jabatan = document.getElementById('participantJabatanInput').value.trim() || 'Peserta';
+      const group = Number(document.getElementById('participantGroupSelect').value || 1);
       if (!name) return alert('Nama wajib diisi.');
-      const id = 'BA-' + String(appState.participants.length + 1).padStart(2, '0');
-      appState.participants.push({ id, no: appState.participants.length + 1, groupNo: 1, name, jabatan, group, avatar: _tempNewParticipantAvatar || '', faceDescriptor: _tempNewParticipantFaceDescriptor || null });
-      _tempNewParticipantAvatar = ''; _tempNewParticipantFaceDescriptor = null;
-      renumberGroups(appState.participants); saveState('Admin', `Tambah peserta ${name}`); closeModal('addParticipantModal'); refreshAllUI();
+
+      if (editId) {
+        const p = appState.participants.find(x => x.id === editId);
+        if (!p) return;
+        p.name = name;
+        p.jabatan = jabatan;
+        p.group = group;
+        if (_tempParticipantAvatar) {
+          p.avatar = _tempParticipantAvatar;
+          p.faceDescriptor = _tempParticipantFaceDescriptor || null;
+        }
+        saveState(currentUser.user.name, `Edit peserta ${p.name}`);
+      } else {
+        const id = 'BA-' + String(appState.participants.length + 1).padStart(2, '0');
+        appState.participants.push({
+          id, no: appState.participants.length + 1, groupNo: 1,
+          name, jabatan, group,
+          avatar: _tempParticipantAvatar || '',
+          faceDescriptor: _tempParticipantFaceDescriptor || null
+        });
+        saveState(currentUser.user.name, `Tambah peserta ${name}`);
+      }
+      _tempParticipantAvatar = '';
+      _tempParticipantFaceDescriptor = null;
+      renumberGroups(appState.participants);
+      closeModal('participantModal');
+      refreshAllUI();
+    }
+
+    function deleteParticipantCrud(pid) {
+      const p = appState.participants.find(x => x.id === pid);
+      if (!p) return;
+      if (!confirm(`Hapus peserta "${p.name}" (${p.id})?`)) return;
+      appState.participants = appState.participants.filter(x => x.id !== pid);
+      delete appState.presensi[pid];
+      delete appState.indexScores[pid];
+      delete appState.skrining[pid];
+      delete appState.testResults[pid];
+      delete appState.akadScores[pid];
+      renumberGroups(appState.participants);
+      saveState(currentUser.user.name, `Hapus peserta ${p.name}`);
+      refreshAllUI();
+    }
+
+    // CRUD RUNDOWN
+    function openRundownModal(editId = '') {
+      document.getElementById('rundownEditId').value = editId || '';
+      if (editId) {
+        const r = appState.rundown.find(x => x.id === editId);
+        if (!r) return;
+        document.getElementById('rundownModalTitle').textContent = 'Edit Rundown';
+        document.getElementById('rdDayInput').value = String(r.day || 1);
+        document.getElementById('rdTimeInput').value = r.time || '';
+        document.getElementById('rdActivityInput').value = r.activity || '';
+        document.getElementById('rdTopicInput').value = r.topic || '';
+        document.getElementById('rdSpeakerInput').value = r.speaker || '';
+        document.getElementById('rdMcInput').value = r.mc || '';
+      } else {
+        document.getElementById('rundownModalTitle').textContent = 'Tambah Rundown';
+        document.getElementById('rdDayInput').value = '1';
+        document.getElementById('rdTimeInput').value = '';
+        document.getElementById('rdActivityInput').value = '';
+        document.getElementById('rdTopicInput').value = '';
+        document.getElementById('rdSpeakerInput').value = '';
+        document.getElementById('rdMcInput').value = 'MC Resmi';
+      }
+      document.getElementById('rundownModal').classList.add('open');
+    }
+
+    function saveRundownCrud() {
+      const editId = document.getElementById('rundownEditId').value;
+      const day = Number(document.getElementById('rdDayInput').value || 1);
+      const time = document.getElementById('rdTimeInput').value.trim();
+      const activity = document.getElementById('rdActivityInput').value.trim();
+      const topic = document.getElementById('rdTopicInput').value.trim();
+      const speaker = document.getElementById('rdSpeakerInput').value.trim();
+      const mc = document.getElementById('rdMcInput').value.trim();
+      if (!activity || !topic) return alert('Kegiatan dan Judul Materi wajib diisi.');
+
+      if (editId) {
+        const r = appState.rundown.find(x => x.id === editId);
+        if (r) Object.assign(r, { day, time, activity, topic, speaker, mc });
+        saveState(currentUser.user.name, `Edit rundown ${activity}`);
+      } else {
+        appState.rundown.push({ id: 'rd-' + Date.now(), day, time, activity, topic, speaker, mc });
+        saveState(currentUser.user.name, `Tambah rundown ${activity}`);
+      }
+      closeModal('rundownModal');
+      renderPublicRundown();
+      renderStaffContent();
+    }
+
+    function deleteRundownCrud(rdId) {
+      if (!confirm('Hapus item rundown ini?')) return;
+      appState.rundown = appState.rundown.filter(x => x.id !== rdId);
+      saveState(currentUser.user.name, `Hapus rundown ${rdId}`);
+      renderPublicRundown();
+      renderStaffContent();
+    }
+
+    // CRUD SOAL PRE-TEST & POST-TEST
+    function addTestQuestionCrud(type) {
+      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
+      if (!Array.isArray(cfg.questions)) cfg.questions = [];
+      cfg.questions.push({
+        id: `${type}_${Date.now()}`,
+        materi: cfg.materiTag || appState.materiTitles[0] || '',
+        type: 'mc',
+        text: 'Pertanyaan baru...',
+        options: ['Pilihan A', 'Pilihan B', 'Pilihan C', 'Pilihan D'],
+        answer: 0
+      });
+      saveState(currentUser.user.name, `Tambah soal ${type.toUpperCase()}`);
+      renderStaffContent();
+    }
+
+    function deleteTestQuestionCrud(type, qId) {
+      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
+      cfg.questions = (cfg.questions || []).filter(q => q.id !== qId);
+      saveState(currentUser.user.name, `Hapus soal ${type.toUpperCase()}`);
+      renderStaffContent();
+    }
+
+    function updateTestQuestionText(type, qId, val) {
+      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
+      const q = (cfg.questions || []).find(x => x.id === qId);
+      if (q) { q.text = val; saveState(currentUser.user.name, `Edit soal ${type.toUpperCase()}`); }
+    }
+
+    function updateTestQuestionOption(type, qId, optIdx, val) {
+      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
+      const q = (cfg.questions || []).find(x => x.id === qId);
+      if (q && Array.isArray(q.options)) { q.options[optIdx] = val; saveState(currentUser.user.name, `Edit opsi soal`); }
+    }
+
+    function updateTestQuestionAnswer(type, qId, ansIdx) {
+      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
+      const q = (cfg.questions || []).find(x => x.id === qId);
+      if (q) { q.answer = Number(ansIdx); saveState(currentUser.user.name, `Edit kunci soal`); }
+    }
+
+    // CRUD PENILAI AKAD
+    function addAkadAssessorCrud() {
+      appState.akadAssessors.push({ id: 'akad-' + Date.now(), name: 'Penilai Akad Baru', password: 'akad123', avatar: '', assignedIds: [] });
+      saveState(currentUser.user.name, 'Tambah penilai akad');
+      initStaffDropdown();
+      renderStaffContent();
+    }
+
+    function deleteAkadAssessorCrud(akadId) {
+      if (appState.akadAssessors.length <= 1) return alert('Minimal harus ada 1 penilai akad.');
+      if (!confirm('Hapus penilai akad ini?')) return;
+      appState.akadAssessors = appState.akadAssessors.filter(a => a.id !== akadId);
+      saveState(currentUser.user.name, `Hapus penilai akad ${akadId}`);
+      initStaffDropdown();
+      renderStaffContent();
     }
 
     function renderIndexView(area) {
