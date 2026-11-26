@@ -318,7 +318,7 @@
 
     .aspect-block { margin-top: 12px; }
     .aspect-title { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-    .score-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .score-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
     .score-btn {
       width: 38px;
       height: 38px;
@@ -931,8 +931,8 @@
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQCNSVWfZ4XOwMQyea7SyGD1ZDUY6Nhl1dI0q0nJRSK6f3yVhg1JcVlV0cwZIG1XjZxg/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_19';
-    const SESSION_KEY = 'baitul_arqam_ppda_session_v12';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_20';
+    const SESSION_KEY = 'baitul_arqam_ppda_session_v13';
     const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -1504,7 +1504,7 @@
       });
       const pIdx = appState.indexScores[pid] || {};
       let keaktifan = 0, etika = 0, kedisiplinan = 0, empati = 0;
-      appState.indexSessions.forEach(s => {
+      (appState.indexSessions || []).forEach(s => {
         const r = pIdx[s.id];
         if (r) { keaktifan += Number(r.keaktifan || 0); etika += Number(r.etika || 0); kedisiplinan += Number(r.kedisiplinan || 0); empati += Number(r.empati || 0); }
       });
@@ -1514,7 +1514,7 @@
       const testScore = preSum + postSum;
       const skr = appState.skrining[pid] || {};
       let skriningScore = 0;
-      appState.skriningSections.forEach(sec => { skriningScore += (skr[sec.id]?.items || []).reduce((a, b) => a + Number(b || 0), 0); });
+      (appState.skriningSections || []).forEach(sec => { skriningScore += (skr[sec.id]?.items || []).reduce((a, b) => a + Number(b || 0), 0); });
       const akadScore = Number(appState.akadScores[pid]?.score || 0);
       const totalPoint = presensiMateri + presensiIbadah + keaktifan + etika + kedisiplinan + empati + testScore + skriningScore + akadScore;
       return { presensiMateri, presensiIbadah, keaktifan, etika, kedisiplinan, empati, preSum, postSum, testScore, skriningScore, akadScore, totalPoint, level: getLevelLabel(totalPoint), levelRank: getLevelRank(totalPoint) };
@@ -1757,7 +1757,7 @@
       alert(`Jawaban tersimpan! Skor benar: ${correctCount}.${presensiMsg}`);
     }
 
-    // SCAN BARCODE STANDAR QR (QRCODE-GENERATOR + JSQR + BARCODEDETECTOR)
+    // SCAN BARCODE STANDAR QR
     function unlockScanPortal() {
       if (document.getElementById('scanPasswordInput').value !== appState.scanPassword) return alert('Password panitia salah!');
       sessionMeta.scanUnlocked = true; persistSessionMeta();
@@ -2063,7 +2063,6 @@
       recordAttendanceForParticipant(p, 'Barcode');
     }
 
-    // GENERATOR QR CODE STANDAR ASLI (QRCODE-GENERATOR)
     function buildPureBarcodeDataUrl(participant) {
       const canvas = document.createElement('canvas');
       const size = 260;
@@ -2269,9 +2268,7 @@
       renderStaffContent();
     }
 
-    function savePresensiSessionTiming(sessId) {
-      saveAllPresensiChanges(sessId);
-    }
+    function savePresensiSessionTiming(sessId) { saveAllPresensiChanges(sessId); }
 
     function setPresensiScore(pid, sessId, val) {
       if (!appState.presensi[pid]) appState.presensi[pid] = {};
@@ -2289,7 +2286,7 @@
     }
 
     // =========================================================================
-    // CRUD PENUH UNTUK ADMIN & SUPERADMIN (DENGAN TOMBOL SIMPAN PERUBAHAN)
+    // CRUD PENUH UNTUK ADMIN & SUPERADMIN
     // =========================================================================
     function renderAdminControlView(area) {
       const mod = sessionMeta.adminModule || 'participants';
@@ -2808,27 +2805,410 @@
       renderStaffContent();
     }
 
+    // =========================================================================
+    // CRUD & SIMPAN PERUBAHAN: INDEX, SKRINING, DAN AKAD AMANAH
+    // =========================================================================
     function renderIndexView(area) {
-      const grp = currentUser.role === 'instructor' ? currentUser.user.group : 1;
-      const members = appState.participants.filter(p => p.group === grp), sess = appState.indexSessions[0];
-      area.innerHTML = `<div class="bento-card"><h2>Index — Kelompok ${grp} (${sess.title})</h2><div class="vertical-stack" style="margin-top:14px;">${members.map(m => {
-        const row = appState.indexScores[m.id]?.[sess.id] || {};
-        return `<div class="item-card-vertical"><strong>${m.groupNo}. ${m.name}</strong>${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(f => `<div class="aspect-block"><span class="aspect-title" style="text-transform:capitalize;">${f}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(row[f]) === v ? 'selected' : ''}" onclick="if(!appState.indexScores['${m.id}']) appState.indexScores['${m.id}']={}; if(!appState.indexScores['${m.id}']['${sess.id}']) appState.indexScores['${m.id}']['${sess.id}']={}; appState.indexScores['${m.id}']['${sess.id}']['${f}']=${v}; saveState(currentUser.user.name,'Index'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}</div>`;
-      }).join('')}</div><div class="section-save-bar"><button class="btn btn-primary" onclick="saveState(currentUser.user.name,'Simpan Index',true)">💾 Simpan Perubahan Index</button></div></div>`;
+      const grp = isAdminRole()
+        ? Number(window._indexGroupFilter || 1)
+        : Number(currentUser.user.group || 1);
+      if (!Array.isArray(appState.indexSessions) || !appState.indexSessions.length) {
+        appState.indexSessions = [{ id: 'idx_' + Date.now(), title: '1. Sesi Index 1' }];
+      }
+      const activeSessId = window._selectedIndexSession || appState.indexSessions[0].id;
+      const sess = appState.indexSessions.find(s => s.id === activeSessId) || appState.indexSessions[0];
+      const members = appState.participants.filter(p => Number(p.group) === grp);
+
+      area.innerHTML = `
+        <div class="bento-card">
+          <div class="card-header">
+            <div>
+              <h2>Index Penilaian — Kelompok ${grp}</h2>
+              <p style="color:var(--text-muted); font-size:13.5px;">Kelola sesi index, beri nilai 1–5 (keaktifan, etika, kedisiplinan, empati), dan simpan perubahan.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              ${isAdminRole() ? `
+                <select style="width:160px;" onchange="window._indexGroupFilter=Number(this.value); renderStaffContent();">
+                  ${[1,2,3,4,5,6].map(g => `<option value="${g}" ${grp === g ? 'selected' : ''}>Kelompok ${g}</option>`).join('')}
+                </select>
+              ` : ''}
+              <select style="width:240px;" onchange="window._selectedIndexSession=this.value; renderStaffContent();">
+                ${appState.indexSessions.map(s => `<option value="${s.id}" ${s.id === sess.id ? 'selected' : ''}>${s.title}</option>`).join('')}
+              </select>
+              <button class="btn btn-sm btn-primary" onclick="addIndexSessionCrud()">+ Tambah Sesi Index</button>
+              ${appState.indexSessions.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteIndexSessionCrud('${sess.id}')">Hapus Sesi</button>` : ''}
+            </div>
+          </div>
+
+          <div class="bento-card" style="background:var(--surface-subtle); box-shadow:none; margin-bottom:16px;">
+            <label class="field-label">Nama / Judul Sesi Index Aktif</label>
+            <input type="text" id="indexSessionTitleInput" value="${(sess.title || '').replace(/"/g, '&quot;')}" />
+          </div>
+
+          <div class="vertical-stack">
+            ${members.length ? members.map(m => {
+              const row = appState.indexScores[m.id]?.[sess.id] || {};
+              return `
+                <div class="item-card-vertical">
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <img class="avatar" src="${avatarSrc(m)}" />
+                      <div>
+                        <strong>${m.groupNo}. ${m.name}</strong>
+                        <div style="font-size:12px; color:var(--text-muted);">${m.jabatan} (${m.id})</div>
+                      </div>
+                    </div>
+                    <button class="btn btn-sm" onclick="saveIndexChanges(false, '${m.id}')">💾 Simpan ${m.name.split(',')[0]}</button>
+                  </div>
+                  ${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(f => {
+                    const curVal = Number(row[f] || 0);
+                    return `
+                      <div class="aspect-block">
+                        <span class="aspect-title" style="text-transform:capitalize;">${f}</span>
+                        <div class="score-group">
+                          ${[1,2,3,4,5].map(v => `
+                            <button type="button" class="score-btn ${curVal === v ? 'selected' : ''}" onclick="setIndexFieldScore('${m.id}', '${sess.id}', '${f}', ${v})">${v}</button>
+                          `).join('')}
+                          <input type="number" min="0" max="5" id="idxNum_${m.id}_${f}" value="${curVal}" style="width:74px; min-height:38px; padding:4px 8px;" onchange="setIndexFieldScore('${m.id}', '${sess.id}', '${f}', Number(this.value || 0))" />
+                        </div>
+                      </div>`;
+                  }).join('')}
+                </div>`;
+            }).join('') : `<p style="color:var(--text-muted);">Belum ada peserta di Kelompok ${grp}.</p>`}
+          </div>
+
+          <div class="section-save-bar">
+            <button class="btn btn-primary" onclick="saveIndexChanges(true)">💾 Simpan Perubahan Index</button>
+          </div>
+        </div>`;
     }
 
+    function addIndexSessionCrud() {
+      const nextIdx = appState.indexSessions.length + 1;
+      const newSess = { id: 'idx_' + Date.now(), title: `${nextIdx}. Sesi Index Baru ${nextIdx}` };
+      appState.indexSessions.push(newSess);
+      window._selectedIndexSession = newSess.id;
+      saveState(currentUser.user.name, `Tambah sesi index ${newSess.title}`, true);
+      renderStaffContent();
+    }
+
+    function deleteIndexSessionCrud(sessId) {
+      if (appState.indexSessions.length <= 1) return alert('Minimal harus ada 1 sesi index.');
+      if (!confirm('Hapus sesi index ini?')) return;
+      appState.indexSessions = appState.indexSessions.filter(s => s.id !== sessId);
+      window._selectedIndexSession = appState.indexSessions[0].id;
+      saveState(currentUser.user.name, `Hapus sesi index ${sessId}`, true);
+      renderStaffContent();
+    }
+
+    function setIndexFieldScore(pid, sessId, field, val) {
+      const clamped = Math.max(0, Math.min(5, Number(val || 0)));
+      if (!appState.indexScores[pid]) appState.indexScores[pid] = {};
+      if (!appState.indexScores[pid][sessId]) appState.indexScores[pid][sessId] = {};
+      appState.indexScores[pid][sessId][field] = clamped;
+      const numEl = document.getElementById(`idxNum_${pid}_${field}`);
+      if (numEl) numEl.value = clamped;
+      renderStaffContent();
+    }
+
+    function saveIndexChanges(showToast = true, singlePid = '') {
+      const activeSessId = window._selectedIndexSession || appState.indexSessions[0].id;
+      const sess = appState.indexSessions.find(s => s.id === activeSessId) || appState.indexSessions[0];
+      const titleInp = document.getElementById('indexSessionTitleInput');
+      if (titleInp && titleInp.value.trim()) sess.title = titleInp.value.trim();
+
+      const targetList = singlePid
+        ? appState.participants.filter(p => p.id === singlePid)
+        : appState.participants;
+
+      targetList.forEach(p => {
+        if (!appState.indexScores[p.id]) appState.indexScores[p.id] = {};
+        if (!appState.indexScores[p.id][sess.id]) appState.indexScores[p.id][sess.id] = {};
+        ['keaktifan', 'etika', 'kedisiplinan', 'empati'].forEach(f => {
+          const el = document.getElementById(`idxNum_${p.id}_${f}`);
+          if (el) {
+            appState.indexScores[p.id][sess.id][f] = Math.max(0, Math.min(5, Number(el.value || 0)));
+          }
+        });
+      });
+
+      saveState(currentUser.user.name, singlePid ? `Simpan index ${singlePid}` : `Simpan Perubahan Index (${sess.title})`, showToast);
+      renderStaffContent();
+    }
+
+    // SKRINING (CRUD BAGIAN & BUTIR + SIMPAN PERUBAHAN)
     function renderSkriningView(area) {
-      const grp = currentUser.role === 'instructor' ? currentUser.user.group : 1;
-      const members = appState.participants.filter(p => p.group === grp), p = members[0], sec = appState.skriningSections[0];
-      const rec = p ? (appState.skrining[p.id]?.[sec.id] || { items: [] }) : { items: [] };
-      area.innerHTML = `<div class="bento-card"><h2>Skrining — ${p ? p.name : ''} (${sec.title})</h2><div class="vertical-stack" style="margin-top:14px;">${sec.items.map((it, idx) => `<div class="item-card-vertical"><span class="aspect-title">${idx + 1}. ${it}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(rec.items[idx]) === v ? 'selected' : ''}" onclick="if(!appState.skrining['${p.id}']) appState.skrining['${p.id}']={}; if(!appState.skrining['${p.id}']['${sec.id}']) appState.skrining['${p.id}']['${sec.id}']={items:[]}; appState.skrining['${p.id}']['${sec.id}'].items[${idx}]=${v}; saveState(currentUser.user.name,'Skrining'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}</div><div class="section-save-bar"><button class="btn btn-primary" onclick="saveState(currentUser.user.name,'Simpan Skrining',true)">💾 Simpan Perubahan Skrining</button></div></div>`;
+      const grp = isAdminRole()
+        ? Number(window._skriningGroupFilter || 1)
+        : Number(currentUser.user.group || 1);
+      if (!Array.isArray(appState.skriningSections) || !appState.skriningSections.length) {
+        appState.skriningSections = [{ id: 'skr_' + Date.now(), title: 'Bagian Skrining 1', items: ['Indikator 1'] }];
+      }
+      const members = appState.participants.filter(p => Number(p.group) === grp);
+      const selectedPid = window._selectedSkriningPid && members.some(m => m.id === window._selectedSkriningPid)
+        ? window._selectedSkriningPid
+        : (members[0]?.id || '');
+      window._selectedSkriningPid = selectedPid;
+
+      const secId = window._selectedSkriningSecId || appState.skriningSections[0].id;
+      const sec = appState.skriningSections.find(s => s.id === secId) || appState.skriningSections[0];
+      const p = members.find(m => m.id === selectedPid) || null;
+      const rec = p ? (appState.skrining[p.id]?.[sec.id] || { items: [], notes: '' }) : { items: [], notes: '' };
+
+      area.innerHTML = `
+        <div class="bento-card">
+          <div class="card-header">
+            <div>
+              <h2>Skrining & Penilaian Praktik</h2>
+              <p style="color:var(--text-muted); font-size:13.5px;">Tambah/edit/hapus bagian & butir skrining, beri nilai 1–5, dan simpan perubahan.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              ${isAdminRole() ? `
+                <select style="width:150px;" onchange="window._skriningGroupFilter=Number(this.value); window._selectedSkriningPid=''; renderStaffContent();">
+                  ${[1,2,3,4,5,6].map(g => `<option value="${g}" ${grp === g ? 'selected' : ''}>Kelompok ${g}</option>`).join('')}
+                </select>
+              ` : ''}
+              <select style="width:230px;" onchange="window._selectedSkriningPid=this.value; renderStaffContent();">
+                ${members.map(m => `<option value="${m.id}" ${m.id === selectedPid ? 'selected' : ''}>${m.groupNo}. ${m.name}</option>`).join('')}
+              </select>
+              <select style="width:220px;" onchange="window._selectedSkriningSecId=this.value; renderStaffContent();">
+                ${appState.skriningSections.map(s => `<option value="${s.id}" ${s.id === sec.id ? 'selected' : ''}>${s.title}</option>`).join('')}
+              </select>
+              <button class="btn btn-sm btn-primary" onclick="addSkriningSectionCrud()">+ Bagian Baru</button>
+              ${appState.skriningSections.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteSkriningSectionCrud('${sec.id}')">Hapus Bagian</button>` : ''}
+            </div>
+          </div>
+
+          <div class="bento-card" style="background:var(--surface-subtle); box-shadow:none; margin-bottom:16px;">
+            <div class="grid-2" style="align-items:end; gap:12px;">
+              <div>
+                <label class="field-label">Judul Bagian Skrining</label>
+                <input type="text" id="skriningSectionTitleInput" value="${(sec.title || '').replace(/"/g, '&quot;')}" />
+              </div>
+              <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn btn-sm btn-primary" onclick="addSkriningItemCrud('${sec.id}')">+ Tambah Butir Indikator</button>
+              </div>
+            </div>
+          </div>
+
+          ${p ? `
+            <div class="vertical-stack">
+              ${(sec.items || []).map((it, idx) => {
+                const curVal = Number(rec.items?.[idx] || 0);
+                return `
+                  <div class="item-card-vertical">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+                      <strong style="font-size:13px; color:var(--text-muted);">Butir #${idx + 1}</strong>
+                      ${(sec.items || []).length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteSkriningItemCrud('${sec.id}', ${idx})">Hapus Butir</button>` : ''}
+                    </div>
+                    <input type="text" id="skrItemTitle_${idx}" value="${String(it || '').replace(/"/g, '&quot;')}" style="margin-bottom:10px;" />
+                    <div class="score-group">
+                      ${[1,2,3,4,5].map(v => `
+                        <button type="button" class="score-btn ${curVal === v ? 'selected' : ''}" onclick="setSkriningItemScore('${p.id}', '${sec.id}', ${idx}, ${v})">${v}</button>
+                      `).join('')}
+                      <input type="number" min="0" max="5" id="skrItemNum_${idx}" value="${curVal}" style="width:74px; min-height:38px; padding:4px 8px;" onchange="setSkriningItemScore('${p.id}', '${sec.id}', ${idx}, Number(this.value || 0))" />
+                    </div>
+                  </div>`;
+              }).join('')}
+              <div class="item-card-vertical">
+                <label class="field-label">Catatan Hasil Skrining (${p.name})</label>
+                <textarea id="skriningNotesInput" rows="2" placeholder="Catatan perbaikan bacaan, praktik wudlu/shalat, dll...">${rec.notes || ''}</textarea>
+              </div>
+            </div>
+          ` : `<p style="color:var(--text-muted);">Tidak ada peserta pada kelompok ini.</p>`}
+
+          <div class="section-save-bar">
+            <button class="btn btn-primary" onclick="saveSkriningChanges('${p ? p.id : ''}', '${sec.id}')">💾 Simpan Perubahan Skrining</button>
+          </div>
+        </div>`;
     }
 
+    function addSkriningSectionCrud() {
+      const nextNum = appState.skriningSections.length + 1;
+      const newSec = { id: 'skr_' + Date.now(), title: `Bagian Skrining ${nextNum}`, items: ['Indikator 1', 'Indikator 2'] };
+      appState.skriningSections.push(newSec);
+      window._selectedSkriningSecId = newSec.id;
+      saveState(currentUser.user.name, `Tambah bagian skrining ${newSec.title}`, true);
+      renderStaffContent();
+    }
+
+    function deleteSkriningSectionCrud(secId) {
+      if (appState.skriningSections.length <= 1) return alert('Minimal harus ada 1 bagian skrining.');
+      if (!confirm('Hapus bagian skrining ini?')) return;
+      appState.skriningSections = appState.skriningSections.filter(s => s.id !== secId);
+      window._selectedSkriningSecId = appState.skriningSections[0].id;
+      saveState(currentUser.user.name, `Hapus bagian skrining ${secId}`, true);
+      renderStaffContent();
+    }
+
+    function addSkriningItemCrud(secId) {
+      const sec = appState.skriningSections.find(s => s.id === secId);
+      if (!sec) return;
+      if (!Array.isArray(sec.items)) sec.items = [];
+      sec.items.push(`Butir Penilaian ${sec.items.length + 1}`);
+      renderStaffContent();
+    }
+
+    function deleteSkriningItemCrud(secId, idx) {
+      const sec = appState.skriningSections.find(s => s.id === secId);
+      if (!sec || (sec.items || []).length <= 1) return alert('Minimal harus ada 1 butir skrining.');
+      sec.items.splice(idx, 1);
+      renderStaffContent();
+    }
+
+    function setSkriningItemScore(pid, secId, idx, val) {
+      const clamped = Math.max(0, Math.min(5, Number(val || 0)));
+      if (!appState.skrining[pid]) appState.skrining[pid] = {};
+      if (!appState.skrining[pid][secId]) appState.skrining[pid][secId] = { items: [], notes: '' };
+      appState.skrining[pid][secId].items[idx] = clamped;
+      const numEl = document.getElementById(`skrItemNum_${idx}`);
+      if (numEl) numEl.value = clamped;
+      renderStaffContent();
+    }
+
+    function saveSkriningChanges(pid, secId) {
+      const sec = appState.skriningSections.find(s => s.id === secId);
+      if (sec) {
+        const titleEl = document.getElementById('skriningSectionTitleInput');
+        if (titleEl && titleEl.value.trim()) sec.title = titleEl.value.trim();
+        (sec.items || []).forEach((_, idx) => {
+          const itemTitleEl = document.getElementById(`skrItemTitle_${idx}`);
+          if (itemTitleEl && itemTitleEl.value.trim()) sec.items[idx] = itemTitleEl.value.trim();
+        });
+      }
+      if (pid && sec) {
+        if (!appState.skrining[pid]) appState.skrining[pid] = {};
+        if (!appState.skrining[pid][sec.id]) appState.skrining[pid][sec.id] = { items: [], notes: '' };
+        const arr = [];
+        (sec.items || []).forEach((_, idx) => {
+          const numEl = document.getElementById(`skrItemNum_${idx}`);
+          arr[idx] = Math.max(0, Math.min(5, Number(numEl ? numEl.value : (appState.skrining[pid][sec.id].items[idx] || 0))));
+        });
+        appState.skrining[pid][sec.id].items = arr;
+        const notesEl = document.getElementById('skriningNotesInput');
+        if (notesEl) appState.skrining[pid][sec.id].notes = notesEl.value;
+      }
+      saveState(currentUser.user.name, `Simpan Perubahan Skrining (${sec?.title || secId})`, true);
+      renderStaffContent();
+    }
+
+    // AKAD AMANAH (CRUD PENUGASAN/CATATAN + SKOR + SIMPAN PERUBAHAN)
     function renderAkadView(area) {
-      area.innerHTML = `<div class="bento-card"><h2>Wawancara Akad Amanah</h2><div class="vertical-stack" style="margin-top:14px;">${appState.participants.map(p => {
-        const cur = Number(appState.akadScores[p.id]?.score || 0);
-        return `<div class="item-card-vertical"><strong>${p.name}</strong><div class="score-group" style="margin-top:8px;">${[1,2,3,4,5].map(v => `<button class="score-btn ${cur === v ? 'selected' : ''}" onclick="appState.akadScores['${p.id}']={score:${v}}; saveState(currentUser.user.name,'Akad'); renderStaffContent();">${v}</button>`).join('')}</div></div>`;
-      }).join('')}</div><div class="section-save-bar"><button class="btn btn-primary" onclick="saveState(currentUser.user.name,'Simpan Akad Amanah',true)">💾 Simpan Perubahan Akad</button></div></div>`;
+      const isAkadRole = currentUser.role === 'akad';
+      const activeAssessor = isAkadRole
+        ? (appState.akadAssessors.find(a => a.id === currentUser.user.id) || appState.akadAssessors[0])
+        : (appState.akadAssessors.find(a => a.id === (window._selectedAkadAssessorId || appState.akadAssessors[0]?.id)) || appState.akadAssessors[0]);
+
+      const assignedIds = Array.isArray(activeAssessor?.assignedIds) ? activeAssessor.assignedIds : [];
+      const showAllAkad = window._akadShowAll || (!isAkadRole && !assignedIds.length);
+      const list = showAllAkad
+        ? appState.participants
+        : appState.participants.filter(p => assignedIds.includes(p.id));
+
+      area.innerHTML = `
+        <div class="bento-card">
+          <div class="card-header">
+            <div>
+              <h2>Wawancara Akad Amanah</h2>
+              <p style="color:var(--text-muted); font-size:13.5px;">Kelola daftar peserta akad amanah, catatan komitmen/RTL, skor 1–5, dan simpan perubahan.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              ${isAdminRole() ? `
+                <select style="width:260px;" onchange="window._selectedAkadAssessorId=this.value; renderStaffContent();">
+                  ${appState.akadAssessors.map(a => `<option value="${a.id}" ${activeAssessor && a.id === activeAssessor.id ? 'selected' : ''}>${a.name}</option>`).join('')}
+                </select>
+              ` : ''}
+              <button class="btn btn-sm ${showAllAkad ? 'btn-primary' : ''}" onclick="window._akadShowAll=!window._akadShowAll; renderStaffContent();">
+                ${showAllAkad ? 'Menampilkan Semua Peserta' : 'Filter Binaan Saja'}
+              </button>
+            </div>
+          </div>
+
+          ${isAdminRole() && activeAssessor ? `
+            <div class="bento-card" style="background:var(--surface-subtle); box-shadow:none; margin-bottom:16px;">
+              <label class="field-label">CRUD Penugasan Peserta untuk Penilai: ${activeAssessor.name}</label>
+              <div class="grid-3" style="max-height:200px; overflow-y:auto; padding:8px; border:1px solid var(--border); border-radius:12px; background:var(--surface);">
+                ${appState.participants.map(p => {
+                  const checked = assignedIds.includes(p.id);
+                  return `
+                    <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; cursor:pointer;">
+                      <input type="checkbox" class="akad-assign-chk" value="${p.id}" ${checked ? 'checked' : ''} style="width:16px; height:16px; min-height:16px;" />
+                      <span>${p.id} — ${p.name}</span>
+                    </label>`;
+                }).join('')}
+              </div>
+              <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                <button class="btn btn-sm" onclick="document.querySelectorAll('.akad-assign-chk').forEach(c=>c.checked=true)">Pilih Semua</button>
+                <button class="btn btn-sm" onclick="document.querySelectorAll('.akad-assign-chk').forEach(c=>c.checked=false)">Kosongkan Pilihan</button>
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="vertical-stack">
+            ${list.map(p => {
+              const rec = appState.akadScores[p.id] || { score: 0, note: '' };
+              const cur = Number(rec.score || 0);
+              return `
+                <div class="item-card-vertical">
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <img class="avatar" src="${avatarSrc(p)}" />
+                      <div>
+                        <strong>${p.name}</strong>
+                        <div style="font-size:12px; color:var(--text-muted);">${p.jabatan} • Kel. ${p.group} (${p.id})</div>
+                      </div>
+                    </div>
+                    <span class="badge badge-info">Skor Saat Ini: ${cur} / 5</span>
+                  </div>
+                  <div class="score-group" style="margin-bottom:10px;">
+                    ${[1,2,3,4,5].map(v => `
+                      <button type="button" class="score-btn ${cur === v ? 'selected' : ''}" onclick="setAkadParticipantScore('${p.id}', ${v})">${v}</button>
+                    `).join('')}
+                    <input type="number" min="0" max="5" id="akadScoreNum_${p.id}" value="${cur}" style="width:74px; min-height:38px; padding:4px 8px;" onchange="setAkadParticipantScore('${p.id}', Number(this.value || 0))" />
+                  </div>
+                  <input type="text" id="akadNote_${p.id}" value="${String(rec.note || '').replace(/"/g, '&quot;')}" placeholder="Catatan komitmen / amanah / RTL peserta..." />
+                </div>`;
+            }).join('')}
+          </div>
+
+          <div class="section-save-bar">
+            <button class="btn btn-primary" onclick="saveAkadAmanahChanges('${activeAssessor ? activeAssessor.id : ''}')">💾 Simpan Perubahan Akad Amanah</button>
+          </div>
+        </div>`;
+    }
+
+    function setAkadParticipantScore(pid, val) {
+      const clamped = Math.max(0, Math.min(5, Number(val || 0)));
+      if (!appState.akadScores[pid]) appState.akadScores[pid] = { score: 0, note: '' };
+      appState.akadScores[pid].score = clamped;
+      const numEl = document.getElementById(`akadScoreNum_${pid}`);
+      if (numEl) numEl.value = clamped;
+      renderStaffContent();
+    }
+
+    function saveAkadAmanahChanges(assessorId = '') {
+      if (isAdminRole() && assessorId) {
+        const ak = appState.akadAssessors.find(a => a.id === assessorId);
+        const chks = document.querySelectorAll('.akad-assign-chk');
+        if (ak && chks.length) {
+          ak.assignedIds = Array.from(chks).filter(c => c.checked).map(c => c.value);
+        }
+      }
+
+      appState.participants.forEach(p => {
+        const numEl = document.getElementById(`akadScoreNum_${p.id}`);
+        const noteEl = document.getElementById(`akadNote_${p.id}`);
+        if (numEl || noteEl) {
+          const prev = appState.akadScores[p.id] || { score: 0, note: '' };
+          appState.akadScores[p.id] = {
+            score: numEl ? Math.max(0, Math.min(5, Number(numEl.value || 0))) : Number(prev.score || 0),
+            note: noteEl ? noteEl.value.trim() : (prev.note || '')
+          };
+        }
+      });
+
+      saveState(currentUser.user.name, 'Simpan Perubahan Akad Amanah', true);
+      renderStaffContent();
     }
 
     function openEditProfileModal() {
