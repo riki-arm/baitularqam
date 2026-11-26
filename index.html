@@ -471,7 +471,7 @@
       <button class="nav-pill active" data-view="rundown" onclick="switchTopView('rundown')">📅 Rundown</button>
       <button class="nav-pill" data-view="dashboard" onclick="switchTopView('dashboard')">📊 Dashboard</button>
       <button class="nav-pill" data-view="final" onclick="switchTopView('final')">🏆 Klasemen Final</button>
-      <button class="nav-pill" data-view="peserta" onclick="switchTopView('peserta')">📝 Portal Peserta</button>
+      <button class="nav-pill" data-view="peserta" onclick="switchTopView('peserta')">✍️ Pre-Test & Post-Test</button>
       <button class="nav-pill" data-view="scan" onclick="switchTopView('scan')">📷 Scan & Barcode</button>
       <button id="navRolePill" class="nav-pill hidden" data-view="role_workspace" onclick="switchTopView('role_workspace')">🛠️ Ruang Tugas</button>
       <button id="navLoginPill" class="nav-pill" data-view="login" onclick="switchTopView('login')">🔐 Login Staf</button>
@@ -583,13 +583,13 @@
       </div>
     </section>
 
-    <!-- 4. PORTAL PESERTA -->
+    <!-- 4. PORTAL PESERTA (FOKUS PRE-TEST & POST-TEST) -->
     <section id="view-peserta" class="bento-grid hidden">
       <div class="bento-card bento-12">
         <div class="card-header">
           <div>
-            <h2>Portal Peserta — Biodata, Pre-Test & Post-Test</h2>
-            <p style="color:var(--text-muted); font-size:13.5px;">Pilih kelompok dan nama peserta untuk mengisi biodata atau mengerjakan tes yang dibuka admin.</p>
+            <h2>Portal Peserta — Pre-Test & Post-Test</h2>
+            <p style="color:var(--text-muted); font-size:13.5px;">Pilih kelompok dan nama peserta untuk mengerjakan Pre-Test dan Post-Test yang dibuka admin.</p>
           </div>
         </div>
 
@@ -616,15 +616,11 @@
                   <div id="pPortalMeta" style="font-size:13px; color:var(--text-muted);"></div>
                 </div>
               </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn btn-sm btn-primary" onclick="togglePesertaSubView('biodata')">📋 Biodata</button>
-                <button class="btn btn-sm btn-warn" onclick="togglePesertaSubView('tes')">✍️ Pre-Test & Post-Test</button>
-              </div>
+              <span class="badge badge-success">Mode Evaluasi Pre-Test & Post-Test</span>
             </div>
           </div>
 
-          <div id="pesertaBiodataArea"></div>
-          <div id="pesertaTestArea" class="hidden">
+          <div id="pesertaTestArea">
             <div id="testButtonsArea" class="grid-2" style="margin-bottom:16px;"></div>
             <div id="quizRunnerArea" class="hidden"></div>
           </div>
@@ -876,8 +872,8 @@
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQCNSVWfZ4XOwMQyea7SyGD1ZDUY6Nhl1dI0q0nJRSK6f3yVhg1JcVlV0cwZIG1XjZxg/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_16';
-    const SESSION_KEY = 'baitul_arqam_ppda_session_v9';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_17';
+    const SESSION_KEY = 'baitul_arqam_ppda_session_v10';
     const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -963,15 +959,6 @@
       { id: 'h3_i1', day: 3, type: 'ibadah', title: 'Qiyamullail, Kultum & Shalat Shubuh', startTime: '03:30', onTimeEnd: '04:30', lateEnd: '05:15', linkedPreMateri: '' },
       { id: 'h3_m1', day: 3, type: 'materi', title: 'Materi ke-7 Outbound', startTime: '07:30', onTimeEnd: '07:50', lateEnd: '09:30', linkedPreMateri: 'Materi ke-7: Ketangguhan & Pengabdian' },
       { id: 'h3_m2', day: 3, type: 'materi', title: 'Materi ke-8', startTime: '09:45', onTimeEnd: '10:00', lateEnd: '11:45', linkedPreMateri: 'Materi ke-8: Komitmen & Pengabdian Pesantren' }
-    ];
-
-    const DEFAULT_BIODATA_FIELDS = [
-      { id: 'f_nama', label: 'Nama Lengkap', type: 'text', options: [] },
-      { id: 'f_jk', label: 'Jenis Kelamin', type: 'select', options: ['Laki-Laki', 'Perempuan'] },
-      { id: 'f_jabatan', label: 'Jabatan di AUM / Pekerjaan', type: 'text', options: [] },
-      { id: 'f_hp', label: 'No. HP / WA', type: 'text', options: [] },
-      { id: 'f_alamat', label: 'Alamat Rumah', type: 'textarea', options: [] },
-      { id: 'f_harapan', label: 'Harapan terhadap Muhammadiyah & PPDA', type: 'textarea', options: [] }
     ];
 
     function renumberGroups(participants) {
@@ -1068,8 +1055,6 @@
             { id: 'post1', materi: 'Materi ke-8: Komitmen & Pengabdian Pesantren', type: 'mc', text: 'Komitmen pasca Baitul Arqam diwujudkan melalui...', options: ['Keteladanan & amanah di AUM', 'Pasif menunggu', 'Mengabaikan aturan', 'Kepentingan pribadi'], answer: 0 }
           ]
         },
-        biodataFields: JSON.parse(JSON.stringify(DEFAULT_BIODATA_FIELDS)),
-        biodataAnswers: {},
         participants,
         presensi: {},
         indexScores: {},
@@ -1306,18 +1291,43 @@
       return entity && entity.avatar ? entity.avatar : fallbackInitialsSvg(entity);
     }
 
+    function getActiveLogoSrc() {
+      return appState.committeeLogo || DEFAULT_COMMITTEE_LOGO;
+    }
+
     function applyBranding() {
-      const logo = appState.committeeLogo || DEFAULT_COMMITTEE_LOGO;
+      const logo = getActiveLogoSrc();
       const headerImg = document.getElementById('headerCommitteeLogo');
       const favLink = document.getElementById('faviconLink');
+      const adminLogoPreview = document.getElementById('adminLogoPreview');
       if (headerImg) { headerImg.onerror = () => { headerImg.src = DEFAULT_COMMITTEE_LOGO; }; headerImg.src = logo; }
       if (favLink) favLink.href = logo;
+      if (adminLogoPreview) { adminLogoPreview.onerror = () => { adminLogoPreview.src = DEFAULT_COMMITTEE_LOGO; }; adminLogoPreview.src = logo; }
+
       const greetEl = document.getElementById('personalizedGreeting');
       if (currentUser) greetEl.textContent = `Hai, ${currentUser.user.name} • Mode ${currentUser.role.toUpperCase()}`;
       else if (sessionMeta.pesertaId) {
         const p = appState.participants.find(x => x.id === sessionMeta.pesertaId);
         greetEl.textContent = p ? `Halo, ${p.name} (Kel. ${p.group} #${p.groupNo})` : 'Bento Grid • Progres Terbuka';
       } else greetEl.textContent = 'Bento Grid • Progres Terbuka';
+    }
+
+    async function handleCommitteeLogoUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+      const dataUrl = await compressImageFile(file, 220, mimeType, 0.88);
+      appState.committeeLogo = dataUrl;
+      saveState(currentUser?.user?.name || 'Admin', 'Ganti logo panitia');
+      applyBranding();
+      alert('Logo berhasil diganti dan disimpan!');
+    }
+
+    function resetCommitteeLogo() {
+      appState.committeeLogo = '';
+      saveState(currentUser?.user?.name || 'Admin', 'Reset logo default');
+      applyBranding();
+      alert('Logo dikembalikan ke bawaan.');
     }
 
     function toggleTheme() {
@@ -1495,7 +1505,7 @@
       }
     }
 
-    // PORTAL PESERTA
+    // PORTAL PESERTA (FOKUS PRE-TEST & POST-TEST)
     function initPesertaDropdowns() {
       const grpSel = document.getElementById('pesertaGroupSelect');
       grpSel.innerHTML = '<option value="">-- Pilih Kelompok Anda --</option>';
@@ -1525,37 +1535,8 @@
       document.getElementById('pPortalAvatar').src = avatarSrc(p);
       document.getElementById('pPortalName').textContent = `${p.name} (${p.id})`;
       document.getElementById('pPortalMeta').textContent = `${p.jabatan} • Kelompok ${p.group} No. ${p.groupNo} (${ins ? ins.name : '-'})`;
-      renderPesertaBiodataForm(p); renderPesertaTests(pid);
+      renderPesertaTests(pid);
       document.getElementById('pesertaWorkspace').classList.remove('hidden');
-    }
-
-    function togglePesertaSubView(mode) {
-      document.getElementById('pesertaBiodataArea').classList.toggle('hidden', mode !== 'biodata');
-      document.getElementById('pesertaTestArea').classList.toggle('hidden', mode !== 'tes');
-    }
-
-    function renderPesertaBiodataForm(p) {
-      const saved = appState.biodataAnswers[p.id] || {};
-      document.getElementById('pesertaBiodataArea').innerHTML = `
-        <div class="bento-card" style="background:var(--surface-subtle); box-shadow:none;">
-          <h3 style="margin-bottom:14px;">Biodata Peserta</h3>
-          ${appState.biodataFields.map(f => {
-            const val = saved[f.id] ?? (f.id === 'f_nama' ? p.name : '');
-            if (f.type === 'textarea') return `<div style="margin-bottom:12px;"><label class="field-label">${f.label}</label><textarea rows="2" id="bio_${f.id}">${val}</textarea></div>`;
-            if (f.type === 'select') return `<div style="margin-bottom:12px;"><label class="field-label">${f.label}</label><select id="bio_${f.id}"><option value="">-- Pilih --</option>${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`;
-            return `<div style="margin-bottom:12px;"><label class="field-label">${f.label}</label><input type="text" id="bio_${f.id}" value="${val}" /></div>`;
-          }).join('')}
-          <button class="btn btn-primary" onclick="savePesertaBiodata('${p.id}')">Simpan Biodata</button>
-        </div>`;
-    }
-
-    function savePesertaBiodata(pid) {
-      const ans = {};
-      appState.biodataFields.forEach(f => { ans[f.id] = document.getElementById('bio_' + f.id)?.value || ''; });
-      appState.biodataAnswers[pid] = ans;
-      const p = appState.participants.find(x => x.id === pid);
-      saveState(p.name, 'Simpan biodata peserta');
-      alert('Biodata berhasil disimpan!');
     }
 
     function getTestQuestionsForMateri(type, materiName) {
@@ -1663,9 +1644,7 @@
       alert(`Jawaban tersimpan! Skor benar: ${correctCount}.${presensiMsg}`);
     }
 
-    // =========================================================================
     // SCAN BARCODE STANDAR QR (QRCODE-GENERATOR + JSQR + BARCODEDETECTOR)
-    // =========================================================================
     function unlockScanPortal() {
       if (document.getElementById('scanPasswordInput').value !== appState.scanPassword) return alert('Password panitia salah!');
       sessionMeta.scanUnlocked = true; persistSessionMeta();
@@ -2179,11 +2158,24 @@
         bodyHtml = `
           <div class="bento-grid">
             <div class="bento-card bento-6">
+              <h3>Logo Panitia / Aplikasi</h3>
+              <div style="display:flex; align-items:center; gap:14px; margin:12px 0; flex-wrap:wrap;">
+                <img id="adminLogoPreview" class="brand-logo" style="width:64px; height:64px;" src="${getActiveLogoSrc()}" alt="Logo" />
+                <div style="flex:1; min-width:200px;">
+                  <label class="field-label">Unggah Logo Baru (.PNG / .JPG)</label>
+                  <input type="file" accept="image/*" onchange="handleCommitteeLogoUpload(event)" />
+                </div>
+              </div>
+              <button class="btn btn-sm" onclick="resetCommitteeLogo()">↺ Kembalikan Logo Default</button>
+            </div>
+
+            <div class="bento-card bento-6">
               <h3>Password Scan & Ekspor Data</h3>
               <div style="margin:12px 0;"><label class="field-label">Password Portal Scan & Barcode</label><div style="display:flex; gap:8px;"><input type="text" id="adminScanPassInput" value="${appState.scanPassword}" /><button class="btn btn-primary" onclick="appState.scanPassword=document.getElementById('adminScanPassInput').value.trim(); saveState('Admin','Update scan pass'); alert('Tersimpan');">Simpan</button></div></div>
               <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;"><button class="btn btn-primary" onclick="exportAllAdministrationExcel()">📊 Unduh Excel Lengkap</button><button class="btn btn-warn" onclick="window.print()">📄 Cetak PDF Landscape</button></div>
             </div>
-            <div class="bento-card bento-6">
+
+            <div class="bento-card bento-12">
               <h3>Tambah Peserta Baru</h3>
               <p style="font-size:13.5px; color:var(--text-muted); margin:8px 0 12px;">Tambah peserta untuk uji coba atau peserta susulan.</p>
               <button class="btn btn-primary" onclick="openAddParticipantModal()">+ Tambah Peserta</button>
@@ -2205,7 +2197,7 @@
             }).join('')}
           </div>`;
       }
-      area.innerHTML = `<div class="bento-card" style="margin-bottom:16px;"><div class="card-header" style="margin-bottom:0;"><div><h2>Panel Admin</h2></div><select style="width:240px;" onchange="sessionMeta.adminModule=this.value; persistSessionMeta(); renderStaffContent();"><option value="overview" ${mod === 'overview' ? 'selected' : ''}>1. Umum & Ekspor</option><option value="tests" ${mod === 'tests' ? 'selected' : ''}>2. Pre-Test & Post-Test</option></select></div></div>${bodyHtml}`;
+      area.innerHTML = `<div class="bento-card" style="margin-bottom:16px;"><div class="card-header" style="margin-bottom:0;"><div><h2>Panel Admin</h2></div><select style="width:240px;" onchange="sessionMeta.adminModule=this.value; persistSessionMeta(); renderStaffContent();"><option value="overview" ${mod === 'overview' ? 'selected' : ''}>1. Logo, Umum & Ekspor</option><option value="tests" ${mod === 'tests' ? 'selected' : ''}>2. Pre-Test & Post-Test</option></select></div></div>${bodyHtml}`;
     }
 
     function openAddParticipantModal() {
