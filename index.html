@@ -3,82 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baitul Arqam PPDA — Sistem Presensi & Evaluasi Terpadu</title>
+  <title>Baitul Arqam PPDA — Evaluasi & Presensi</title>
   <link id="faviconLink" rel="icon" href="" />
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <style>
     :root {
-      --bg: #F3F5F4;
-      --surface: #FFFFFF;
-      --surface-subtle: #F8FAFC;
-      --text: #0F172A;
-      --text-muted: #64748B;
-      --border: #E2E8F0;
-      --primary: #0F5132;
-      --primary-hover: #0B3E26;
-      --primary-soft: rgba(15, 81, 50, 0.10);
-      --accent: #B45309;
-      --accent-soft: rgba(180, 83, 9, 0.12);
-      --danger: #DC2626;
-      --danger-soft: rgba(220, 38, 38, 0.11);
-      --info: #0284C7;
-      --info-soft: rgba(2, 132, 199, 0.11);
-      --radius: 20px;
-      --radius-sm: 12px;
-      --shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      --bg: #f4f6f5;
+      --surface: #ffffff;
+      --surface-subtle: #f8faf9;
+      --text: #13221b;
+      --text-muted: #55695f;
+      --border: #dce4df;
+      --primary: #0f5132;
+      --primary-hover: #0b3d26;
+      --primary-soft: rgba(15, 81, 50, 0.1);
+      --accent: #b45309;
+      --danger: #b91c1c;
+      --warn: #d97706;
+      --success: #15803d;
+      --shadow: 0 8px 24px rgba(15, 34, 25, 0.06);
+      --radius: 18px;
     }
 
-    [data-theme="dark"] {
-      --bg: #0B1120;
-      --surface: #111827;
-      --surface-subtle: #1E293B;
-      --text: #F8FAFC;
-      --text-muted: #94A3B8;
-      --border: #273549;
-      --primary: #22C55E;
-      --primary-hover: #16A34A;
+    html[data-theme="dark"] {
+      --bg: #0c120f;
+      --surface: #141e19;
+      --surface-subtle: #192620;
+      --text: #edf4f0;
+      --text-muted: #9bb0a5;
+      --border: #273930;
+      --primary: #22c55e;
+      --primary-hover: #16a34a;
       --primary-soft: rgba(34, 197, 94, 0.14);
-      --accent: #F59E0B;
-      --accent-soft: rgba(245, 158, 11, 0.15);
-      --danger: #F87171;
-      --danger-soft: rgba(248, 113, 113, 0.15);
-      --info: #38BDF8;
-      --info-soft: rgba(56, 189, 248, 0.15);
+      --accent: #fbbf24;
+      --danger: #f87171;
+      --warn: #fbbf24;
+      --success: #4ade80;
       --shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.5;
-      min-height: 100vh;
       transition: background 0.2s ease, color 0.2s ease;
     }
 
-    .mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
     .hidden { display: none !important; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
     .topbar {
       position: sticky;
       top: 0;
       z-index: 40;
-      background: color-mix(in srgb, var(--surface) 88%, transparent);
-      backdrop-filter: blur(14px);
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
+      backdrop-filter: blur(12px);
     }
 
     .topbar-inner {
-      max-width: 1360px;
+      max-width: 1320px;
       margin: 0 auto;
+      padding: 12px 18px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      align-items: center;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
@@ -91,8 +85,7 @@
       border: 1px solid var(--border);
       background: var(--surface-subtle);
     }
-
-    .brand-title { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+    .brand-title { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; }
     .brand-sub { font-size: 12.5px; color: var(--text-muted); }
 
     .topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -101,107 +94,79 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      padding: 6px 12px;
+      padding: 6px 11px;
       border-radius: 999px;
-      background: var(--surface-subtle);
       border: 1px solid var(--border);
+      background: var(--surface-subtle);
       font-size: 12px;
       font-weight: 600;
     }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+    .sync-dot.syncing { background: var(--warn); }
+    .sync-dot.error { background: var(--danger); }
 
-    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #22C55E; }
-    .sync-dot.syncing { background: #F59E0B; }
-    .sync-dot.error { background: #EF4444; }
-
-    .container { max-width: 1360px; margin: 0 auto; padding: 20px; }
+    .container { max-width: 1320px; margin: 0 auto; padding: 18px; }
 
     .nav-strip {
       display: flex;
       gap: 8px;
       overflow-x: auto;
       padding-bottom: 6px;
-      margin-bottom: 20px;
-      scrollbar-width: thin;
+      margin-bottom: 16px;
     }
-
     .nav-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 10px 16px;
-      border-radius: 999px;
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text);
-      font-size: 13.5px;
-      font-weight: 600;
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.16s ease;
+      transition: all 0.15s ease;
     }
-
     .nav-pill:hover { border-color: var(--primary); }
     .nav-pill.active {
       background: var(--primary);
-      color: #FFFFFF;
+      color: #ffffff;
       border-color: var(--primary);
     }
+    html[data-theme="dark"] .nav-pill.active { color: #08120c; }
 
-    .bento-grid {
-      display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap: 16px;
-    }
-
+    .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
     .bento-card {
+      grid-column: span 12;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 18px;
       box-shadow: var(--shadow);
     }
-
-    .bento-12 { grid-column: span 12; }
-    .bento-8 { grid-column: span 8; }
     .bento-6 { grid-column: span 6; }
-    .bento-4 { grid-column: span 4; }
+    .bento-12 { grid-column: span 12; }
 
-    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-
-    @media (max-width: 960px) {
-      .bento-8, .bento-6, .bento-4 { grid-column: span 12; }
-      .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-
-    @media (max-width: 640px) {
-      .container { padding: 14px; }
-      .bento-card { padding: 16px; border-radius: 16px; }
-      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    @media (max-width: 860px) {
+      .bento-6 { grid-column: span 12; }
     }
 
     .card-header {
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
+      align-items: flex-start;
       gap: 12px;
-      margin-bottom: 16px;
       flex-wrap: wrap;
+      margin-bottom: 16px;
     }
-
-    .card-header h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; }
+    .card-header h2 { font-size: 19px; font-weight: 800; }
     .card-header h3 { font-size: 16px; font-weight: 700; }
 
-    .section-save-bar {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 10px;
-      margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-      flex-wrap: wrap;
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
     }
 
     .field-label {
@@ -209,31 +174,20 @@
       font-size: 12.5px;
       font-weight: 700;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
-    input[type="text"],
-    input[type="password"],
-    input[type="number"],
-    input[type="date"],
-    input[type="time"],
-    select,
-    textarea {
+    input, select, textarea {
       width: 100%;
       min-height: 42px;
-      padding: 9px 12px;
-      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      border-radius: 11px;
       border: 1px solid var(--border);
       background: var(--surface-subtle);
       color: var(--text);
       font-size: 14px;
-      font-family: inherit;
     }
-
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid var(--primary);
-      outline-offset: 1px;
-    }
+    textarea { min-height: 70px; resize: vertical; }
 
     .btn {
       display: inline-flex;
@@ -242,7 +196,7 @@
       gap: 6px;
       min-height: 40px;
       padding: 8px 14px;
-      border-radius: var(--radius-sm);
+      border-radius: 11px;
       border: 1px solid var(--border);
       background: var(--surface-subtle);
       color: var(--text);
@@ -251,78 +205,80 @@
       cursor: pointer;
       transition: all 0.15s ease;
     }
-
     .btn:hover { border-color: var(--primary); }
-    .btn-primary { background: var(--primary); color: #FFFFFF; border-color: var(--primary); }
+    .btn-sm { min-height: 34px; padding: 5px 10px; font-size: 12.5px; border-radius: 9px; }
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+    }
+    html[data-theme="dark"] .btn-primary { color: #08120c; }
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-warn { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
-    .btn-danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
-    .btn-sm { min-height: 34px; padding: 5px 10px; font-size: 12.5px; }
+    .btn-warn { background: var(--warn); border-color: var(--warn); color: #ffffff; }
+    .btn-danger { background: var(--danger); border-color: var(--danger); color: #ffffff; }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 700;
-    }
-
-    .badge-success { background: var(--primary-soft); color: var(--primary); }
-    .badge-warn { background: var(--accent-soft); color: var(--accent); }
-    .badge-danger { background: var(--danger-soft); color: var(--danger); }
-    .badge-info { background: var(--info-soft); color: var(--info); }
-
-    .table-wrap {
-      width: 100%;
-      overflow-x: auto;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-    }
-
+    .table-wrap { width: 100%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
     th, td {
       padding: 10px 12px;
-      text-align: left;
       border-bottom: 1px solid var(--border);
+      text-align: left;
       vertical-align: middle;
     }
     th {
       background: var(--surface-subtle);
       font-size: 12px;
-      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.03em;
       color: var(--text-muted);
-      white-space: nowrap;
+      font-weight: 800;
     }
-    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+    .badge-success { background: rgba(21, 128, 61, 0.14); color: var(--success); }
+    .badge-warn { background: rgba(217, 119, 6, 0.15); color: var(--warn); }
+    .badge-danger { background: rgba(185, 28, 28, 0.14); color: var(--danger); }
+    .badge-info { background: var(--primary-soft); color: var(--primary); }
 
     .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       object-fit: cover;
       border: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .avatar-lg { width: 64px; height: 64px; }
+    .avatar-lg { width: 64px; height: 64px; border-radius: 14px; }
 
     .vertical-stack { display: flex; flex-direction: column; gap: 12px; }
     .item-card-vertical {
-      background: var(--surface-subtle);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
+      background: var(--surface-subtle);
+      border-radius: 14px;
+      padding: 14px;
     }
-
-    .aspect-block { margin-top: 12px; }
-    .aspect-title { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-    .score-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .aspect-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+    }
+    .aspect-title { font-weight: 700; font-size: 13.5px; }
+    .score-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .score-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text);
@@ -331,35 +287,32 @@
     }
     .score-btn.selected {
       background: var(--primary);
-      color: #FFFFFF;
       border-color: var(--primary);
+      color: #ffffff;
     }
+    html[data-theme="dark"] .score-btn.selected { color: #08120c; }
 
-    .scan-alert-box {
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--surface-subtle);
+    .section-save-bar {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .scan-alert-box.status-success { border-color: var(--primary); background: var(--primary-soft); }
-    .scan-alert-box.status-duplicate { border-color: var(--accent); background: var(--accent-soft); }
-    .scan-alert-box.status-error { border-color: var(--danger); background: var(--danger-soft); }
 
     .scanner-stage {
       position: relative;
       width: 100%;
-      max-width: 480px;
       aspect-ratio: 4 / 3;
       border-radius: 16px;
       overflow: hidden;
-      background: #0F172A;
+      background: #090d0b;
       border: 3px solid var(--border);
-      transition: border-color 0.14s ease, box-shadow 0.14s ease;
+      transition: border-color 0.2s ease;
     }
-    .scanner-stage.aligned-green {
-      border-color: #22C55E;
-      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.28);
-    }
+    .scanner-stage.aligned-green { border-color: #22c55e; }
     .scanner-stage video,
     .scanner-stage canvas {
       position: absolute;
@@ -375,21 +328,25 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      z-index: 4;
-      padding: 5px 11px;
+      z-index: 3;
+      background: rgba(0, 0, 0, 0.72);
+      color: #ffffff;
+      padding: 5px 10px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 800;
-      background: rgba(15, 23, 42, 0.75);
-      color: #FFFFFF;
-      border: 1.5px solid rgba(255, 255, 255, 0.35);
-      transition: all 0.14s ease;
+      font-weight: 700;
     }
-    .scanner-stage.aligned-green .reticle-badge {
-      background: #16A34A;
-      border-color: #86EFAC;
-      color: #FFFFFF;
+    .scanner-stage.aligned-green .reticle-badge { background: #16a34a; }
+
+    .scan-alert-box {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-subtle);
     }
+    .scan-alert-box.status-success { border-color: var(--success); background: rgba(21, 128, 61, 0.1); }
+    .scan-alert-box.status-duplicate { border-color: var(--warn); background: rgba(217, 119, 6, 0.1); }
+    .scan-alert-box.status-error { border-color: var(--danger); background: rgba(185, 28, 28, 0.1); }
 
     .barcode-img-grid {
       display: grid;
@@ -397,32 +354,29 @@
       gap: 12px;
     }
     .barcode-img-card {
-      background: var(--surface-subtle);
       border: 1px solid var(--border);
+      background: var(--surface-subtle);
       border-radius: 14px;
       padding: 10px;
-      text-align: center;
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 8px;
+      text-align: center;
     }
     .pure-barcode {
-      width: 100%;
-      max-width: 150px;
-      aspect-ratio: 1 / 1;
-      margin: 0 auto;
-      background: #FFFFFF;
+      width: 124px;
+      height: 124px;
+      background: #ffffff;
       padding: 6px;
       border-radius: 8px;
-      display: block;
     }
 
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      z-index: 80;
-      background: rgba(15, 23, 42, 0.55);
-      backdrop-filter: blur(4px);
+      z-index: 60;
+      background: rgba(0, 0, 0, 0.55);
       display: none;
       align-items: center;
       justify-content: center;
@@ -431,26 +385,25 @@
     .modal-backdrop.open { display: flex; }
     .modal-box {
       width: 100%;
-      max-width: 580px;
-      max-height: 90vh;
-      overflow-y: auto;
+      max-width: 540px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 20px;
+      border-radius: 18px;
+      padding: 18px;
       box-shadow: var(--shadow);
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     @media print {
-      @page { size: landscape; margin: 10mm; }
       .no-print, .topbar, .nav-strip { display: none !important; }
-      .bento-card { box-shadow: none !important; border: 1px solid #CBD5E1 !important; }
-      body { background: #FFFFFF !important; color: #000000 !important; }
+      body { background: #ffffff; color: #000000; }
+      .bento-card { box-shadow: none; border: 1px solid #cccccc; }
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
+  <header class="topbar no-print">
     <div class="topbar-inner">
       <div class="brand-box">
         <img id="headerCommitteeLogo" class="brand-logo" src="" alt="Logo Panitia" />
@@ -822,7 +775,7 @@
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
         <img id="editPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
         <div style="flex:1; min-width:200px;">
-          <label class="field-label">Unggah Foto Baru (Otomatis ke Face ID)</label>
+          <label class="field-label">Unggah Foto Baru (Otomatis ke Drive & Face ID)</label>
           <input type="file" id="editAvatarFileInput" accept="image/*" onchange="handleAvatarUpload(event, 'editPreviewAvatar')" />
         </div>
       </div>
@@ -852,7 +805,7 @@
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;">
         <img id="participantPreviewAvatar" class="avatar avatar-lg" src="" alt="" />
         <div style="flex:1; min-width:200px;">
-          <label class="field-label">Foto Peserta (Auto Face ID)</label>
+          <label class="field-label">Foto Peserta (Auto Drive & Face ID)</label>
           <input type="file" id="participantAvatarFile" accept="image/*" onchange="handleParticipantAvatarUpload(event)" />
         </div>
       </div>
@@ -931,8 +884,8 @@
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQCNSVWfZ4XOwMQyea7SyGD1ZDUY6Nhl1dI0q0nJRSK6f3yVhg1JcVlV0cwZIG1XjZxg/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_20';
-    const SESSION_KEY = 'baitul_arqam_ppda_session_v13';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_21';
+    const SESSION_KEY = 'baitul_arqam_ppda_session_v14';
     const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -1189,7 +1142,7 @@
     let _tempParticipantAvatar = '';
     let _tempParticipantFaceDescriptor = null;
     let _pendingLogoDataUrl = '';
-    let _pendingLogoFilename = 'logo_baitul_arqam_ppda.png';
+    let _pendingLogoFilename = 'logo_baitul_arqam_ppda.jpg';
 
     function isAdminRole() {
       return currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin');
@@ -1267,12 +1220,55 @@
       return null;
     }
 
+    function buildFinalSummaryRows() {
+      return appState.participants.map(p => {
+        const m = computeParticipantMetrics(p.id);
+        return [
+          p.no,
+          p.name,
+          p.jabatan,
+          p.group,
+          p.groupNo,
+          m.presensiMateri,
+          m.presensiIbadah,
+          m.keaktifan,
+          m.etika,
+          m.kedisiplinan,
+          m.empati,
+          m.testScore,
+          m.skriningScore,
+          m.akadScore
+        ];
+      });
+    }
+
+    function writeLocalStorageSafe(stateObj) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateObj));
+        return true;
+      } catch (e) {
+        try {
+          const lightState = {
+            ...stateObj,
+            committeeLogo: stateObj.committeeLogoDriveUrl || '',
+            participants: (stateObj.participants || []).map(p => ({
+              ...p,
+              avatar: p.avatar && p.avatar.startsWith('http') ? p.avatar : ''
+            }))
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(lightState));
+          return true;
+        } catch (e2) {
+          return false;
+        }
+      }
+    }
+
     function saveState(actor = 'Sistem', summary = 'Pembaruan data', showToast = false) {
       appState.updatedAt = Date.now();
       renumberGroups(appState.participants || []);
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-      } catch (e) {
+      const okLocal = writeLocalStorageSafe(appState);
+      if (!okLocal) {
         alert('Penyimpanan browser penuh. Coba gunakan foto berukuran lebih kecil.');
       }
       persistSessionMeta();
@@ -1291,20 +1287,25 @@
       if (!url) return;
       setSyncStatus('syncing', 'Menyinkronkan...');
       try {
-        const res = await fetch(url);
+        const sep = url.includes('?') ? '&' : '?';
+        const res = await fetch(`${url}${sep}_t=${Date.now()}`, { cache: 'no-store' });
         const json = await res.json();
         if (json.ok && json.data) {
           const cloudState = normalizeState({ ...json.data, webAppUrl: url });
           const localTime = Number(appState.updatedAt || 0);
           const cloudTime = Number(cloudState.updatedAt || 0);
-          if (cloudTime > localTime) {
-            if (!cloudState.committeeLogo && appState.committeeLogo) {
-              cloudState.committeeLogo = appState.committeeLogo;
-              cloudState.committeeLogoDriveUrl = appState.committeeLogoDriveUrl || '';
-            }
+
+          if (!cloudState.committeeLogo && appState.committeeLogo) {
+            cloudState.committeeLogo = appState.committeeLogo;
+          }
+          if (!cloudState.committeeLogoDriveUrl && appState.committeeLogoDriveUrl) {
+            cloudState.committeeLogoDriveUrl = appState.committeeLogoDriveUrl;
+          }
+
+          if (cloudTime >= localTime) {
             appState = cloudState;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-          } else if (localTime > cloudTime) {
+            writeLocalStorageSafe(appState);
+          } else {
             await pushToCloud('Sinkronisasi Lokal', 'Unggah perubahan terbaru');
           }
           currentUser = resolveSessionUser();
@@ -1324,14 +1325,52 @@
       if (!url) return;
       setSyncStatus('syncing', 'Menyimpan...');
       try {
-        await fetch(url, {
+        const summaryRows = buildFinalSummaryRows();
+        const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'save_state', actor, summary, data: appState })
+          body: JSON.stringify({
+            action: 'save_state',
+            actor,
+            summary,
+            data: appState,
+            summaryRows
+          })
         });
-        setSyncStatus('ok', 'Tersimpan');
+        const json = await res.json().catch(() => ({}));
+        if (json && json.ok === false) {
+          setSyncStatus('error', 'Gagal Cloud');
+        } else {
+          setSyncStatus('ok', 'Tersimpan');
+        }
       } catch (e) {
         setSyncStatus('error', 'Lokal Tersimpan');
+      }
+    }
+
+    async function uploadImageToServer(dataUrl, fileName, mimeType = 'image/jpeg') {
+      const url = (appState.webAppUrl || DEFAULT_WEB_APP_URL).trim();
+      if (!url || !dataUrl || !dataUrl.startsWith('data:')) {
+        return { ok: false, url: dataUrl || '', error: 'URL Apps Script atau data gambar tidak tersedia.' };
+      }
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'upload_image',
+            base64: dataUrl,
+            mimeType,
+            fileName
+          })
+        });
+        const json = await res.json();
+        if (json && json.ok && json.url) {
+          return { ok: true, url: json.url, fileId: json.fileId, viewUrl: json.viewUrl };
+        }
+        return { ok: false, url: dataUrl, error: (json && json.error) || 'Upload gagal.' };
+      } catch (err) {
+        return { ok: false, url: dataUrl, error: err.message || String(err) };
       }
     }
 
@@ -1346,9 +1385,13 @@
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            canvas.width = size; canvas.height = size;
+            canvas.width = size;
+            canvas.height = size;
             const ctx = canvas.getContext('2d');
-            if (mimeType === 'image/jpeg') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, size, size); }
+            if (mimeType === 'image/jpeg') {
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, size, size);
+            }
             const side = Math.min(img.width, img.height);
             ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
             resolve(canvas.toDataURL(mimeType, quality));
@@ -1372,7 +1415,7 @@
     }
 
     function getActiveLogoSrc() {
-      return appState.committeeLogo || DEFAULT_COMMITTEE_LOGO;
+      return appState.committeeLogoDriveUrl || appState.committeeLogo || DEFAULT_COMMITTEE_LOGO;
     }
 
     function applyBranding() {
@@ -1380,9 +1423,21 @@
       const headerImg = document.getElementById('headerCommitteeLogo');
       const favLink = document.getElementById('faviconLink');
       const adminLogoPreview = document.getElementById('adminLogoPreview');
-      if (headerImg) { headerImg.onerror = () => { headerImg.src = DEFAULT_COMMITTEE_LOGO; }; headerImg.src = logo; }
+      if (headerImg) {
+        headerImg.onerror = () => {
+          if (appState.committeeLogo && headerImg.src !== appState.committeeLogo) {
+            headerImg.src = appState.committeeLogo;
+          } else {
+            headerImg.src = DEFAULT_COMMITTEE_LOGO;
+          }
+        };
+        headerImg.src = logo;
+      }
       if (favLink) favLink.href = logo;
-      if (adminLogoPreview) { adminLogoPreview.onerror = () => { adminLogoPreview.src = DEFAULT_COMMITTEE_LOGO; }; adminLogoPreview.src = _pendingLogoDataUrl || logo; }
+      if (adminLogoPreview) {
+        adminLogoPreview.onerror = () => { adminLogoPreview.src = DEFAULT_COMMITTEE_LOGO; };
+        adminLogoPreview.src = _pendingLogoDataUrl || logo;
+      }
 
       const greetEl = document.getElementById('personalizedGreeting');
       if (currentUser) greetEl.textContent = `Hai, ${currentUser.user.name} • Mode ${currentUser.role.toUpperCase()}`;
@@ -1403,36 +1458,37 @@
     }
 
     async function saveCommitteeLogoChanges() {
-      const candidateLogo = _pendingLogoDataUrl || appState.committeeLogo;
+      const candidateLogo = _pendingLogoDataUrl || appState.committeeLogoDriveUrl || appState.committeeLogo;
       if (!candidateLogo) return alert('Pilih file logo terlebih dahulu.');
 
-      let driveUrl = appState.committeeLogoDriveUrl || '';
-      const url = (appState.webAppUrl || DEFAULT_WEB_APP_URL).trim();
-      if (url && _pendingLogoDataUrl) {
+      let finalLogoUrl = candidateLogo;
+      let uploadOk = false;
+      let uploadErrMsg = '';
+
+      if (_pendingLogoDataUrl) {
         setSyncStatus('syncing', 'Mengunggah logo ke Drive...');
-        try {
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-              action: 'upload_logo',
-              fileName: _pendingLogoFilename,
-              dataUrl: _pendingLogoDataUrl
-            })
-          });
-          const json = await res.json();
-          if (json && json.url) driveUrl = json.url;
-        } catch (e) {}
+        const up = await uploadImageToServer(_pendingLogoDataUrl, _pendingLogoFilename, 'image/jpeg');
+        if (up.ok && up.url) {
+          finalLogoUrl = up.url;
+          uploadOk = true;
+        } else {
+          uploadErrMsg = up.error || 'Gagal mengunggah logo.';
+        }
       }
 
-      appState.committeeLogo = candidateLogo;
-      appState.committeeLogoDriveUrl = driveUrl;
+      appState.committeeLogo = finalLogoUrl;
+      appState.committeeLogoDriveUrl = finalLogoUrl;
       _pendingLogoDataUrl = '';
       saveState(currentUser?.user?.name || 'Admin', 'Simpan Logo Panitia');
       applyBranding();
-      alert(driveUrl
-        ? `Logo berhasil disimpan & tercatat di Drive:\n${driveUrl}`
-        : 'Logo berhasil disimpan untuk sesi & sinkronisasi!');
+
+      if (uploadOk) {
+        alert('Logo berhasil diunggah ke Google Drive & disimpan!');
+      } else if (uploadErrMsg) {
+        alert(`Logo tersimpan di aplikasi, tetapi upload ke Drive gagal:\n${uploadErrMsg}`);
+      } else {
+        alert('Logo berhasil disimpan!');
+      }
     }
 
     function resetCommitteeLogo() {
@@ -1618,7 +1674,6 @@
       }
     }
 
-    // PORTAL PESERTA (FOKUS PRE-TEST & POST-TEST)
     function initPesertaDropdowns() {
       const grpSel = document.getElementById('pesertaGroupSelect');
       grpSel.innerHTML = '<option value="">-- Pilih Kelompok Anda --</option>';
@@ -1757,7 +1812,6 @@
       alert(`Jawaban tersimpan! Skor benar: ${correctCount}.${presensiMsg}`);
     }
 
-    // SCAN BARCODE STANDAR QR
     function unlockScanPortal() {
       if (document.getElementById('scanPasswordInput').value !== appState.scanPassword) return alert('Password panitia salah!');
       sessionMeta.scanUnlocked = true; persistSessionMeta();
@@ -1928,7 +1982,6 @@
       setBarcodeAlignedGreen(false);
     }
 
-    // FACE CAM
     async function ensureFaceModelsLoaded() {
       if (faceModelsLoaded) return true;
       if (!window.faceapi) return false;
@@ -2130,7 +2183,6 @@
     function printAllBarcodes() { printBarcodeByIds(appState.participants.map(p => p.id)); }
     function closeBarcodePrintArea() { document.getElementById('barcodePrintArea').classList.add('hidden'); switchTopView('scan'); }
 
-    // LOGIN & RUANG TUGAS STAF
     function initStaffDropdown() {
       const sel = document.getElementById('staffAccountSelect');
       const adminsList = [`<option value="superadmin:${appState.superadmin.id}">${appState.superadmin.name} (Superadmin)</option>`, ...(appState.extraAdmins || []).map(a => `<option value="admin:${a.id}">${a.name} (Admin)</option>`)].join('');
@@ -2285,9 +2337,6 @@
       renderStaffContent();
     }
 
-    // =========================================================================
-    // CRUD PENUH UNTUK ADMIN & SUPERADMIN
-    // =========================================================================
     function renderAdminControlView(area) {
       const mod = sessionMeta.adminModule || 'participants';
       let bodyHtml = '';
@@ -2548,7 +2597,6 @@
       renderStaffContent();
     }
 
-    // CRUD PESERTA
     function openParticipantModal(editId = '') {
       _tempParticipantAvatar = '';
       _tempParticipantFaceDescriptor = null;
@@ -2573,9 +2621,13 @@
 
     async function handleParticipantAvatarUpload(e) {
       const file = e.target.files?.[0]; if (!file) return;
-      _tempParticipantAvatar = await compressImageFile(file, 260, 'image/jpeg', 0.85);
-      document.getElementById('participantPreviewAvatar').src = _tempParticipantAvatar;
-      _tempParticipantFaceDescriptor = await extractFaceDescriptorFromDataUrl(_tempParticipantAvatar);
+      const compressed = await compressImageFile(file, 260, 'image/jpeg', 0.85);
+      document.getElementById('participantPreviewAvatar').src = compressed;
+      _tempParticipantFaceDescriptor = await extractFaceDescriptorFromDataUrl(compressed);
+      setSyncStatus('syncing', 'Mengunggah foto ke Drive...');
+      const up = await uploadImageToServer(compressed, `${sanitizeFilename(document.getElementById('participantNameInput')?.value || 'Peserta')}_${Date.now()}.jpg`, 'image/jpeg');
+      _tempParticipantAvatar = up.ok && up.url ? up.url : compressed;
+      setSyncStatus(up.ok ? 'ok' : 'error', up.ok ? 'Foto siap' : 'Foto lokal');
     }
 
     function saveParticipantCrud() {
@@ -2628,7 +2680,6 @@
       refreshAllUI();
     }
 
-    // CRUD RUNDOWN
     function openRundownModal(editId = '') {
       document.getElementById('rundownEditId').value = editId || '';
       if (editId) {
@@ -2684,7 +2735,6 @@
       renderStaffContent();
     }
 
-    // CRUD SOAL PRE-TEST & POST-TEST
     function syncTestMateriSelection(type, val) {
       const cfg = type === 'pre' ? appState.preTest : appState.postTest;
       cfg.materiTag = val;
@@ -2740,7 +2790,6 @@
       renderStaffContent();
     }
 
-    // CRUD INSTRUKTUR
     function addInstructorCrud() {
       const nextNum = appState.instructors.length + 1;
       appState.instructors.push({
@@ -2778,7 +2827,6 @@
       renderStaffContent();
     }
 
-    // CRUD PENILAI AKAD
     function addAkadAssessorCrud() {
       appState.akadAssessors.push({ id: 'akad-' + Date.now(), name: 'Penilai Akad Baru', password: 'akad123', avatar: '', assignedIds: [] });
       renderStaffContent();
@@ -2805,9 +2853,6 @@
       renderStaffContent();
     }
 
-    // =========================================================================
-    // CRUD & SIMPAN PERUBAHAN: INDEX, SKRINING, DAN AKAD AMANAH
-    // =========================================================================
     function renderIndexView(area) {
       const grp = isAdminRole()
         ? Number(window._indexGroupFilter || 1)
@@ -2936,7 +2981,6 @@
       renderStaffContent();
     }
 
-    // SKRINING (CRUD BAGIAN & BUTIR + SIMPAN PERUBAHAN)
     function renderSkriningView(area) {
       const grp = isAdminRole()
         ? Number(window._skriningGroupFilter || 1)
@@ -3092,7 +3136,6 @@
       renderStaffContent();
     }
 
-    // AKAD AMANAH (CRUD PENUGASAN/CATATAN + SKOR + SIMPAN PERUBAHAN)
     function renderAkadView(area) {
       const isAkadRole = currentUser.role === 'akad';
       const activeAssessor = isAkadRole
@@ -3221,8 +3264,12 @@
 
     async function handleAvatarUpload(e, previewId) {
       const file = e.target.files[0]; if (!file) return;
-      _tempUploadedAvatar = await compressImageFile(file, 260, 'image/jpeg', 0.85);
-      document.getElementById(previewId).src = _tempUploadedAvatar;
+      const compressed = await compressImageFile(file, 260, 'image/jpeg', 0.85);
+      document.getElementById(previewId).src = compressed;
+      setSyncStatus('syncing', 'Mengunggah foto profil...');
+      const up = await uploadImageToServer(compressed, `profil_${sanitizeFilename(currentUser?.user?.name || 'akun')}_${Date.now()}.jpg`, 'image/jpeg');
+      _tempUploadedAvatar = up.ok && up.url ? up.url : compressed;
+      setSyncStatus(up.ok ? 'ok' : 'error', up.ok ? 'Foto siap' : 'Foto lokal');
     }
 
     function saveProfileEdit() {
