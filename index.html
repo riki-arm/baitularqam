@@ -193,6 +193,17 @@
     .card-header h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; }
     .card-header h3 { font-size: 16px; font-weight: 700; }
 
+    .section-save-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
     .field-label {
       display: block;
       font-size: 12.5px;
@@ -825,7 +836,7 @@
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn" onclick="closeModal('profileModal')">Batal</button>
-        <button class="btn btn-primary" onclick="saveProfileEdit()">Simpan</button>
+        <button class="btn btn-primary" onclick="saveProfileEdit()">Simpan Perubahan</button>
       </div>
     </div>
   </div>
@@ -866,7 +877,7 @@
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn" onclick="closeModal('participantModal')">Batal</button>
-        <button class="btn btn-primary" onclick="saveParticipantCrud()">Simpan Peserta</button>
+        <button class="btn btn-primary" onclick="saveParticipantCrud()">Simpan Perubahan</button>
       </div>
     </div>
   </div>
@@ -913,15 +924,15 @@
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="btn" onclick="closeModal('rundownModal')">Batal</button>
-        <button class="btn btn-primary" onclick="saveRundownCrud()">Simpan Rundown</button>
+        <button class="btn btn-primary" onclick="saveRundownCrud()">Simpan Perubahan</button>
       </div>
     </div>
   </div>
 
   <script>
     const DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQCNSVWfZ4XOwMQyea7SyGD1ZDUY6Nhl1dI0q0nJRSK6f3yVhg1JcVlV0cwZIG1XjZxg/exec';
-    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_18';
-    const SESSION_KEY = 'baitul_arqam_ppda_session_v11';
+    const STORAGE_KEY = 'baitul_arqam_ppda_bento_v2026_19';
+    const SESSION_KEY = 'baitul_arqam_ppda_session_v12';
     const FACE_MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
 
     const DEFAULT_COMMITTEE_LOGO = "data:image/svg+xml;utf8," + encodeURIComponent(`
@@ -1037,9 +1048,10 @@
       renumberGroups(participants);
 
       return {
-        updatedAt: 0,
+        updatedAt: Date.now(),
         webAppUrl: DEFAULT_WEB_APP_URL,
         committeeLogo: '',
+        committeeLogoDriveUrl: '',
         scanPassword: 'panitia2026',
         eventStartDate: '2026-12-21',
         superadmin: { id: 'superadmin-1', name: 'Riki Ahmad Roqin Muntaha, S.Pd.', password: 'admin123', avatar: '' },
@@ -1125,8 +1137,9 @@
       const merged = {
         ...base,
         ...parsed,
-        updatedAt: Number(parsed.updatedAt || 0),
-        committeeLogo: parsed.committeeLogo || '',
+        updatedAt: Number(parsed.updatedAt || Date.now()),
+        committeeLogo: typeof parsed.committeeLogo === 'string' ? parsed.committeeLogo : '',
+        committeeLogoDriveUrl: typeof parsed.committeeLogoDriveUrl === 'string' ? parsed.committeeLogoDriveUrl : '',
         webAppUrl: parsed.webAppUrl || DEFAULT_WEB_APP_URL,
         eventStartDate: parsed.eventStartDate || base.eventStartDate,
         superadmin: { ...base.superadmin, ...(parsed.superadmin || {}) },
@@ -1175,6 +1188,8 @@
     let _tempUploadedAvatar = '';
     let _tempParticipantAvatar = '';
     let _tempParticipantFaceDescriptor = null;
+    let _pendingLogoDataUrl = '';
+    let _pendingLogoFilename = 'logo_baitul_arqam_ppda.png';
 
     function isAdminRole() {
       return currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin');
@@ -1252,12 +1267,18 @@
       return null;
     }
 
-    function saveState(actor = 'Sistem', summary = 'Pembaruan data') {
+    function saveState(actor = 'Sistem', summary = 'Pembaruan data', showToast = false) {
       appState.updatedAt = Date.now();
       renumberGroups(appState.participants || []);
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        alert('Penyimpanan browser penuh. Coba gunakan foto berukuran lebih kecil.');
+      }
       persistSessionMeta();
+      currentUser = resolveSessionUser();
       pushToCloud(actor, summary);
+      if (showToast) alert(`Perubahan "${summary}" berhasil disimpan!`);
     }
 
     function setSyncStatus(mode, text) {
@@ -1274,11 +1295,17 @@
         const json = await res.json();
         if (json.ok && json.data) {
           const cloudState = normalizeState({ ...json.data, webAppUrl: url });
-          if (Number(cloudState.updatedAt || 0) >= Number(appState.updatedAt || 0)) {
+          const localTime = Number(appState.updatedAt || 0);
+          const cloudTime = Number(cloudState.updatedAt || 0);
+          if (cloudTime > localTime) {
+            if (!cloudState.committeeLogo && appState.committeeLogo) {
+              cloudState.committeeLogo = appState.committeeLogo;
+              cloudState.committeeLogoDriveUrl = appState.committeeLogoDriveUrl || '';
+            }
             appState = cloudState;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-          } else {
-            pushToCloud('Sinkronisasi Lokal', 'Unggah perubahan terbaru');
+          } else if (localTime > cloudTime) {
+            await pushToCloud('Sinkronisasi Lokal', 'Unggah perubahan terbaru');
           }
           currentUser = resolveSessionUser();
           refreshAllUI();
@@ -1355,7 +1382,7 @@
       const adminLogoPreview = document.getElementById('adminLogoPreview');
       if (headerImg) { headerImg.onerror = () => { headerImg.src = DEFAULT_COMMITTEE_LOGO; }; headerImg.src = logo; }
       if (favLink) favLink.href = logo;
-      if (adminLogoPreview) { adminLogoPreview.onerror = () => { adminLogoPreview.src = DEFAULT_COMMITTEE_LOGO; }; adminLogoPreview.src = logo; }
+      if (adminLogoPreview) { adminLogoPreview.onerror = () => { adminLogoPreview.src = DEFAULT_COMMITTEE_LOGO; }; adminLogoPreview.src = _pendingLogoDataUrl || logo; }
 
       const greetEl = document.getElementById('personalizedGreeting');
       if (currentUser) greetEl.textContent = `Hai, ${currentUser.user.name} • Mode ${currentUser.role.toUpperCase()}`;
@@ -1365,22 +1392,55 @@
       } else greetEl.textContent = 'Bento Grid • Progres Terbuka';
     }
 
-    async function handleCommitteeLogoUpload(e) {
+    async function handleCommitteeLogoSelection(e) {
       const file = e.target.files?.[0];
       if (!file) return;
       const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-      const dataUrl = await compressImageFile(file, 220, mimeType, 0.88);
-      appState.committeeLogo = dataUrl;
-      saveState(currentUser?.user?.name || 'Admin', 'Ganti logo panitia');
+      _pendingLogoFilename = sanitizeFilename(file.name) || (mimeType === 'image/png' ? 'logo_ppda.png' : 'logo_ppda.jpg');
+      _pendingLogoDataUrl = await compressImageFile(file, 260, mimeType, 0.88);
+      const preview = document.getElementById('adminLogoPreview');
+      if (preview) preview.src = _pendingLogoDataUrl;
+    }
+
+    async function saveCommitteeLogoChanges() {
+      const candidateLogo = _pendingLogoDataUrl || appState.committeeLogo;
+      if (!candidateLogo) return alert('Pilih file logo terlebih dahulu.');
+
+      let driveUrl = appState.committeeLogoDriveUrl || '';
+      const url = (appState.webAppUrl || DEFAULT_WEB_APP_URL).trim();
+      if (url && _pendingLogoDataUrl) {
+        setSyncStatus('syncing', 'Mengunggah logo ke Drive...');
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'upload_logo',
+              fileName: _pendingLogoFilename,
+              dataUrl: _pendingLogoDataUrl
+            })
+          });
+          const json = await res.json();
+          if (json && json.url) driveUrl = json.url;
+        } catch (e) {}
+      }
+
+      appState.committeeLogo = candidateLogo;
+      appState.committeeLogoDriveUrl = driveUrl;
+      _pendingLogoDataUrl = '';
+      saveState(currentUser?.user?.name || 'Admin', 'Simpan Logo Panitia');
       applyBranding();
-      alert('Logo berhasil diganti dan disimpan!');
+      alert(driveUrl
+        ? `Logo berhasil disimpan & tercatat di Drive:\n${driveUrl}`
+        : 'Logo berhasil disimpan untuk sesi & sinkronisasi!');
     }
 
     function resetCommitteeLogo() {
+      _pendingLogoDataUrl = '';
       appState.committeeLogo = '';
-      saveState(currentUser?.user?.name || 'Admin', 'Reset logo default');
+      appState.committeeLogoDriveUrl = '';
+      saveState(currentUser?.user?.name || 'Admin', 'Reset logo default', true);
       applyBranding();
-      alert('Logo dikembalikan ke bawaan.');
     }
 
     function toggleTheme() {
@@ -1652,7 +1712,7 @@
                 ? q.options.map((opt, oIdx) => `<label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;"><input type="radio" name="ans_${q.id}" value="${oIdx}" style="width:18px; height:18px; min-height:18px;" /><span>${String.fromCharCode(65 + oIdx)}. ${opt}</span></label>`).join('')
                 : `<input type="text" id="short_${q.id}" placeholder="Tuliskan jawaban..." />`}
             </div>`).join('')}
-          <button class="btn btn-primary" onclick="submitQuiz('${type}')">Kirim Jawaban</button>
+          <button class="btn btn-primary" onclick="submitQuiz('${type}')">Simpan & Kirim Jawaban</button>
         </div>`;
     }
 
@@ -2154,7 +2214,7 @@
               <div><label class="field-label">Batas Terlambat (+2)</label><input type="time" id="presLateEndInput" value="${activeSess.lateEnd || '08:30'}" /></div>
               <div><button class="btn btn-primary" style="width:100%;" onclick="savePresensiSessionTiming('${activeSess.id}')">Simpan Jam</button></div>
             </div>
-            ${activeSess.type === 'materi' ? `<div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);"><label class="field-label">Otomatis +5 Poin Presensi Kehadiran Saat Peserta Mengerjakan Pre-Test Materi:</label><select onchange="linkPresensiSessionToMateri('${activeSess.id}', this.value)"><option value="">-- Tidak Ditautkan ke Pre-Test --</option>${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${activeSess.linkedPreMateri === m ? 'selected' : ''}>${m}</option>`).join('')}</select></div>` : ''}
+            ${activeSess.type === 'materi' ? `<div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);"><label class="field-label">Otomatis +5 Poin Presensi Kehadiran Saat Peserta Mengerjakan Pre-Test Materi:</label><select id="presLinkedMateriSelect"><option value="">-- Tidak Ditautkan ke Pre-Test --</option>${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${activeSess.linkedPreMateri === m ? 'selected' : ''}>${m}</option>`).join('')}</select></div>` : ''}
           </div>
           <div class="table-wrap">
             <table>
@@ -2163,12 +2223,41 @@
                 ${list.map((p, idx) => {
                   const m = computeParticipantMetrics(p.id);
                   const val = Number(appState.presensi[p.id]?.[activeSess.id] ?? 0);
-                  return `<tr><td class="mono">${idx + 1}</td><td><strong>${p.name}</strong> <span class="mono" style="font-size:12px; color:var(--text-muted);">(${p.id})</span></td><td>Kel. ${p.group}</td><td class="mono">${m.presensiMateri}</td><td class="mono">${m.presensiIbadah}</td><td class="mono" style="font-weight:800; color:var(--primary);">${val}</td><td><div style="display:flex; gap:5px; align-items:center;"><button class="btn btn-sm ${val === 5 ? 'btn-primary' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 5)">5</button><button class="btn btn-sm ${val === 2 ? 'btn-primary' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 2)">2</button><button class="btn btn-sm ${val === 0 ? 'btn-warn' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 0)">0</button><input type="number" value="${val}" style="width:72px; min-height:34px; padding:4px 8px;" onchange="setPresensiScore('${p.id}', '${activeSess.id}', Number(this.value || 0))" /></div></td></tr>`;
+                  return `<tr><td class="mono">${idx + 1}</td><td><strong>${p.name}</strong> <span class="mono" style="font-size:12px; color:var(--text-muted);">(${p.id})</span></td><td>Kel. ${p.group}</td><td class="mono">${m.presensiMateri}</td><td class="mono">${m.presensiIbadah}</td><td class="mono" style="font-weight:800; color:var(--primary);">${val}</td><td><div style="display:flex; gap:5px; align-items:center;"><button class="btn btn-sm ${val === 5 ? 'btn-primary' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 5)">5</button><button class="btn btn-sm ${val === 2 ? 'btn-primary' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 2)">2</button><button class="btn btn-sm ${val === 0 ? 'btn-warn' : ''}" onclick="setPresensiScore('${p.id}', '${activeSess.id}', 0)">0</button><input type="number" id="presVal_${p.id}" value="${val}" style="width:72px; min-height:34px; padding:4px 8px;" /></div></td></tr>`;
                 }).join('')}
               </tbody>
             </table>
           </div>
+          <div class="section-save-bar">
+            <button class="btn btn-primary" onclick="saveAllPresensiChanges('${activeSess.id}')">💾 Simpan Perubahan Presensi</button>
+          </div>
         </div>`;
+    }
+
+    function saveAllPresensiChanges(sessId) {
+      const sess = getPresensiSessions().find(s => s.id === sessId);
+      if (sess) {
+        sess.startTime = document.getElementById('presStartTimeInput')?.value || sess.startTime;
+        sess.onTimeEnd = document.getElementById('presOnTimeEndInput')?.value || sess.onTimeEnd;
+        sess.lateEnd = document.getElementById('presLateEndInput')?.value || sess.lateEnd;
+        const linkedSel = document.getElementById('presLinkedMateriSelect');
+        if (linkedSel) {
+          const materiTitle = linkedSel.value;
+          getPresensiSessions().forEach(s => { if (materiTitle && s.linkedPreMateri === materiTitle && s.id !== sessId) s.linkedPreMateri = ''; });
+          sess.linkedPreMateri = materiTitle;
+          if (!appState.preTest.materiSessionMap) appState.preTest.materiSessionMap = {};
+          if (materiTitle) appState.preTest.materiSessionMap[materiTitle] = sessId;
+        }
+      }
+      appState.participants.forEach(p => {
+        const inp = document.getElementById('presVal_' + p.id);
+        if (inp) {
+          if (!appState.presensi[p.id]) appState.presensi[p.id] = {};
+          appState.presensi[p.id][sessId] = Number(inp.value || 0);
+        }
+      });
+      saveState(currentUser.user.name, `Simpan presensi ${sess?.title || sessId}`, true);
+      renderStaffContent();
     }
 
     function deletePresensiSession(sessId) {
@@ -2176,27 +2265,12 @@
       if (!confirm('Hapus sesi presensi ini?')) return;
       appState.presensiSessions = appState.presensiSessions.filter(s => s.id !== sessId);
       window._selectedPresensiSession = appState.presensiSessions[0].id;
-      saveState(currentUser.user.name, `Hapus sesi presensi ${sessId}`);
+      saveState(currentUser.user.name, `Hapus sesi presensi ${sessId}`, true);
       renderStaffContent();
     }
 
     function savePresensiSessionTiming(sessId) {
-      const sess = getPresensiSessions().find(s => s.id === sessId); if (!sess) return;
-      sess.startTime = document.getElementById('presStartTimeInput').value || sess.startTime;
-      sess.onTimeEnd = document.getElementById('presOnTimeEndInput').value || sess.onTimeEnd;
-      sess.lateEnd = document.getElementById('presLateEndInput').value || sess.lateEnd;
-      saveState(currentUser.user.name, `Atur jam presensi ${sess.title}`);
-      alert(`Aturan waktu "${sess.title}" tersimpan!\n• ${sess.startTime}–${sess.onTimeEnd} = +5 Poin\n• >${sess.onTimeEnd}–${sess.lateEnd} = +2 Poin\n• Lewat ${sess.lateEnd} / Tidak absen = 0 Poin`);
-      renderStaffContent();
-    }
-
-    function linkPresensiSessionToMateri(sessId, materiTitle) {
-      getPresensiSessions().forEach(s => { if (materiTitle && s.linkedPreMateri === materiTitle && s.id !== sessId) s.linkedPreMateri = ''; });
-      const target = getPresensiSessions().find(s => s.id === sessId); if (target) target.linkedPreMateri = materiTitle;
-      if (!appState.preTest.materiSessionMap) appState.preTest.materiSessionMap = {};
-      if (materiTitle) appState.preTest.materiSessionMap[materiTitle] = sessId;
-      saveState(currentUser.user.name, `Tautkan presensi ${sessId} ke ${materiTitle || 'Nonaktif'}`);
-      renderStaffContent();
+      saveAllPresensiChanges(sessId);
     }
 
     function setPresensiScore(pid, sessId, val) {
@@ -2210,12 +2284,12 @@
       const grpFilter = window._presensiGroupFilter || 'all';
       const list = grpFilter === 'all' ? appState.participants : appState.participants.filter(p => Number(p.group) === Number(grpFilter));
       list.forEach(p => { if (!appState.presensi[p.id]) appState.presensi[p.id] = {}; appState.presensi[p.id][sessId] = Number(val); });
-      saveState(currentUser.user.name, `Bulk presensi ${sessId} = ${val}`);
+      saveState(currentUser.user.name, `Bulk presensi ${sessId} = ${val}`, true);
       renderStaffContent();
     }
 
     // =========================================================================
-    // CRUD PENUH UNTUK ADMIN & SUPERADMIN
+    // CRUD PENUH UNTUK ADMIN & SUPERADMIN (DENGAN TOMBOL SIMPAN PERUBAHAN)
     // =========================================================================
     function renderAdminControlView(area) {
       const mod = sessionMeta.adminModule || 'participants';
@@ -2226,7 +2300,10 @@
           <div class="bento-card">
             <div class="card-header">
               <div><h3>CRUD Data Peserta (${appState.participants.length} Orang)</h3><p style="color:var(--text-muted); font-size:13px;">Tambah, ubah nama/jabatan/kelompok/foto, atau hapus peserta.</p></div>
-              <button class="btn btn-sm btn-primary" onclick="openParticipantModal()">+ Tambah Peserta</button>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-sm btn-primary" onclick="openParticipantModal()">+ Tambah Peserta</button>
+                <button class="btn btn-sm" onclick="saveState(currentUser.user.name, 'Simpan Data Peserta', true)">💾 Simpan Perubahan</button>
+              </div>
             </div>
             <div class="table-wrap">
               <table>
@@ -2257,7 +2334,7 @@
               <div><h3>CRUD Rundown Acara</h3><p style="color:var(--text-muted); font-size:13px;">Tambah, edit, atau hapus jadwal rundown & tanggal mulai kegiatan.</p></div>
               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <label class="field-label" style="margin:0;">Tanggal Hari 1:</label>
-                <input type="date" style="width:170px;" value="${appState.eventStartDate || '2026-12-21'}" onchange="appState.eventStartDate=this.value; saveState('Admin','Ubah tanggal acara'); renderStaffContent();" />
+                <input type="date" id="adminEventStartDateInput" style="width:170px;" value="${appState.eventStartDate || '2026-12-21'}" />
                 <button class="btn btn-sm btn-primary" onclick="openRundownModal()">+ Tambah Rundown</button>
               </div>
             </div>
@@ -2283,6 +2360,9 @@
                 </tbody>
               </table>
             </div>
+            <div class="section-save-bar">
+              <button class="btn btn-primary" onclick="saveRundownAndDateChanges()">💾 Simpan Perubahan Rundown</button>
+            </div>
           </div>`;
       } else if (mod === 'tests') {
         bodyHtml = `
@@ -2293,10 +2373,16 @@
               const qs = cfg.questions || [];
               return `
                 <div class="bento-card bento-6">
-                  <div class="card-header"><h3>${isPre ? 'PRE-TEST' : 'POST-TEST'}</h3><button class="btn btn-sm ${cfg.open ? 'btn-primary' : ''}" onclick="${isPre ? 'appState.preTest.open=!appState.preTest.open' : 'appState.postTest.open=!appState.postTest.open'}; saveState('Admin','Toggle tes'); renderStaffContent();">${cfg.open ? '✅ DIBUKA' : '🔒 DITUTUP'}</button></div>
-                  <div style="margin-bottom:10px;"><label class="field-label">Token Ujian</label><input type="text" value="${cfg.token || ''}" onchange="${isPre ? 'appState.preTest.token' : 'appState.postTest.token'}=this.value.trim(); saveState('Admin','Ubah token');" /></div>
-                  <div style="margin-bottom:10px;"><label class="field-label">Materi Aktif</label><select onchange="${isPre ? 'appState.preTest.materiTag' : 'appState.postTest.materiTag'}=this.value; saveState('Admin','Pilih materi tes'); renderStaffContent();">${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${m === activeMateri ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
-                  <div style="margin-bottom:14px;"><label class="field-label">Otomatis +5 Poin Presensi Kehadiran Sesi:</label><select onchange="if(!${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}) ${isPre ? 'appState.preTest.materiSessionMap={}' : 'appState.postTest.materiSessionMap={}'}; ${isPre ? 'appState.preTest.materiSessionMap' : 'appState.postTest.materiSessionMap'}['${activeMateri.replace(/'/g, "\\'")}']=this.value; saveState('Admin','Tautkan sesi tes'); renderStaffContent();"><option value="">-- Nonaktif --</option>${getPresensiSessions().filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${linkedSessId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}</select></div>
+                  <div class="card-header">
+                    <h3>${isPre ? 'PRE-TEST' : 'POST-TEST'}</h3>
+                    <label style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; cursor:pointer;">
+                      <input type="checkbox" id="testOpen_${type}" ${cfg.open ? 'checked' : ''} style="width:18px; height:18px; min-height:18px;" />
+                      <span>Buka Ujian</span>
+                    </label>
+                  </div>
+                  <div style="margin-bottom:10px;"><label class="field-label">Token Ujian</label><input type="text" id="testToken_${type}" value="${cfg.token || ''}" /></div>
+                  <div style="margin-bottom:10px;"><label class="field-label">Materi Aktif</label><select id="testMateri_${type}" onchange="syncTestMateriSelection('${type}', this.value)">${appState.materiTitles.map(m => `<option value="${m.replace(/"/g, '&quot;')}" ${m === activeMateri ? 'selected' : ''}>${m}</option>`).join('')}</select></div>
+                  <div style="margin-bottom:14px;"><label class="field-label">Otomatis +5 Poin Presensi Kehadiran Sesi:</label><select id="testLinkedSess_${type}">${getPresensiSessions().filter(s => s.type === 'materi').map(s => `<option value="${s.id}" ${linkedSessId === s.id ? 'selected' : ''}>Hari ${s.day} — ${s.title}</option>`).join('')}</select></div>
 
                   <div style="border-top:1px solid var(--border); padding-top:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -2310,15 +2396,18 @@
                             <strong>Soal #${idx + 1} (${q.type === 'mc' ? 'Pilihan Ganda' : 'Isian Singkat'})</strong>
                             <button class="btn btn-sm btn-danger" onclick="deleteTestQuestionCrud('${type}', '${q.id}')">Hapus</button>
                           </div>
-                          <input type="text" value="${(q.text || '').replace(/"/g, '&quot;')}" style="margin-bottom:8px;" onchange="updateTestQuestionText('${type}', '${q.id}', this.value)" />
+                          <input type="text" id="qText_${type}_${q.id}" value="${(q.text || '').replace(/"/g, '&quot;')}" style="margin-bottom:8px;" />
                           ${q.type === 'mc' ? `
                             <div class="grid-2" style="gap:6px;">
-                              ${(q.options || []).map((opt, oIdx) => `<input type="text" value="${String(opt || '').replace(/"/g, '&quot;')}" placeholder="Opsi ${String.fromCharCode(65 + oIdx)}" onchange="updateTestQuestionOption('${type}', '${q.id}', ${oIdx}, this.value)" />`).join('')}
+                              ${(q.options || []).map((opt, oIdx) => `<input type="text" id="qOpt_${type}_${q.id}_${oIdx}" value="${String(opt || '').replace(/"/g, '&quot;')}" placeholder="Opsi ${String.fromCharCode(65 + oIdx)}" />`).join('')}
                             </div>
-                            <div style="margin-top:6px;"><label class="field-label" style="display:inline;">Kunci Jawaban:</label> <select style="width:120px; min-height:34px;" onchange="updateTestQuestionAnswer('${type}', '${q.id}', Number(this.value))">${[0,1,2,3].map(o => `<option value="${o}" ${Number(q.answer) === o ? 'selected' : ''}>Opsi ${String.fromCharCode(65 + o)}</option>`).join('')}</select></div>
+                            <div style="margin-top:6px;"><label class="field-label" style="display:inline;">Kunci Jawaban:</label> <select id="qAns_${type}_${q.id}" style="width:120px; min-height:34px;">${[0,1,2,3].map(o => `<option value="${o}" ${Number(q.answer) === o ? 'selected' : ''}>Opsi ${String.fromCharCode(65 + o)}</option>`).join('')}</select></div>
                           ` : ''}
                         </div>`).join('')}
                     </div>
+                  </div>
+                  <div class="section-save-bar">
+                    <button class="btn btn-primary" onclick="saveTestConfigAndQuestions('${type}')">💾 Simpan Perubahan ${isPre ? 'Pre-Test' : 'Post-Test'}</button>
                   </div>
                 </div>`;
             }).join('')}
@@ -2327,19 +2416,34 @@
         bodyHtml = `
           <div class="bento-grid">
             <div class="bento-card bento-6">
-              <div class="card-header"><h3>Instruktur Kelompok (6 Kelompok)</h3></div>
+              <div class="card-header">
+                <h3>Instruktur Kelompok (${appState.instructors.length} Orang)</h3>
+                <button class="btn btn-sm btn-primary" onclick="addInstructorCrud()">+ Tambah Instruktur</button>
+              </div>
               <div class="vertical-stack">
                 ${appState.instructors.map((ins, idx) => `
                   <div class="item-card-vertical" style="padding:12px;">
-                    <div class="grid-2" style="gap:8px;">
-                      <div><label class="field-label">Nama Instruktur Kel. ${ins.group}</label><input type="text" value="${ins.name.replace(/"/g, '&quot;')}" onchange="appState.instructors[${idx}].name=this.value.trim(); saveState('Admin','Edit instruktur'); initPesertaDropdowns(); initStaffDropdown();" /></div>
-                      <div><label class="field-label">Password</label><input type="text" value="${ins.password}" onchange="appState.instructors[${idx}].password=this.value.trim(); saveState('Admin','Edit pass instruktur');" /></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+                      <strong>Instruktur #${idx + 1}</strong>
+                      ${appState.instructors.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteInstructorCrud('${ins.id}')">Hapus</button>` : ''}
+                    </div>
+                    <div class="grid-3" style="gap:8px;">
+                      <div><label class="field-label">Kelompok</label><select id="insGroup_${ins.id}">${[1,2,3,4,5,6].map(g => `<option value="${g}" ${Number(ins.group) === g ? 'selected' : ''}>Kel. ${g}</option>`).join('')}</select></div>
+                      <div><label class="field-label">Nama Lengkap</label><input type="text" id="insName_${ins.id}" value="${ins.name.replace(/"/g, '&quot;')}" /></div>
+                      <div><label class="field-label">Password</label><input type="text" id="insPass_${ins.id}" value="${ins.password}" /></div>
                     </div>
                   </div>`).join('')}
               </div>
+              <div class="section-save-bar">
+                <button class="btn btn-primary" onclick="saveInstructorsCrud()">💾 Simpan Perubahan Instruktur</button>
+              </div>
             </div>
+
             <div class="bento-card bento-6">
-              <div class="card-header"><h3>Penilai Akad Amanah</h3><button class="btn btn-sm btn-primary" onclick="addAkadAssessorCrud()">+ Tambah Penilai</button></div>
+              <div class="card-header">
+                <h3>Penilai Akad Amanah (${appState.akadAssessors.length} Orang)</h3>
+                <button class="btn btn-sm btn-primary" onclick="addAkadAssessorCrud()">+ Tambah Penilai</button>
+              </div>
               <div class="vertical-stack">
                 ${appState.akadAssessors.map((ak, idx) => `
                   <div class="item-card-vertical" style="padding:12px;">
@@ -2347,9 +2451,12 @@
                       <strong>Penilai #${idx + 1}</strong>
                       ${appState.akadAssessors.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteAkadAssessorCrud('${ak.id}')">Hapus</button>` : ''}
                     </div>
-                    <input type="text" value="${ak.name.replace(/"/g, '&quot;')}" style="margin-bottom:6px;" onchange="appState.akadAssessors[${idx}].name=this.value.trim(); saveState('Admin','Edit penilai akad'); initStaffDropdown();" />
-                    <input type="text" value="${ak.password}" placeholder="Password" onchange="appState.akadAssessors[${idx}].password=this.value.trim(); saveState('Admin','Edit pass penilai akad');" />
+                    <input type="text" id="akadName_${ak.id}" value="${ak.name.replace(/"/g, '&quot;')}" style="margin-bottom:6px;" />
+                    <input type="text" id="akadPass_${ak.id}" value="${ak.password}" placeholder="Password" />
                   </div>`).join('')}
+              </div>
+              <div class="section-save-bar">
+                <button class="btn btn-primary" onclick="saveAkadAssessorsCrud()">💾 Simpan Perubahan Penilai Akad</button>
               </div>
             </div>
           </div>`;
@@ -2359,19 +2466,32 @@
             <div class="bento-card bento-6">
               <h3>Logo Panitia / Aplikasi</h3>
               <div style="display:flex; align-items:center; gap:14px; margin:12px 0; flex-wrap:wrap;">
-                <img id="adminLogoPreview" class="brand-logo" style="width:64px; height:64px;" src="${getActiveLogoSrc()}" alt="Logo" />
+                <img id="adminLogoPreview" class="brand-logo" style="width:64px; height:64px;" src="${_pendingLogoDataUrl || getActiveLogoSrc()}" alt="Logo" />
                 <div style="flex:1; min-width:200px;">
                   <label class="field-label">Unggah Logo Baru (.PNG / .JPG)</label>
-                  <input type="file" accept="image/*" onchange="handleCommitteeLogoUpload(event)" />
+                  <input type="file" accept="image/*" onchange="handleCommitteeLogoSelection(event)" />
                 </div>
               </div>
-              <button class="btn btn-sm" onclick="resetCommitteeLogo()">↺ Kembalikan Logo Default</button>
+              ${appState.committeeLogoDriveUrl ? `<p style="font-size:12px; color:var(--text-muted); margin-bottom:10px; word-break:break-all;">Drive URL: ${appState.committeeLogoDriveUrl}</p>` : ''}
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-sm btn-primary" onclick="saveCommitteeLogoChanges()">💾 Simpan Perubahan Logo</button>
+                <button class="btn btn-sm" onclick="resetCommitteeLogo()">↺ Kembalikan Logo Default</button>
+              </div>
             </div>
 
             <div class="bento-card bento-6">
               <h3>Password Scan & Ekspor Data</h3>
-              <div style="margin:12px 0;"><label class="field-label">Password Portal Scan & Barcode</label><div style="display:flex; gap:8px;"><input type="text" id="adminScanPassInput" value="${appState.scanPassword}" /><button class="btn btn-primary" onclick="appState.scanPassword=document.getElementById('adminScanPassInput').value.trim(); saveState('Admin','Update scan pass'); alert('Tersimpan');">Simpan</button></div></div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;"><button class="btn btn-primary" onclick="exportAllAdministrationExcel()">📊 Unduh Excel Lengkap</button><button class="btn btn-warn" onclick="window.print()">📄 Cetak PDF Landscape</button></div>
+              <div style="margin:12px 0;">
+                <label class="field-label">Password Portal Scan & Barcode</label>
+                <div style="display:flex; gap:8px;">
+                  <input type="text" id="adminScanPassInput" value="${appState.scanPassword}" />
+                  <button class="btn btn-primary" onclick="appState.scanPassword=document.getElementById('adminScanPassInput').value.trim(); saveState(currentUser.user.name,'Simpan Password Scan',true);">💾 Simpan Perubahan</button>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
+                <button class="btn btn-primary" onclick="exportAllAdministrationExcel()">📊 Unduh Excel Lengkap</button>
+                <button class="btn btn-warn" onclick="window.print()">📄 Cetak PDF Landscape</button>
+              </div>
             </div>
 
             <div class="bento-card bento-12">
@@ -2383,11 +2503,14 @@
                     ${Object.entries(appState.aspectTargets).map(([key, tgt]) => `
                       <tr>
                         <td><strong>${key}</strong></td>
-                        <td><input type="number" style="width:110px;" value="${tgt.min}" onchange="appState.aspectTargets['${key}'].min=Number(this.value||0); saveState('Admin','Target min'); renderPublicDashboard();" /></td>
-                        <td><input type="number" style="width:110px;" value="${tgt.max}" onchange="appState.aspectTargets['${key}'].max=Number(this.value||100); saveState('Admin','Target max'); renderPublicDashboard();" /></td>
+                        <td><input type="number" id="tgtMin_${key}" style="width:110px;" value="${tgt.min}" /></td>
+                        <td><input type="number" id="tgtMax_${key}" style="width:110px;" value="${tgt.max}" /></td>
                       </tr>`).join('')}
                   </tbody>
                 </table>
+              </div>
+              <div class="section-save-bar">
+                <button class="btn btn-primary" onclick="saveAspectTargetsChanges()">💾 Simpan Perubahan Target Aspek</button>
               </div>
             </div>
           </div>`;
@@ -2407,6 +2530,25 @@
           </div>
         </div>
         ${bodyHtml}`;
+    }
+
+    function saveAspectTargetsChanges() {
+      Object.keys(appState.aspectTargets).forEach(key => {
+        const minEl = document.getElementById('tgtMin_' + key);
+        const maxEl = document.getElementById('tgtMax_' + key);
+        if (minEl) appState.aspectTargets[key].min = Number(minEl.value || 0);
+        if (maxEl) appState.aspectTargets[key].max = Number(maxEl.value || 100);
+      });
+      saveState(currentUser.user.name, 'Simpan Target 9 Aspek', true);
+      renderPublicDashboard();
+    }
+
+    function saveRundownAndDateChanges() {
+      const dateEl = document.getElementById('adminEventStartDateInput');
+      if (dateEl && dateEl.value) appState.eventStartDate = dateEl.value;
+      saveState(currentUser.user.name, 'Simpan Rundown & Tanggal', true);
+      renderPublicRundown();
+      renderStaffContent();
     }
 
     // CRUD PESERTA
@@ -2456,7 +2598,7 @@
           p.avatar = _tempParticipantAvatar;
           p.faceDescriptor = _tempParticipantFaceDescriptor || null;
         }
-        saveState(currentUser.user.name, `Edit peserta ${p.name}`);
+        saveState(currentUser.user.name, `Edit peserta ${p.name}`, true);
       } else {
         const id = 'BA-' + String(appState.participants.length + 1).padStart(2, '0');
         appState.participants.push({
@@ -2465,7 +2607,7 @@
           avatar: _tempParticipantAvatar || '',
           faceDescriptor: _tempParticipantFaceDescriptor || null
         });
-        saveState(currentUser.user.name, `Tambah peserta ${name}`);
+        saveState(currentUser.user.name, `Tambah peserta ${name}`, true);
       }
       _tempParticipantAvatar = '';
       _tempParticipantFaceDescriptor = null;
@@ -2485,7 +2627,7 @@
       delete appState.testResults[pid];
       delete appState.akadScores[pid];
       renumberGroups(appState.participants);
-      saveState(currentUser.user.name, `Hapus peserta ${p.name}`);
+      saveState(currentUser.user.name, `Hapus peserta ${p.name}`, true);
       refreshAllUI();
     }
 
@@ -2527,10 +2669,10 @@
       if (editId) {
         const r = appState.rundown.find(x => x.id === editId);
         if (r) Object.assign(r, { day, time, activity, topic, speaker, mc });
-        saveState(currentUser.user.name, `Edit rundown ${activity}`);
+        saveState(currentUser.user.name, `Edit rundown ${activity}`, true);
       } else {
         appState.rundown.push({ id: 'rd-' + Date.now(), day, time, activity, topic, speaker, mc });
-        saveState(currentUser.user.name, `Tambah rundown ${activity}`);
+        saveState(currentUser.user.name, `Tambah rundown ${activity}`, true);
       }
       closeModal('rundownModal');
       renderPublicRundown();
@@ -2540,12 +2682,18 @@
     function deleteRundownCrud(rdId) {
       if (!confirm('Hapus item rundown ini?')) return;
       appState.rundown = appState.rundown.filter(x => x.id !== rdId);
-      saveState(currentUser.user.name, `Hapus rundown ${rdId}`);
+      saveState(currentUser.user.name, `Hapus rundown ${rdId}`, true);
       renderPublicRundown();
       renderStaffContent();
     }
 
     // CRUD SOAL PRE-TEST & POST-TEST
+    function syncTestMateriSelection(type, val) {
+      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
+      cfg.materiTag = val;
+      renderStaffContent();
+    }
+
     function addTestQuestionCrud(type) {
       const cfg = type === 'pre' ? appState.preTest : appState.postTest;
       if (!Array.isArray(cfg.questions)) cfg.questions = [];
@@ -2557,40 +2705,85 @@
         options: ['Pilihan A', 'Pilihan B', 'Pilihan C', 'Pilihan D'],
         answer: 0
       });
-      saveState(currentUser.user.name, `Tambah soal ${type.toUpperCase()}`);
       renderStaffContent();
     }
 
     function deleteTestQuestionCrud(type, qId) {
       const cfg = type === 'pre' ? appState.preTest : appState.postTest;
       cfg.questions = (cfg.questions || []).filter(q => q.id !== qId);
-      saveState(currentUser.user.name, `Hapus soal ${type.toUpperCase()}`);
+      saveState(currentUser.user.name, `Hapus soal ${type.toUpperCase()}`, true);
       renderStaffContent();
     }
 
-    function updateTestQuestionText(type, qId, val) {
-      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
-      const q = (cfg.questions || []).find(x => x.id === qId);
-      if (q) { q.text = val; saveState(currentUser.user.name, `Edit soal ${type.toUpperCase()}`); }
+    function saveTestConfigAndQuestions(type) {
+      const isPre = type === 'pre';
+      const cfg = isPre ? appState.preTest : appState.postTest;
+      cfg.open = Boolean(document.getElementById('testOpen_' + type)?.checked);
+      cfg.token = (document.getElementById('testToken_' + type)?.value || '').trim();
+      const materiVal = document.getElementById('testMateri_' + type)?.value || appState.materiTitles[0] || '';
+      cfg.materiTag = materiVal;
+      const linkedSessId = document.getElementById('testLinkedSess_' + type)?.value || '';
+      if (!cfg.materiSessionMap) cfg.materiSessionMap = {};
+      cfg.materiSessionMap[materiVal] = linkedSessId;
+
+      (cfg.questions || []).forEach(q => {
+        const textInp = document.getElementById(`qText_${type}_${q.id}`);
+        if (textInp) q.text = textInp.value;
+        if (q.type === 'mc') {
+          [0, 1, 2, 3].forEach(oIdx => {
+            const optInp = document.getElementById(`qOpt_${type}_${q.id}_${oIdx}`);
+            if (optInp && Array.isArray(q.options)) q.options[oIdx] = optInp.value;
+          });
+          const ansSel = document.getElementById(`qAns_${type}_${q.id}`);
+          if (ansSel) q.answer = Number(ansSel.value || 0);
+        }
+      });
+
+      saveState(currentUser.user.name, `Simpan ${isPre ? 'Pre-Test' : 'Post-Test'}`, true);
+      renderStaffContent();
     }
 
-    function updateTestQuestionOption(type, qId, optIdx, val) {
-      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
-      const q = (cfg.questions || []).find(x => x.id === qId);
-      if (q && Array.isArray(q.options)) { q.options[optIdx] = val; saveState(currentUser.user.name, `Edit opsi soal`); }
+    // CRUD INSTRUKTUR
+    function addInstructorCrud() {
+      const nextNum = appState.instructors.length + 1;
+      appState.instructors.push({
+        id: 'ins-' + Date.now(),
+        group: ((nextNum - 1) % 6) + 1,
+        name: `Instruktur Baru ${nextNum}`,
+        password: 'ins123',
+        avatar: ''
+      });
+      renderStaffContent();
     }
 
-    function updateTestQuestionAnswer(type, qId, ansIdx) {
-      const cfg = type === 'pre' ? appState.preTest : appState.postTest;
-      const q = (cfg.questions || []).find(x => x.id === qId);
-      if (q) { q.answer = Number(ansIdx); saveState(currentUser.user.name, `Edit kunci soal`); }
+    function deleteInstructorCrud(insId) {
+      if (appState.instructors.length <= 1) return alert('Minimal harus ada 1 instruktur.');
+      if (!confirm('Hapus instruktur ini?')) return;
+      appState.instructors = appState.instructors.filter(i => i.id !== insId);
+      saveState(currentUser.user.name, `Hapus instruktur ${insId}`, true);
+      initPesertaDropdowns();
+      initStaffDropdown();
+      renderStaffContent();
+    }
+
+    function saveInstructorsCrud() {
+      appState.instructors.forEach(ins => {
+        const grpEl = document.getElementById('insGroup_' + ins.id);
+        const nameEl = document.getElementById('insName_' + ins.id);
+        const passEl = document.getElementById('insPass_' + ins.id);
+        if (grpEl) ins.group = Number(grpEl.value || 1);
+        if (nameEl && nameEl.value.trim()) ins.name = nameEl.value.trim();
+        if (passEl && passEl.value.trim()) ins.password = passEl.value.trim();
+      });
+      saveState(currentUser.user.name, 'Simpan Perubahan Instruktur', true);
+      initPesertaDropdowns();
+      initStaffDropdown();
+      renderStaffContent();
     }
 
     // CRUD PENILAI AKAD
     function addAkadAssessorCrud() {
       appState.akadAssessors.push({ id: 'akad-' + Date.now(), name: 'Penilai Akad Baru', password: 'akad123', avatar: '', assignedIds: [] });
-      saveState(currentUser.user.name, 'Tambah penilai akad');
-      initStaffDropdown();
       renderStaffContent();
     }
 
@@ -2598,7 +2791,19 @@
       if (appState.akadAssessors.length <= 1) return alert('Minimal harus ada 1 penilai akad.');
       if (!confirm('Hapus penilai akad ini?')) return;
       appState.akadAssessors = appState.akadAssessors.filter(a => a.id !== akadId);
-      saveState(currentUser.user.name, `Hapus penilai akad ${akadId}`);
+      saveState(currentUser.user.name, `Hapus penilai akad ${akadId}`, true);
+      initStaffDropdown();
+      renderStaffContent();
+    }
+
+    function saveAkadAssessorsCrud() {
+      appState.akadAssessors.forEach(ak => {
+        const nameEl = document.getElementById('akadName_' + ak.id);
+        const passEl = document.getElementById('akadPass_' + ak.id);
+        if (nameEl && nameEl.value.trim()) ak.name = nameEl.value.trim();
+        if (passEl && passEl.value.trim()) ak.password = passEl.value.trim();
+      });
+      saveState(currentUser.user.name, 'Simpan Perubahan Penilai Akad', true);
       initStaffDropdown();
       renderStaffContent();
     }
@@ -2609,21 +2814,21 @@
       area.innerHTML = `<div class="bento-card"><h2>Index — Kelompok ${grp} (${sess.title})</h2><div class="vertical-stack" style="margin-top:14px;">${members.map(m => {
         const row = appState.indexScores[m.id]?.[sess.id] || {};
         return `<div class="item-card-vertical"><strong>${m.groupNo}. ${m.name}</strong>${['keaktifan', 'etika', 'kedisiplinan', 'empati'].map(f => `<div class="aspect-block"><span class="aspect-title" style="text-transform:capitalize;">${f}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(row[f]) === v ? 'selected' : ''}" onclick="if(!appState.indexScores['${m.id}']) appState.indexScores['${m.id}']={}; if(!appState.indexScores['${m.id}']['${sess.id}']) appState.indexScores['${m.id}']['${sess.id}']={}; appState.indexScores['${m.id}']['${sess.id}']['${f}']=${v}; saveState(currentUser.user.name,'Index'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}</div>`;
-      }).join('')}</div></div>`;
+      }).join('')}</div><div class="section-save-bar"><button class="btn btn-primary" onclick="saveState(currentUser.user.name,'Simpan Index',true)">💾 Simpan Perubahan Index</button></div></div>`;
     }
 
     function renderSkriningView(area) {
       const grp = currentUser.role === 'instructor' ? currentUser.user.group : 1;
       const members = appState.participants.filter(p => p.group === grp), p = members[0], sec = appState.skriningSections[0];
       const rec = p ? (appState.skrining[p.id]?.[sec.id] || { items: [] }) : { items: [] };
-      area.innerHTML = `<div class="bento-card"><h2>Skrining — ${p ? p.name : ''} (${sec.title})</h2><div class="vertical-stack" style="margin-top:14px;">${sec.items.map((it, idx) => `<div class="item-card-vertical"><span class="aspect-title">${idx + 1}. ${it}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(rec.items[idx]) === v ? 'selected' : ''}" onclick="if(!appState.skrining['${p.id}']) appState.skrining['${p.id}']={}; if(!appState.skrining['${p.id}']['${sec.id}']) appState.skrining['${p.id}']['${sec.id}']={items:[]}; appState.skrining['${p.id}']['${sec.id}'].items[${idx}]=${v}; saveState(currentUser.user.name,'Skrining'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}</div></div>`;
+      area.innerHTML = `<div class="bento-card"><h2>Skrining — ${p ? p.name : ''} (${sec.title})</h2><div class="vertical-stack" style="margin-top:14px;">${sec.items.map((it, idx) => `<div class="item-card-vertical"><span class="aspect-title">${idx + 1}. ${it}</span><div class="score-group">${[1,2,3,4,5].map(v => `<button class="score-btn ${Number(rec.items[idx]) === v ? 'selected' : ''}" onclick="if(!appState.skrining['${p.id}']) appState.skrining['${p.id}']={}; if(!appState.skrining['${p.id}']['${sec.id}']) appState.skrining['${p.id}']['${sec.id}']={items:[]}; appState.skrining['${p.id}']['${sec.id}'].items[${idx}]=${v}; saveState(currentUser.user.name,'Skrining'); renderStaffContent();">${v}</button>`).join('')}</div></div>`).join('')}</div><div class="section-save-bar"><button class="btn btn-primary" onclick="saveState(currentUser.user.name,'Simpan Skrining',true)">💾 Simpan Perubahan Skrining</button></div></div>`;
     }
 
     function renderAkadView(area) {
       area.innerHTML = `<div class="bento-card"><h2>Wawancara Akad Amanah</h2><div class="vertical-stack" style="margin-top:14px;">${appState.participants.map(p => {
         const cur = Number(appState.akadScores[p.id]?.score || 0);
         return `<div class="item-card-vertical"><strong>${p.name}</strong><div class="score-group" style="margin-top:8px;">${[1,2,3,4,5].map(v => `<button class="score-btn ${cur === v ? 'selected' : ''}" onclick="appState.akadScores['${p.id}']={score:${v}}; saveState(currentUser.user.name,'Akad'); renderStaffContent();">${v}</button>`).join('')}</div></div>`;
-      }).join('')}</div></div>`;
+      }).join('')}</div><div class="section-save-bar"><button class="btn btn-primary" onclick="saveState(currentUser.user.name,'Simpan Akad Amanah',true)">💾 Simpan Perubahan Akad</button></div></div>`;
     }
 
     function openEditProfileModal() {
@@ -2646,7 +2851,7 @@
       if (pass) currentUser.user.password = pass;
       if (_tempUploadedAvatar) currentUser.user.avatar = _tempUploadedAvatar;
       _tempUploadedAvatar = '';
-      saveState(currentUser.user.name, 'Update profil'); closeModal('profileModal'); refreshAllUI();
+      saveState(currentUser.user.name, 'Update profil', true); closeModal('profileModal'); refreshAllUI();
     }
 
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
